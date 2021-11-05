@@ -1,0 +1,10 @@
+# For virtual environment
+Lib
+Scripts
+pyvenv.cfg
+
+share
+include
+__pycache__
+.vscode
+.flaskenv

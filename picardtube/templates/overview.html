@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/jquery.validate.min.js') }}"></script>
+<div class="container">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+          <span class="input-group-text" id="basic-addon2"><button type="button" id="addsong" class="btn btn-success" data-toggle="modal" data-target="#downloadmodal"><i class="fi-xwsuxl-plus-solid"></i></button></span>
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Artist</th>
+                <th scope="col">Album</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-labelledby="download songs modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Download song</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <form id="queryform" class="form-group" style="width: 100%;">
+                            <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" id="supportedsitesanchor">Supported sites can be viewed here</a>
+                            <div id="query_log"></div>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="query" placeholder="Enter URL to download" aria-describedby="basic-addon2">
+                                <div class="input-group-append">
+                                    <!-- <select class="custom-select" id="query_type">
+                                        <option selected value="url">Input type: URL</option>
+                                        <option value="mbq">Input type: Musicbrainz query</option>
+                                    </select> -->
+                                    <button type="button" id="searchsongbtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="ytcol"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
