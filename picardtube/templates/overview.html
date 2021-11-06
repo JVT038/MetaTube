@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
-<script src="{{ url_for('static', filename='JS/libraries/jquery.validate.min.js') }}"></script>
 <div class="container">
     <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name" aria-describedby="basic-addon2">
+        <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name">
         <div class="input-group-append">
-          <span class="input-group-text" id="basic-addon2"><button type="button" id="addsong" class="btn btn-success" data-toggle="modal" data-target="#downloadmodal"><i class="fi-xwsuxl-plus-solid"></i></button></span>
+            <button type="button" id="addsong" class="btn btn-success input-group-text bg-success" data-toggle="modal" data-target="#downloadmodal"><i class="fi-xwsuxl-plus-solid"></i></button>
+            <button class="navbar-toggler d-block d-md-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fi-xnsuxl-three-bars-solid"></i>
+            </button>
         </div>
     </div>
     <table class="table">

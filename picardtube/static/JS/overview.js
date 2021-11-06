@@ -25,7 +25,6 @@ $(document).ready(function() {
     });
 
     function insertYTcol(response) {
-        $("#ytcol").empty();
         var data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
@@ -41,21 +40,33 @@ $(document).ready(function() {
         
         let length = minutes + ":" + seconds;
         let html = {
-            'img': '<img class="img-fluid" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />',
+            'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />',
             'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>',
             'input_start': '<div class="row">Start: <div class="form-inline float-right"><input class="form-control float-right" type="text" value="0:00" pattern="[0-9\:]" title="minutes:seconds" /></div></div>',
             'input_end': '<div class="row">End: <div class="form-inline float-right"><input class="form-control" type="text" value="'+length+'" pattern="[0-9\:]" title="minutes:seconds" /></div></div>'
         }
         let inject = html['img'] + html['text'] + html['input_start'] + html['input_end'];
-        $("#ytcol").append(inject);
-        $("#query_log").html(response);
+        return inject;
     }
 
     function insertMBcol(mbp_data) {
-        $.each(mbp_data, function(value, key) {
-            let release_id = key.id;
-            let title = key.title;
-            let artists = key["artist-credit"];
+        let ul = $('<ul class="list-unstyled"></ul>');
+        
+        $.each(mbp_data, function(key_release, value_release) {
+            let release_id = value_release.id;
+            let title = value_release.title;
+            let artists = "Artist: ";
+            if(value_release["artist-credit"].length > 1) {
+                artists = "Artists: <br/>";
+            }
+            $.each(value_release["artist-credit"], function(key_artist, value_artist) {
+                if(typeof(value_artist) == 'object') {
+                    // artists_array[key_artist] = [value_artist.name, value_artist.id]
+                    let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a><br/>';
+                    artists+=a;
+                }
+            });
+            let release_type = value_release["release-group"].type;
             $.ajax({
                 url: Flask.url_for('findcover'),
                 method: 'GET',
@@ -67,45 +78,49 @@ $(document).ready(function() {
                         cover = response;
                         let mbp_url = response.cover.release;
                         let mbp_image = response.cover.images[0].thumbnails.small;
-                        let img = $('<img src="'+mbp_image+'" style="cursor: pointer" onclick="window.open(\''+mbp_url+'\', \'_blank\')" class="img-fluid" alt="Thumbnail for '+release_id+'" />');
-                        let row = $('<div class="row" id="'+release_id+'"></div>');
-                        row.prepend(img);
-                        $("#mbpcol").append(row);
+                        let img = $('<img src="'+mbp_image+'" style="cursor: pointer" onclick="window.open(\''+mbp_url+'\', \'_blank\')" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'" title="Click to view on Musicbrainz.org" />');
+                        let desc = $('<div class="media-body"><h5 class="mt-0 mb-1">'+title+'</h5><p>'+artists+'Type: '+release_type+'</p></div>')
+                        let list = $('<li class="media" id="'+release_id+'"></li>');
+                        list.prepend(img);
+                        list.append(desc);
+                        ul.prepend(list);
                     }
                 }, 
                 error: function(error) {
                     console.log(error)
-                    if(error.status == 500 && error.error == 'empty') {
-                        $("#query_log").html('<p class="text-center">Enter an URL!</p>')
-                    }
                 }
             })
         });
+        return ul;
     }
 
     $("#searchsongbtn").on('click', function() {
-        let validator = $("#queryform").validate()
-        // if(validator.element($(this))) {
-            var query = $("#query").val()
-            $.ajax({
-                url: Flask.url_for('search'),
-                method: 'GET',
-                data: {
-                    query: query
-                },
-                success: function(response) {
-                    $("#query_log").empty();
-                    info = response;
-                    insertYTcol(response.yt);
-                    insertMBcol(response.mbp);
-                    $(".modal-footer").removeClass('d-none')
-                }, 
-                error: function(error) {
-                    if(error.status == 400) {
-                        $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
-                    }
+        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
+        $("#ytcol").empty().append(spinner);
+        $("#mbpcol").empty().append(spinner);
+        var query = $("#query").val()
+        $.ajax({
+            url: Flask.url_for('search'),
+            method: 'GET',
+            data: {
+                query: query
+            },
+            success: function(response) {
+                $("#query_log").empty();
+                info = response;
+                let ytcol = insertYTcol(response.yt);
+                let mbpcol = insertMBcol(response.mbp);
+                $("#ytcol").empty().append(ytcol);
+                $("#mbpcol").empty().append(mbpcol);
+                $(".modal-footer").removeClass('d-none')
+            }, 
+            error: function(error) {
+                $("#ytcol").empty();
+                $("#mbpcol").empty();
+                if(error.status == 400) {
+                    $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
                 }
-            })
-        // }
+            }
+        })
     });
 })

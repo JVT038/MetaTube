@@ -8,3 +8,4 @@ include
 __pycache__
 .vscode
 .flaskenv
+bootstrap 4.0

@@ -63,7 +63,7 @@ The following tools were used in this project:
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 - [JavaScript](https://www.javascript.com/)
 - [Python Musicbrainz](https://python-musicbrainzngs.readthedocs.io)
-- [Bootstrap 4.0](https://getbootstrap.com/docs/4.0)
+- [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
 - [jQuery 3.6.0](https://jquery.com/)
 - [Fricornix](https://friconix.com/)
 
@@ -109,7 +109,7 @@ $ flask run
 
 ## :memo: License ##
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE.md) file.
+This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.
 
 
 Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038</a>
@@ -129,6 +129,9 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for YouTube playlists
 - [ ] Use Sponsorblock to automatically skip intro and outro
 - [ ] Build a logger
+- [ ] Change metadata of file
+- [ ] Select output type (coding, extension, etc.)
+- [ ] Add custom YouTube-DLP options
 &#xa0;
 
 <a href="#top">Back to top</a>
