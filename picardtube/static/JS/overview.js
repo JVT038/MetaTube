@@ -10,7 +10,6 @@ $(document).ready(function() {
     });
     // Option to change the query type - disabled at the moment
     $(document).on('change', '#query_type', function() {
-        console.log('iets')
         if($(this).val() == 'url') {
             $("#query").attr('placeholder', 'Enter URL to download')
             $("#supportedsitesanchor").show();
@@ -52,13 +51,11 @@ $(document).ready(function() {
         $("#query_log").html(response);
     }
 
-    function insertMBcol(response) {
-        console.log(response);
-        $.each(response, function(value, key) {
+    function insertMBcol(mbp_data) {
+        $.each(mbp_data, function(value, key) {
             let release_id = key.id;
             let title = key.title;
             let artists = key["artist-credit"];
-            console.log(artists)
             $.ajax({
                 url: Flask.url_for('findcover'),
                 method: 'GET',
@@ -66,11 +63,18 @@ $(document).ready(function() {
                     id: release_id
                 },
                 success: function(response) {
-                    console.log(response);
-                    console.log('iets');
+                    if(response.cover != null) {
+                        cover = response;
+                        let mbp_url = response.cover.release;
+                        let mbp_image = response.cover.images[0].thumbnails.small;
+                        let img = $('<img src="'+mbp_image+'" style="cursor: pointer" onclick="window.open(\''+mbp_url+'\', \'_blank\')" class="img-fluid" alt="Thumbnail for '+release_id+'" />');
+                        let row = $('<div class="row" id="'+release_id+'"></div>');
+                        row.prepend(img);
+                        $("#mbpcol").append(row);
+                    }
                 }, 
                 error: function(error) {
-                    console.log(error.error)
+                    console.log(error)
                     if(error.status == 500 && error.error == 'empty') {
                         $("#query_log").html('<p class="text-center">Enter an URL!</p>')
                     }
@@ -90,15 +94,15 @@ $(document).ready(function() {
                     query: query
                 },
                 success: function(response) {
+                    $("#query_log").empty();
                     info = response;
                     insertYTcol(response.yt);
                     insertMBcol(response.mbp);
                     $(".modal-footer").removeClass('d-none')
                 }, 
                 error: function(error) {
-                    console.log(error.error)
-                    if(error.status == 500 && error.error == 'empty') {
-                        $("#query_log").html('<p class="text-center">Enter an URL!</p>')
+                    if(error.status == 400) {
+                        $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
                     }
                 }
             })

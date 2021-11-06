@@ -21,7 +21,7 @@
     </table>
 </div>
 <div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-labelledby="download songs modal" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg mw-100 w-75">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Download song</h5>
@@ -33,8 +33,8 @@
                 <div class="container-fluid">
                     <div class="row">
                         <form id="queryform" class="form-group" style="width: 100%;">
-                            <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" id="supportedsitesanchor">Supported sites can be viewed here</a>
-                            <div id="query_log"></div>
+                            <!-- <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" id="supportedsitesanchor">Supported sites can be viewed here</a> -->
+                            <p>Only YouTube URLs are currently supported</p>
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" id="query" placeholder="Enter URL to download" aria-describedby="basic-addon2">
                                 <div class="input-group-append">
@@ -45,6 +45,7 @@
                                     <button type="button" id="searchsongbtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
                                 </div>
                             </div>
+                            <div id="query_log"></div>
                         </form>
                     </div>
                     <div class="row">

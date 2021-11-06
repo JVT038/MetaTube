@@ -125,6 +125,10 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Make it mobile-friendly
 - [ ] Add Docker support
 - [ ] Add it to the PyPi library
+- [ ] Add support for other sites than YouTube
+- [ ] Add support for YouTube playlists
+- [ ] Use Sponsorblock to automatically skip intro and outro
+- [ ] Build a logger
 &#xa0;
 
 <a href="#top">Back to top</a>

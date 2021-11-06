@@ -1,7 +1,7 @@
 from picardtube import app
 from picardtube.ytdl import ytdlp
 from picardtube.mbp import MBP
-from flask import render_template_string, render_template, request, jsonify
+from flask import render_template, request, jsonify
 
 @app.route('/')
 def index():
@@ -10,23 +10,29 @@ def index():
 @app.route('/ajax/search', methods=['GET'])
 def search():
     query = request.args.get('query')
-    if query is not None:
-        video = ytdlp.search(query)
-        mbp = MBP.search(
-            query = video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
-            artist = video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"])
-        )
-        response = jsonify(status='success', yt=video, mbp=mbp["release-list"])
-        return response
-    if query is None:
-        return "empty", 400
+    if query is not None and len(query) > 1:
+        try:
+            video = ytdlp.search(query)
+            mbp = MBP.search(
+                query = video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
+                artist = video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"])
+            )
+            response = jsonify(status='success', yt=video, mbp=mbp["release-list"])
+            return response
+        except ValueError as error:
+            return str(error), 400
+    else:
+        return "Enter an URL!", 400
 
 @app.route('/ajax/findcover', methods=['GET'])
 def findcover():
     id = request.args.get('id')
     if id is not None:
-        cover = MBP.get_cover(id)
-        response = jsonify(status='Success', cover=cover)
-        return response
+        try:
+            cover = MBP.get_cover(id)
+            response = jsonify(status='Success', cover=cover)
+            return response
+        except Exception as error:
+            return str(error), 400
     if id is None:
         return "empty", 400
