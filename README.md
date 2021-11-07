@@ -47,7 +47,7 @@
 
 ## :dart: About ##
 
-I made this project to download music from YouTube more easy, with automatically fetching metadata from MusicBrainz Picard. 
+I made this project to download music from YouTube more easily, by automatically fetching music metadata from MusicBrainz Picard. 
 
 ## :sparkles: Features ##
 
@@ -85,7 +85,6 @@ $ pip install virtualenv
 
 # Create virtual environment in current directory
 $ virtualenv .
-
 # Activate environment
 # Windows:
 $ cd Scripts
@@ -132,6 +131,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Change metadata of file
 - [ ] Select output type (coding, extension, etc.)
 - [ ] Add custom YouTube-DLP options
+- [ ] Add authentication system with an optional reverse proxy
+- [ ] Add support for TheAudioDB
 &#xa0;
 
 <a href="#top">Back to top</a>

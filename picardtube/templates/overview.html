@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/overview.css') }}" />
 <div class="container">
     <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name">
         <div class="input-group-append">
             <button type="button" id="addsong" class="btn btn-success input-group-text bg-success" data-toggle="modal" data-target="#downloadmodal"><i class="fi-xwsuxl-plus-solid"></i></button>
-            <button class="navbar-toggler d-block d-md-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fi-xnsuxl-three-bars-solid"></i>
             </button>
         </div>
@@ -18,6 +19,7 @@
                 <th scope="col">Artist</th>
                 <th scope="col">Album</th>
                 <th scope="col">Date</th>
+                <th scope="col">Downloadprogress</th>
             </tr>
         </thead>
     </table>
@@ -44,6 +46,7 @@
                                         <option selected value="url">Input type: URL</option>
                                         <option value="mbq">Input type: Musicbrainz query</option>
                                     </select> -->
+                                    <input type="number" id="amount" class="form-control num_input" max="100" step="1" title="Max amount of items to load (default is 5 and max is 100)" placeholder="Amount of items to load (default is 5 and max is 100)" />
                                     <button type="button" id="searchsongbtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
                                 </div>
                             </div>

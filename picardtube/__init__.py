@@ -1,17 +1,21 @@
 from flask import Flask
-from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from flask_fontawesome import FontAwesome
 from flask_jsglue import JSGlue
 from flask_migrate import Migrate
 from config import Config
-app = Flask(__name__, static_url_path='/static')
-app.config.from_object(Config)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-fontawesome = FontAwesome(app)
-csrf = CSRFProtect(app)
-jsglue = JSGlue(app)
+db = SQLAlchemy()
+migrate = Migrate()
+jsglue = JSGlue()
 
+from picardtube.settings import bp as bp_settings
+from picardtube.overview import bp as bp_overview
 
-from picardtube import routes
+def create_app(config_class=Config):
+    app = Flask(__name__, static_url_path='/static')
+    app.config.from_object(config_class)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jsglue.init_app(app)
+    app.register_blueprint(bp_overview, url_prefix='/')
+    app.register_blueprint(bp_settings, url_prefix='/settings')
+    return app
