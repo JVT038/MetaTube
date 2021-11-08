@@ -23,8 +23,12 @@ class Config(db.Model):
     
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
-        db.session.commit()
-        return True
+        print(ffmpeg_path)
+        if db.session.commit():
+            return True
+        else:
+            print(False)
+            return False
 
 class Templates(db.Model):
     template_id = db.Column(db.Integer, primary_key=True)

@@ -6,15 +6,16 @@ from picardtube.database import Config
 import picardtube.youtube as yt
 import picardtube.sponsorblock as sb
 import picardtube.musicbrainz as musicbrainz
-from picardtube.init import checkdb
+# from picardtube.init import checkdb
 
 from flask import render_template, request, jsonify
 
 @bp.route('/')
-@checkdb
+# @checkdb
 def index():
-    # ffmpeg_path = True if len(Config.ffmpeg_directory) > 0 else False
-    ffmpeg_path = "asdf"
+    ffmpeg_path = True if len(Config.query.get(1).ffmpeg_directory) > 0 else False
+    print(Config.query.get(1).ffmpeg_directory)
+    print(ffmpeg_path)
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path)
 
 @bp.route('/ajax/search', methods=['GET'])

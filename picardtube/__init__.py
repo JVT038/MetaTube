@@ -9,15 +9,17 @@ jsglue = JSGlue()
 
 from picardtube.settings import bp as bp_settings
 from picardtube.overview import bp as bp_overview
+from picardtube.init import init
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, compare_type=True)
     jsglue.init_app(app)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
+    init(app)
     return app
 
 import picardtube.database

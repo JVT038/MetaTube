@@ -4,7 +4,7 @@
     <nav>
         <ul class="nav nav-tabs justify-content-center" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" href="#generaltab" data-toggle="tab">Download settings</a>
+                <a class="nav-link active" href="#downloadtab" data-toggle="tab">Download settings</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#templatestab" data-toggle="tab">Template settings</a>
@@ -15,9 +15,9 @@
         </ul>
     </nav>
     <div class="tab-content">
-        <div class="tab-pane active" id="generaltab">
+        <div class="tab-pane active" id="downloadtab">
             <h4>Download settings</h4>
-            <form>
+            <form method="post">
                 {{ general_form.csrf_token }}
                 <div class="form-row">
                     {% with messages = get_flashed_messages() %}
@@ -30,12 +30,19 @@
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <label for="#ffmpeg_path">Absolute or relative path to the ffmpeg application or folder containing ffmpeg. Required to download videos.</label>
-                        {{ general_form.ffmpeg_path(class='form-control', id='ffmpeg_path')}}
+                        <label for="#ffmpeg_path">Absolute or relative path from the base directory* to the ffmpeg application or folder containing ffmpeg. Required to download videos.</label>
+                        <label>* The base directory is the same directory where <code>picardtube.py</code> is located</label>
+                        {{ general_form.ffmpeg_path(class='form-control', id='ffmpeg_path', value='ffmpeg')}}
                     </div>
                 </div>
                 {{ general_form.submit(class='btn btn-success', id='submitgeneralform') }}
             </form>
+        </div>
+        <div class="tab-pane" id="templatestab">
+
+        </div>
+        <div class="tab-pane" id="userstab">
+            
         </div>
     </div>
 </div>

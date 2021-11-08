@@ -1,9 +1,12 @@
 from flask_migrate import init, migrate, upgrade
 from picardtube.database import *
-from picardtube import db, migrate
+from picardtube import db
 from picardtube import Config as env
 import os
 class Default():
+    def __init__(self, app):
+        self._app = app
+        app.app_context().push()
     def config():
         if Config.query.count() > 0:
             return True
@@ -35,11 +38,13 @@ class Default():
         
     def init_db(self, db_exists = True):
         if db_exists is False:
-            if os.path.isdir(os.path.join(env.BASE_DIR, 'migrations')) and os.path.exists(os.path.join(env.BASE_DIR, 'migrations')):
-                upgrade(directory=os.path.join(env.BASE_DIR, 'migrations'))
+            directory = os.path.join(env.BASE_DIR, 'migrations')
+            if os.path.isdir(directory) and os.path.exists(directory):
+                upgrade(directory)
             else:
-                migrate(directory=os.path.join(env.BASE_DIR, 'migrations'))
-                upgrade(directory=os.path.join(env.BASE_DIR, 'migrations'))
+                init(directory)
+                migrate(directory)
+                upgrade(directory)
         methods = ['config', 'templates']
         for method in methods:
             getattr(Default, method)()
