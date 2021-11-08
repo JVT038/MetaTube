@@ -35,6 +35,7 @@
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
+                    {% if ffmpeg_path is sameas True %}
                     <div class="row">
                         <form id="queryform" class="form-group" style="width: 100%;">
                             <!-- <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" id="supportedsitesanchor">Supported sites can be viewed here</a> -->
@@ -57,6 +58,11 @@
                         <div class="col-md-6" id="ytcol"></div>
                         <div class="col-md-6" id="mbpcol"></div>
                     </div>
+                    {% else %}
+                    <div class="row">
+                        <h3 class="text-center">Select an FFmpeg location in settings before downloading any songs!</h3>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="modal-footer d-none">

@@ -13,3 +13,4 @@ class Config(object):
     TEMPLATES_AUTO_RELOAD = os.environ.get('TEMPLATES_AUTO_RELOAD') or False
     FLASK_DEBUG= os.environ.get('FLASK_DEBUG') or False
     FLASK_ENV = os.environ.get('FLASK_ENV') or 'production'
+    BASE_DIR = basedir

@@ -1,3 +1,42 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container">
+    <nav>
+        <ul class="nav nav-tabs justify-content-center" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" href="#generaltab" data-toggle="tab">Download settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#templatestab" data-toggle="tab">Template settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#userstab" data-toggle="tab">User settings</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="tab-content">
+        <div class="tab-pane active" id="generaltab">
+            <h4>Download settings</h4>
+            <form>
+                {{ general_form.csrf_token }}
+                <div class="form-row">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <p class="text-center">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        <label for="#ffmpeg_path">Absolute or relative path to the ffmpeg application or folder containing ffmpeg. Required to download videos.</label>
+                        {{ general_form.ffmpeg_path(class='form-control', id='ffmpeg_path')}}
+                    </div>
+                </div>
+                {{ general_form.submit(class='btn btn-success', id='submitgeneralform') }}
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

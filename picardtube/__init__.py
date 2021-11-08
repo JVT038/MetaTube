@@ -16,6 +16,8 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jsglue.init_app(app)
-    app.register_blueprint(bp_overview, url_prefix='/')
-    app.register_blueprint(bp_settings, url_prefix='/settings')
+    app.register_blueprint(bp_overview)
+    app.register_blueprint(bp_settings)
     return app
+
+import picardtube.database

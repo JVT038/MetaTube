@@ -1,4 +1,4 @@
 from flask import Blueprint
-bp = Blueprint('setings', __name__, static_folder='../static', template_folder='../templates/')
+bp = Blueprint('settings', __name__, static_folder='../static', template_folder='../templates/')
 
 from . import routes

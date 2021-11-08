@@ -55,16 +55,18 @@ $(document).ready(function() {
                 thumbnail += value_thumbnail.url;
             }
         });
-        segments_array = [];
-        segment_data = segments;
-        $.each(segments, function(key_segments) {
-            json_segment = JSON.parse(segments[key_segments]);
-            // segments_array.push(JSON.parse(segments[key_segments]))
-            if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
-                let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
-                segments_array.push(skip_segments);
-            }
-        });
+        if(segments != 'error') {
+            segments_array = [];
+            segment_data = segments;
+            $.each(segments, function(key_segments) {
+                json_segment = JSON.parse(segments[key_segments]);
+                // segments_array.push(JSON.parse(segments[key_segments]))
+                if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
+                    let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
+                    segments_array.push(skip_segments);
+                }
+            });
+        }
 
         let minutes = Math.floor(data.duration / 60);
         let seconds = data.duration % 60;

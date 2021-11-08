@@ -1,1 +1,3 @@
-from picardtube import app
+from picardtube import create_app
+app = create_app()
+app.run()
