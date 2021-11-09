@@ -12,3 +12,4 @@ bootstrap 4.0
 app.db
 migrations
 bin
+downloads/*

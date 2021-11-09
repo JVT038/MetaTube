@@ -133,6 +133,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add custom YouTube-DLP options
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
+- [ ] Add translations
 &#xa0;
 
 <a href="#top">Back to top</a>

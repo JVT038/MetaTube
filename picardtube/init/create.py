@@ -13,6 +13,7 @@ class Default():
         config = Config(
             auth = False,
             ffmpeg_directory = "",
+            output_folder = "downloads",
             proxy_status = False,
             proxy_username = "",
             proxy_password = "",
@@ -29,8 +30,7 @@ class Default():
         template = Templates(
             template_id = 0,
             template_name = 'default',
-            extension = 'mp3',
-            output_folder = '/downloads'
+            extension = 'mp3'
         )
         db.session.add(template)
         db.session.commit()

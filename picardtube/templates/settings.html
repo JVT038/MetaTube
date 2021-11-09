@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+<script src="{{ url_for('static', filename='JS/settings.js') }}"></script>
 <div class="container">
     <nav>
         <ul class="nav nav-tabs justify-content-center" role="tablist">
@@ -17,9 +18,9 @@
     <div class="tab-content">
         <div class="tab-pane active" id="downloadtab">
             <h4>Download settings</h4>
-            <form method="post">
-                {{ general_form.csrf_token }}
-                <div class="form-row">
+            <form method="post" id="downloadsform">
+                {{ download_form.csrf_token }}
+                <div class="form-row" id="downloadsettingslog">
                     {% with messages = get_flashed_messages() %}
                         {% if messages %}
                             {% for message in messages %}
@@ -27,15 +28,27 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
+                    {% for field, error in download_form.errors.items() %}
+                        {% for e in error %}
+                            <p class="text-center">{{ field.label }} {{ e }}</p>
+                        {% endfor %}
+                    {% endfor %}
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <label for="#ffmpeg_path">Absolute or relative path from the base directory* to the ffmpeg application or folder containing ffmpeg. Required to download videos.</label>
-                        <label>* The base directory is the same directory where <code>picardtube.py</code> is located</label>
-                        {{ general_form.ffmpeg_path(class='form-control', id='ffmpeg_path', value='ffmpeg')}}
+                        <label for="#ffmpeg_path">An absolute path or relative path from the base directory* to the folder containing ffmpeg. Required to download videos.</label>
+                        {{ download_form.ffmpeg_path(class='form-control', id='ffmpeg_path')}}
+                    </div>
+                    <div class="col">
+                        <label for="#output_path">An absolute path or relative path from the base directory* to the output folder, where Picardtube will store all its downloads</label>
+                        {{ download_form.output_folder(class='form-control', id='output_folder')}}
                     </div>
                 </div>
-                {{ general_form.submit(class='btn btn-success', id='submitgeneralform') }}
+                {{ download_form.submit(class='btn btn-success', id='submitdownloadform') }}
+                {% if download_form.ffmpeg_path.data|length > 1 %}
+                    <button type="button" class="btn btn-success", id="testffmpeg">Test FFmpeg</button>
+                {% endif %}
+                <p>* The base directory is the same directory where <code>picardtube.py</code> is located</p>
             </form>
         </div>
         <div class="tab-pane" id="templatestab">

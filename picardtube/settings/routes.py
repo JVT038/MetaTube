@@ -1,20 +1,36 @@
 from picardtube.settings import bp
 from picardtube.settings.forms import *
 from picardtube.database import Config
-# from picardtube.init import checkdb
-from flask import render_template, flash
+from picardtube.ffmpeg import ffmpeg
+from picardtube import db
+from flask import render_template, flash, jsonify
 
 @bp.route('/settings', methods=['GET', 'POST'])
-# @checkdb
 def settings():
-    general_form = GeneralSettings()
-    ffmpeg_path = Config.ffmpeg_directory
-    if general_form.validate_on_submit():
-        db_config = Config().query.get(1)
-        if db_config.ffmpeg(general_form.ffmpeg_path.data):
+    download_form = DownloadSettingsForm()
+    ffmpeg_form = TestffmpegForm()
+    db_config = Config().query.get(1)
+    ffmpeg_path = db_config.ffmpeg_directory
+    output_folder = db_config.output_folder
+    if download_form.is_submitted() is False:
+        download_form.ffmpeg_path.data = ffmpeg_path
+        download_form.output_folder.data = output_folder
+    if download_form.validate_on_submit():
+        if db_config.ffmpeg(download_form.ffmpeg_path.data):
             flash('FFmpeg path has succefully been updated!')
-            return render_template('settings.html', general_form=general_form, current_page='settings', ffmpeg=ffmpeg_path)
+            return render_template('settings.html', download_form=download_form, current_page='settings')
         else:
-            flash('Something went wrong. Check the logs for more info')
-            return render_template('settings.html', general_form=general_form, current_page='settings', ffmpeg=ffmpeg_path)
-    return render_template('settings.html', general_form=general_form, current_page='settings', ffmmpeg=ffmpeg_path)
+            flash('FFmpeg path has succefully been updated!')
+            return render_template('settings.html', download_form=download_form, current_page='settings')
+    else:
+        for field, error in download_form.errors.items():
+            for e in error:
+                print(e)
+
+    return render_template('settings.html', download_form=download_form, current_page='settings', ffmpeg=ffmpeg_form)
+
+@bp.route('/testffmpeg', methods=['GET'])
+def testffmpeg():
+    ffmpeg_instance = ffmpeg()
+    test = ffmpeg_instance.test()
+    return jsonify(test), 200

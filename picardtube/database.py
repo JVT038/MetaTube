@@ -1,14 +1,3 @@
-# from picardtube.database import models
-# from picardtube import db
-# class default():
-#     def createtemplate():
-#         template = models.Templates()
-#         template.template_id = 0
-#         template.template_name = 'default'
-#         template.extension = 'mp3'
-#         template.output_folder = '/downloads'
-#         db.session.add(template)
-#         db.session.commit()
 from picardtube import db
 
 class Config(db.Model):
@@ -20,6 +9,7 @@ class Config(db.Model):
     proxy_password = db.Column(db.String(128))
     proxy_address = db.Column(db.String(128))
     proxy_port = db.Column(db.String(128))
+    output_folder = db.Column(db.String(128))
     
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
@@ -34,7 +24,6 @@ class Templates(db.Model):
     template_id = db.Column(db.Integer, primary_key=True)
     template_name = db.Column(db.String(64), unique=True)
     extension = db.Column(db.String(16))
-    output_folder = db.Column(db.String(128))
 
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,4 +40,6 @@ class Database(db.Model):
     auth_password = db.Column(db.String(128))
 
 class Users():
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+    password_hash = db.Column(db.String(128))
