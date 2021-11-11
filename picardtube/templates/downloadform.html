@@ -1,17 +1,17 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap/bootstrap.min.css') }}" />
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap/bootstrap.min.css') }}" />
 <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/icon type">
 <script src="{{ url_for('static', filename='JS/libraries/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ url_for('static', filename='JS/libraries/popper.min.js') }}"></script>
 <script src="{{ url_for('static', filename='JS/libraries/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='JS/libraries/friconix.js') }}"></script>
-{{ JSGlue.include() }}
+{{ JSGlue.include() }} -->
 <form>
     <div class="form-row">
         <div class="col">
             <label for="#template">Template</label>
             <select class="custom-select" id="template">
                 {% for template in templates %}
-                    <option value="{{ template.name }}">{{ template.name }}</option>
+                    <option value="{{ template.id }}">{{ template.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -19,10 +19,33 @@
     <div class="row">
         <div class="col">
             <label for="#type">Type</label>
-            <select class="custom-select" id="type">
-                <option value="audio">Audio</option>
-                <option value="video">Video</option>
+            <input id="type" class="form-control disabled" value="Audio" disabled />
+        </div>
+        <div class="col">
+            <label for="#extension">Extension</label>
+            <select class="custom-select" id="extension">
+                <optgroup label="Audio">
+                    <option value="aac">AAC</option>
+                    <option value="flac">FLAC</option>
+                    <option value="mp3" selected>MP3</option>
+                    <option value="m4a">M4A</option>
+                    <option value="opus">Opus</option>
+                    <option value="vorbis">Vorbis</option>
+                    <option value="wav">WAV</option>
+                </optgroup>
+                <optgroup label="Video">
+                    <option value="mp4">MP4</option>
+                    <option value="flv">Flash Video (FLV)</option>
+                    <option value="webm">WebM</option>
+                    <option value="ogg">Ogg</option>
+                    <option value="mkv">Matroska (MKV)</option>
+                    <option value="avi">AVI</option>
+                </optgroup>
             </select>
+        </div>
+        <div class="col">
+            <label for="#output_folder">Output folder</label>
+            <input type="text" id="output_folder" value="downloads" class="form-control" />
         </div>
     </div>
 </form>

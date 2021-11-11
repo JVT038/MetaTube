@@ -42,8 +42,8 @@ def template():
     data.name = request.form.get('name')
     data.output_folder = request.form.get('output_folder')
     data.ext = request.form.get('output_ext')
-    id = request.form.get('id')
-    if len(data.name) < 1 or len(data.output_folder) < 1 or len(data.ext) < 1 or len(goal) < 1 or len(id) < 1 or int(id) == 0:
+    id = request.form.get('id', "0")
+    if len(data.name) < 1 or len(data.output_folder) < 1 or len(data.ext) < 1 or len(goal) < 1 or len(id) < 1 or data.name == 'Default':
         response = jsonify('Enter all fields!')
         return response, 400
     else:

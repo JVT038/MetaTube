@@ -33,7 +33,7 @@ class Default():
         template = Templates(
             id = 0,
             name = 'Default',
-            type = 'audio',
+            type = 'Audio',
             extension = 'mp3',
             output_folder = 'downloads'
         )

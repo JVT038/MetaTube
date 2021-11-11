@@ -6,6 +6,7 @@ from picardtube.database import *
 import picardtube.youtube as yt
 import picardtube.sponsorblock as sb
 import picardtube.musicbrainz as musicbrainz
+from mock import Mock
 
 from flask import render_template, request, jsonify
 
@@ -27,8 +28,10 @@ def search():
                     artist = video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
                     amount = amount
                 )
+                templates = Templates.query.all()
+                downloadform = render_template('downloadform.html', templates=templates)
                 segments = sb.segments(video["id"]) if type(sb.segments(video["id"])) == 'list' else 'error'
-                response = jsonify(status='success', yt=video, mbp=mbp["release-list"], segments=segments)
+                response = jsonify(status='success', yt=video, mbp=mbp["release-list"], segments=segments, downloadform=downloadform)
                 return response
             except ValueError as error:
                 return str(error), 400
@@ -54,3 +57,20 @@ def findcover():
 def template():
     templates = Templates.query.all()
     return render_template('downloadform.html', templates=templates)
+
+@bp.route('/fetchtemplate')
+def fetchtemplate():
+    id = request.args.get('id')
+    if id is not None and len(id) > 0:
+        template = Templates.fetchtemplate(id)
+        data = {
+            "name": template.name,
+            "type": template.type,
+            "extension": template.extension,
+            "output_folder": template.output_folder
+        }
+        response = jsonify(data)
+        return response, 200
+    else:
+        response = jsonify('invalid ID')
+        return response, 400

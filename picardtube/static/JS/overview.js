@@ -42,7 +42,7 @@ $(document).ready(function() {
         $("#searchsongbtn").trigger('click');
     });
 
-    function insertYTcol(response, segments) {
+    function insertYTcol(response, segments, form) {
         var data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
@@ -85,7 +85,7 @@ $(document).ready(function() {
             'input_start': '<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>',
             'input_end': '<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>'
         }
-        let inject = html['img'] + html['text'];
+        let inject = html['img'] + html['text'] + form;
         $("#ytcol").empty();
         return inject;
     }
@@ -159,7 +159,7 @@ $(document).ready(function() {
             success: function(response) {
                 $("#query_log").empty();
                 info = response;
-                let ytcol = insertYTcol(response.yt, response.segments);
+                let ytcol = insertYTcol(response.yt, response.segments, response.downloadform);
                 let mbpcol = insertMBcol(response.mbp);
                 $("#ytcol").append(ytcol);
                 $("#mbpcol").append(mbpcol);
@@ -186,5 +186,29 @@ $(document).ready(function() {
         let checkbox = $(this).children('.input-group-text').children('input');
         checkbox.prop('checked', true);
         $('.mbp-item input[type=\'radio\']').not(checkbox).prop('checked', false);
+    });
+    $(document).on('change', '#template', function() {
+        let id = $(this).val();
+        $.ajax({
+            url: Flask.url_for('overview.fetchtemplate'),
+            method: 'GET',
+            data: {
+                id: id
+            },
+            success: function(response) {
+                data = response;
+                $("#extension").val([]);
+                $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
+                $("#type").text(response.type);
+                $("#output_folder").val(response.output_folder)
+            }, 
+            error: function(error) {
+                $("#ytcol").empty();
+                $("#mbpcol").empty();
+                if(error.status == 400) {
+                    $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
+                }
+            }
+        });
     });
 })
