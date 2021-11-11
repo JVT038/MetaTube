@@ -11,7 +11,7 @@
             <label for="#template">Template</label>
             <select class="custom-select" id="template">
                 {% for template in templates %}
-                    <option value="{{ template.template_name }}">{{ template.template_name }}</option>
+                    <option value="{{ template.name }}">{{ template.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -20,7 +20,7 @@
         <div class="col">
             <label for="#type">Type</label>
             <select class="custom-select" id="type">
-                <option value="audio" {{ ''  }}>Audio</option>
+                <option value="audio">Audio</option>
                 <option value="video">Video</option>
             </select>
         </div>

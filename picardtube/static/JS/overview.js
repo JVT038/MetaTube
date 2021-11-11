@@ -85,13 +85,14 @@ $(document).ready(function() {
             'input_start': '<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>',
             'input_end': '<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>'
         }
-        let inject = html['img'] + html['text'] + html['input_start'] + html['input_end'];
+        let inject = html['img'] + html['text'];
         $("#ytcol").empty();
         return inject;
     }
 
     function insertMBcol(mbp_data) {
-        let ul = $('<ul class="list-unstyled"></ul>');
+        let ul = document.createElement('ul');
+        ul.classList.add('list-unstyled');
         $.each(mbp_data, function(key_release, value_release) {
             let release_id = value_release.id;
             let title = value_release.title;
@@ -126,14 +127,13 @@ $(document).ready(function() {
                     cover = response;
                     let mbp_url = 'https://musicbrainz.org/release/'+release_id;
                     let mbp_image = response.cover == null ? Flask.url_for('static', {"filename": "images/empty_cover.png"}) : response.cover.images[0].thumbnails.small;
-                    let img = $('<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>');
-                    let desc = $('<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>')
-                    let checkbox = $('<div class="input-group-text"><input type="radio" aria-label="Radio button for selecting an item"></div>')
-                    let list = $('<li class="media mbp-item" style="cursor: pointer;" id="'+release_id+'"></li>');
-                    list.prepend(img);
-                    list.append(desc);
-                    list.append(checkbox);
-                    ul.append(list);
+                    html = {
+                        'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
+                        'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
+                        'checkbox': '<div class="input-group-text"><input type="radio" aria-label="Radio button for selecting an item"></div>',
+                    }
+                    let list = '<li class="media mbp-item" style="cursor: pointer" id="'+release_id+'">'+html['img']+html['desc']+html['checkbox']+'</li>';
+                    ul.insertAdjacentHTML('afterbegin', list);
                 }, 
                 error: function(error) {
                     console.log(error)

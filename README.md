@@ -92,7 +92,7 @@ $ virtualenv .
 $ cd Scripts
 $ activate
 # Linux:
-$ source Scripts/activate
+$ source bin/activate
  
 # Navigate to the root directory
 $ cd ../
