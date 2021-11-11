@@ -53,7 +53,7 @@ class Default():
             upgrade(directory)
         for method in self._methods:
             getattr(Default, method)()
-        print('Created database, tables and rows')
+        print('Created the database and all necessary tables and rows')
         return True
             
     def check_db(self):
@@ -63,7 +63,8 @@ class Default():
         # sqlite = sqlite3.connect(self._url.replace('sqlite:///', ''))
         # cursor = sqlite.cursor()
         # inspector = inspect(engine)
-        for table in dir(database):
+        tables = ['Config', 'Database', 'Templates']
+        for table in tables:
             if ('__' + table + '__') not in dir(database) and table != 'db':
                 for method in self._methods:
                     getattr(Default, method)()
@@ -85,8 +86,9 @@ class Default():
                 #             sqlite.commit()
                 #             sqlite.close()
             else:
+                print(f'Table {table} doesn\'t exist')
                 db.create_all()
-                print('Created all the tables')
+                print('Created all missing tables')
                 for method in self._methods:
                     getattr(Default, method)()
         return True

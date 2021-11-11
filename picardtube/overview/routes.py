@@ -3,11 +3,10 @@
 # from picardtube.sponsorblock import sb
 from picardtube.overview import bp
 from picardtube.database import *
-import picardtube.youtube as yt
+from picardtube.youtube import YouTube as yt
 import picardtube.sponsorblock as sb
 import picardtube.musicbrainz as musicbrainz
-from mock import Mock
-
+import os
 from flask import render_template, request, jsonify
 
 @bp.route('/')
@@ -74,3 +73,32 @@ def fetchtemplate():
     else:
         response = jsonify('invalid ID')
         return response, 400
+    
+@bp.route('/downloadvideo', methods=['POST'])
+def download():
+    url = [request.form.get('url')]
+    type = request.form.get('type')
+    ext = request.form.get('ext')
+    # filename = request.form.get('filename', 'filename')
+    filename = "%(title).%(ext)s"
+    filepath = os.path.join(request.form.get('output_folder', 'downloads'), filename)
+    ffmpeg = Config.get_ffmpeg()
+    postprocessors = []
+    if type == 'Audio':
+        postprocessors.append({
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": ext,
+            "preferredquality": 192
+        })
+    elif type == 'Video':
+        postprocessors.append({
+            "key": "FFmpegExtractAudio",
+            "preferedformat": ext
+        })
+    ytdl_options = {
+        'format': 'bestvideo+bestaudio/best',
+        'postprocessors': postprocessors,
+    }
+    download = yt()
+    download.get_video(url, ytdl_options)
+    return "downloading...", 200

@@ -60,7 +60,6 @@ $(document).ready(function() {
             segment_data = segments;
             $.each(segments, function(key_segments) {
                 json_segment = JSON.parse(segments[key_segments]);
-                // segments_array.push(JSON.parse(segments[key_segments]))
                 if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
                     let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
                     segments_array.push(skip_segments);
@@ -75,12 +74,8 @@ $(document).ready(function() {
         }
         
         let length = minutes + ":" + seconds;
-        // let img = $('<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />');
-        // let text = $('<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>');
-        // let input_start = $('<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>');
-        // let input_end = $('<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>');
         let html = {
-            'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />',
+            'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" url="'+data.webpage_url+'" />',
             'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>',
             'input_start': '<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>',
             'input_end': '<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>'
@@ -210,5 +205,28 @@ $(document).ready(function() {
                 }
             }
         });
+    });
+    $("#downloadbtn").on('click', function() {
+        let url = $("#thumbnail_yt").attr('url');
+        let ext = $("#extension").val();
+        let output_folder = $("#output_folder").val();
+        let type = $("#type").val();
+
+
+        $.ajax({
+            url: Flask.url_for('overview.download'),
+            method: 'POST',
+            data: {
+                url: url,
+                ext: ext,
+                output_folder: output_folder,
+                type: type
+            },
+            success: function(response) {
+                console.log(response);
+            }, error: function(error) {
+                console.log(error);
+            }
+        })
     });
 })

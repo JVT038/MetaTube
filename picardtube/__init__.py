@@ -11,7 +11,7 @@ from picardtube.settings import bp as bp_settings
 from picardtube.overview import bp as bp_overview
 from picardtube.init import init as init_db
 
-def create_app(config_class=Config):
+def create_app(address, config_class=Config):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     db.init_app(app)
@@ -20,6 +20,7 @@ def create_app(config_class=Config):
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     init_db(app)
+    print(f'Started the PicardTube server on {address}')
     return app
 
 import picardtube.database

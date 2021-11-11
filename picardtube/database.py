@@ -14,6 +14,9 @@ class Config(db.Model):
         self.ffmpeg_directory = ffmpeg_path
         db.session.commit()
         return True
+    
+    def get_ffmpeg():
+        return Config.query.get(1).ffmpeg_directory
 
 class Templates(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=True)
