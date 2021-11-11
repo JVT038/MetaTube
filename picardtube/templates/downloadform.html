@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap/bootstrap.min.css') }}" />
+<link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/icon type">
+<script src="{{ url_for('static', filename='JS/libraries/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/friconix.js') }}"></script>
+{{ JSGlue.include() }}
+<form>
+    <div class="form-row">
+        <div class="col">
+            <label for="#template">Template</label>
+            <select class="custom-select" id="template">
+                {% for template in templates %}
+                    <option value="{{ template.template_name }}">{{ template.template_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="#type">Type</label>
+            <select class="custom-select" id="type">
+                <option value="audio" {{ ''  }}>Audio</option>
+                <option value="video">Video</option>
+            </select>
+        </div>
+    </div>
+</form>

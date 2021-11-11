@@ -9,21 +9,48 @@ class Config(db.Model):
     proxy_password = db.Column(db.String(128))
     proxy_address = db.Column(db.String(128))
     proxy_port = db.Column(db.String(128))
-    output_folder = db.Column(db.String(128))
     
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
-        print(ffmpeg_path)
-        if db.session.commit():
-            return True
-        else:
-            print(False)
-            return False
+        db.session.commit()
+        return True
 
 class Templates(db.Model):
-    template_id = db.Column(db.Integer, primary_key=True)
-    template_name = db.Column(db.String(64), unique=True)
-    extension = db.Column(db.String(16))
+    id = db.Column(db.Integer, primary_key=True, nullable=True)
+    name = db.Column(db.String(64), unique=True, nullable=True)
+    type = db.Column(db.String(64), nullable=True)
+    extension = db.Column(db.String(16), nullable=True)
+    output_folder = db.Column(db.String(128), nullable=True)
+    
+    def check_existing(value):
+        return True if Templates.query.filter_by(name = value).count() > 0 else False
+    
+    def add(data):
+        row = Templates(
+            name = data.name,
+            type = data.type,
+            extension = data.ext,
+            output_folder = data.output_folder
+        )
+        db.session.add(row)
+        db.session.commit()
+        return True
+    
+    def fetchtemplate(input_id):
+        return Templates.query.filter_by(id = input_id).first()
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return True
+    
+    def edit(self, data):
+        self.name = data.name
+        self.type = data.type
+        self.extension = data.ext
+        self.output_folder = data.output_folder
+        db.session.commit()
+        return True
 
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key=True)

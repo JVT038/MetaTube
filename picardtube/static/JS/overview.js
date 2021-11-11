@@ -75,6 +75,10 @@ $(document).ready(function() {
         }
         
         let length = minutes + ":" + seconds;
+        // let img = $('<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />');
+        // let text = $('<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>');
+        // let input_start = $('<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>');
+        // let input_end = $('<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>');
         let html = {
             'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" />',
             'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>',
@@ -82,6 +86,7 @@ $(document).ready(function() {
             'input_end': '<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>'
         }
         let inject = html['img'] + html['text'] + html['input_start'] + html['input_end'];
+        $("#ytcol").empty();
         return inject;
     }
 
@@ -92,7 +97,17 @@ $(document).ready(function() {
             let title = value_release.title;
             let artists = value_release['artist-credit'].length > 1 ? "Artists: <br />" : "Artist: ";
             let date = value_release.date;
-            let language = value_release["text-representation"]["language"];
+            let language = ""
+            if("text-representation" in value_release) {
+                if("language" in value_release["text-representation"]) {
+                    language =  value_release["text-representation"]["language"]
+                } else {
+                    language = "Unknown"
+                }
+            } else {
+                language = "Unknown"
+            }
+            // let language = !"text-representation" in value_release ? "Unknown" : ("language" in value_release["text-represenation"] ? value_release["text-representation"]["language"] : "Unknown");
             $.each(value_release["artist-credit"], function(key_artist, value_artist) {
                 if(typeof(value_artist) == 'object') {
                     // artists_array[key_artist] = [value_artist.name, value_artist.id]
@@ -125,6 +140,7 @@ $(document).ready(function() {
                 }
             })
         });
+        $("#mbpcol").empty();
         return ul;
     }
     $("#searchsongbtn").on('click', function() {
@@ -145,8 +161,8 @@ $(document).ready(function() {
                 info = response;
                 let ytcol = insertYTcol(response.yt, response.segments);
                 let mbpcol = insertMBcol(response.mbp);
-                $("#ytcol").empty().append(ytcol);
-                $("#mbpcol").empty().append(mbpcol);
+                $("#ytcol").append(ytcol);
+                $("#mbpcol").append(mbpcol);
                 $(".modal-footer").removeClass('d-none')
             }, 
             error: function(error) {

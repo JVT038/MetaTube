@@ -6,7 +6,6 @@ from wtforms.validators import DataRequired, regexp
 
 class DownloadSettingsForm(FlaskForm):
     ffmpeg_path = StringField('Path to FFmpeg location', validators=[DataRequired('Enter a path for FFmpeg!')])
-    output_folder = StringField('Path to output folder', validators=[DataRequired('Enter a path for the downloads!')])
     submit = SubmitField('Update settings')
 
 class TestffmpegForm(FlaskForm):

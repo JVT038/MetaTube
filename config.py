@@ -6,6 +6,8 @@ dotenv_path = join(dirname(__file__), '.flaskenv')
 os.environ.setdefault('WERKZEUG_RUN_MAIN', 'true')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
+else:
+    os.environ.setdefault('FLASK_APP', 'picardtube.py')
 class Config(object):
     ''' All environment variables are stored here ''' 
     SECRET_KEY = os.environ.get('SECRET_KEY')  or 's44wzgFU9zNCQa3z'
@@ -16,3 +18,4 @@ class Config(object):
     FLASK_DEBUG= os.environ.get('FLASK_DEBUG') or False
     FLASK_ENV = os.environ.get('FLASK_ENV') or 'production'
     BASE_DIR = basedir
+    PORT = os.environ.get('PORT') or 5000

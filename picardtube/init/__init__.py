@@ -8,15 +8,11 @@ from picardtube.init.create import Default
 def init(app):
     db_url = Config.SQLALCHEMY_DATABASE_URI
     if db_url.startswith('sqlite:///'):
-        default = Default(app)
-        if os.path.exists(os.path.join(Config.BASE_DIR, 'picardtube', db_url.replace('sqlite:///', ""))):
-            if default.check_db():
-                print('DB is ok')
-            else:
-                print('DB doesn\'t have default rows')
+        absolute_url = os.path.join(Config.BASE_DIR, 'picardtube', db_url.replace('sqlite:///', ""))
+        relative_url = 'sqlite:///' + os.path.join('picardtube', db_url.replace('sqlite:///', ''))
+        default = Default(app, relative_url)
+        if os.path.exists(absolute_url):
+            if default.check_db() is False:
                 default.init_db()
-                print('DB rows created')
         else:
-            print('DB doesn\'t exist')
             default.init_db(False)
-            print('DB + rows created')

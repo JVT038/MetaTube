@@ -1,27 +1,26 @@
-<div align="center" id="top"> 
+<!-- <div align="center" id="top"> 
   <img src="./.github/app.gif" alt="Picardtube" />
 
   &#xa0;
 
-  <!-- <a href="https://picardtube.netlify.app">Demo</a> -->
-</div>
-
+  <a href="https://picardtube.netlify.app">Demo</a>
+</div> -->
 <h1 align="center">Picardtube</h1>
 
 <p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/JVT038/picardtube?color=56BEB8">
+  <img alt="Github top language" src="https://img.shields.io/github/languages/top/JVT038/picardtube">
 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/JVT038/picardtube?color=56BEB8">
+  <img alt="Github language count" src="https://img.shields.io/github/languages/count/JVT038/picardtube">
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/JVT038/picardtube?color=56BEB8">
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/JVT038/picardtube">
 
-  <img alt="License" src="https://img.shields.io/github/license/JVT038/picardtube?color=56BEB8">
+  <img alt="License" src="https://img.shields.io/github/license/JVT038/picardtube">
 
-  <img alt="Github issues" src="https://img.shields.io/github/issues/JVT038/picardtube?color=56BEB8" />
+  <img alt="Github issues" src="https://img.shields.io/github/issues/JVT038/picardtube" />
 
-  <img alt="Github forks" src="https://img.shields.io/github/forks/JVT038/picardtube?color=56BEB8" />
+  <img alt="Github forks" src="https://img.shields.io/github/forks/JVT038/picardtube" />
 
-  <img alt="Github stars" src="https://img.shields.io/github/stars/JVT038/picardtube?color=56BEB8" />
+  <img alt="Github stars" src="https://img.shields.io/github/stars/JVT038/picardtube" />
 </p>
 
 <h2 align="center">Status</h2>
@@ -51,9 +50,9 @@ I made this project to download music from YouTube more easily, by automatically
 
 ## :sparkles: Features ##
 
-:heavy_check_mark: Automatically download YouTube videos
-:heavy_check_mark: Add metadata from the Musicbrainz Picard database
-:heavy_check_mark: Set start and end point to cut off any outros and/or intros
+:heavy_check_mark: Automatically download YouTube videos <br/>
+:heavy_check_mark: Add metadata from the Musicbrainz Picard database <br/>
+:heavy_check_mark: Set start and end point to cut off any outros  and/or intros
 
 ## :rocket: Technologies ##
 
@@ -66,6 +65,9 @@ The following tools were used in this project:
 - [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
 - [jQuery 3.6.0](https://jquery.com/)
 - [Fricornix](https://friconix.com/)
+- [Youtube-DLP](https://github.com/yt-dlp/yt-dlp)
+- [Sponsorblock.py](https://github.com/wasi-master/sponsorblock.py)
+- [FFmpeg 4.4.1](https://ffmpeg.org/)
 
 ## :white_check_mark: Requirements ##
 

@@ -21,41 +21,147 @@
             <form method="post" id="downloadsform">
                 {{ download_form.csrf_token }}
                 <div class="form-row" id="downloadsettingslog">
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <p class="text-center">{{ message }}</p>
+                    <div class="col">
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p class="text-center">{{ message }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        {% for field, error in download_form.errors.items() %}
+                            {% for e in error %}
+                                <p class="text-center">{{ field.label }} {{ e }}</p>
                             {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    {% for field, error in download_form.errors.items() %}
-                        {% for e in error %}
-                            <p class="text-center">{{ field.label }} {{ e }}</p>
                         {% endfor %}
-                    {% endfor %}
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <label for="#ffmpeg_path">An absolute path or relative path from the base directory* to the folder containing ffmpeg. Required to download videos.</label>
+                        <label for="#ffmpeg_path">An absolute path* or relative path from the root directory** to the folder containing ffmpeg. Required to download videos.</label>
                         {{ download_form.ffmpeg_path(class='form-control', id='ffmpeg_path')}}
-                    </div>
-                    <div class="col">
-                        <label for="#output_path">An absolute path or relative path from the base directory* to the output folder, where Picardtube will store all its downloads</label>
-                        {{ download_form.output_folder(class='form-control', id='output_folder')}}
                     </div>
                 </div>
                 {{ download_form.submit(class='btn btn-success', id='submitdownloadform') }}
-                {% if download_form.ffmpeg_path.data|length > 1 %}
-                    <button type="button" class="btn btn-success", id="testffmpeg">Test FFmpeg</button>
-                {% endif %}
-                <p>* The base directory is the same directory where <code>picardtube.py</code> is located</p>
+                <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
+                    ** The root directory is the same directory where <code>picardtube.py</code> is located</p>
             </form>
         </div>
         <div class="tab-pane" id="templatestab">
-
+            <h4>Template settings</h4>
+            <p class="text-center" id="templateslog"></p>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Template name</th>
+                            <th scope="col">Template type</th>
+                            <th scope="col">Template extension</th>
+                            <th scope="col">Template output folder</th>
+                            <th scope="col">Edit template</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for template in templates %}
+                            <tr id="{{ template.id }}">
+                                <td class="td_name">{{ template.name }}</td>
+                                <td class="td_type">{{ template.type }}</td>
+                                <td class="td_extension">{{ template.extension }}</td>
+                                <td class="td_output_folder">{{ template.output_folder }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
+                                    <button type="button" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="5" class="text-center">Add template <button type="button" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="tab-pane" id="userstab">
             
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removetemplatemodal" tabindex="-1" role="dialog" aria-labelledby="remove template modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="removetemplatemodaltitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                Are you sure you want to delete this Template? 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deltemplatebtnmodal">Delete template</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="templatesmodal" aria-labelledby="template modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg mw-100 w-75">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add template</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addtemplateform">
+                    <div class="form-row">
+                        <div class="col">
+                            <p class="text-center" id="templatemodallog"></p>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label for="#template_name">Name of the template</label>
+                            <input type="text" id="template_name" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label for="#template_folder">Output folder* of the template</label>
+                            <input type="text" id="template_folder" class="form-control" />
+                            <p class="float-left">* (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory)</p>
+                        </div>
+                        <div class="col">
+                            <label for="#template_type">Output type of the template</label>
+                            <select class="custom-select" id="template_type">
+                                <optgroup label="Audio">
+                                    <option value="aac">AAC</option>
+                                    <option value="flac">FLAC</option>
+                                    <option value="mp3">MP3</option>
+                                    <option value="m4a">M4A</option>
+                                    <option value="opus">Opus</option>
+                                    <option value="vorbis">Vorbis</option>
+                                    <option value="wav">WAV</option>
+                                </optgroup>
+                                <optgroup label="Video">
+                                    <option value="mp4">MP4</option>
+                                    <option value="flv">Flash Video (FLV)</option>
+                                    <option value="webm">WebM</option>
+                                    <option value="ogg">Ogg</option>
+                                    <option value="mkv">Matroska (MKV)</option>
+                                    <option value="avi">AVI</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="addtemplatebtn" class="btn btn-primary">Add template</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>

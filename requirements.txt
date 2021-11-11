@@ -1,4 +1,6 @@
 alembic==1.7.4
+certifi==2021.10.8
+charset-normalizer==2.0.7
 click==8.0.3
 colorama==0.4.4
 Flask==2.0.2
@@ -8,15 +10,20 @@ Flask-Migrate==3.1.0
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
 greenlet==1.1.2
+idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.2
 Mako==1.1.5
 MarkupSafe==2.0.1
+mock==4.0.3
 musicbrainzngs==0.7.1
 mutagen==1.45.1
 pycryptodomex==3.11.0
 python-dotenv==0.19.1
+requests==2.26.0
+sponsorblock.py==0.1.0
 SQLAlchemy==1.4.26
+urllib3==1.26.7
 websockets==10.0
 Werkzeug==2.0.2
 WTForms==2.3.3
