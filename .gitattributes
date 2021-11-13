@@ -1,2 +1,2 @@
-picardtube/static/CSS/libraries/** linguist-vendored
-picardtube/static/JS/libraries/** linguist-vendored
+picardtube/static/CSS/libraries/ linguist-vendored
+picardtube/static/JS/libraries/ linguist-vendored
