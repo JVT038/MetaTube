@@ -27,8 +27,23 @@
 
 <h4 align="center"> 
 	🚧  Picardtube 🚀 Under construction...  🚧 <br/>
-  It's definitely not finished and at the moment of typing this, you can only enter an URL and fetch some info about the video
-</h4> 
+</h4>
+<p>
+  It's definitely not finished yet and these features are currently supported:
+
+  - Fetch information from a YouTube video based on an URL
+  - Query and fetch results from the Musicbrainz API
+  - Set up templates and options for the YouTube download
+  - Download YouTube videos based on a selected template
+
+  To-Do before the first release:
+
+  - Automatically merge metadata from Musicbrainz with the downloaded file
+  - Skip fragments (such as intros, outros, etc.) from the download
+  - Store the information about downloaded releases in the database
+  - Some decent mobile support
+  - Docker support
+</p>
 
 <hr>
 
