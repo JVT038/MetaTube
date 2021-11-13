@@ -3,6 +3,7 @@ from picardtube.settings.forms import *
 from picardtube.database import *
 from picardtube.ffmpeg import ffmpeg
 from picardtube import Config as env
+from picardtube.youtube import YouTube as youtube
 from flask import render_template, flash, request, jsonify
 from mock import Mock
 import os
@@ -42,8 +43,10 @@ def template():
     data.name = request.form.get('name')
     data.output_folder = request.form.get('output_folder')
     data.ext = request.form.get('output_ext')
+    data.output_name = request.form.get('output_name')
+    data.bitrate = request.form.get('bitrate')
     id = request.form.get('id', "0")
-    if len(data.name) < 1 or len(data.output_folder) < 1 or len(data.ext) < 1 or len(goal) < 1 or len(id) < 1 or data.name == 'Default':
+    if len(data.name) < 1 or len(data.output_folder) < 1 or len(data.ext) < 1 or len(goal) < 1 or len(id) < 1 or data.name == 'Default' or len(data.bitrate) < 1 or len(data.output_name) < 1:
         response = jsonify('Enter all fields!')
         return response, 400
     else:
@@ -72,7 +75,7 @@ def template():
             response = jsonify('Template successfully added')
             return response, 200
         elif goal == 'edit':
-            template = Templates.fetchtemplate(input_id=id)
+            template = Templates.fetchtemplate(id)
             template.edit(data)
             response = jsonify('Template successfully changed')
             return response, 200

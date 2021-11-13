@@ -57,7 +57,7 @@ def template():
     templates = Templates.query.all()
     return render_template('downloadform.html', templates=templates)
 
-@bp.route('/fetchtemplate')
+@bp.route('/ajax/fetchtemplate')
 def fetchtemplate():
     id = request.args.get('id')
     if id is not None and len(id) > 0:
@@ -66,7 +66,9 @@ def fetchtemplate():
             "name": template.name,
             "type": template.type,
             "extension": template.extension,
-            "output_folder": template.output_folder
+            "output_folder": template.output_folder,
+            "output_name": template.output_name,
+            "bitrate": template.bitrate
         }
         response = jsonify(data)
         return response, 200
@@ -74,31 +76,37 @@ def fetchtemplate():
         response = jsonify('invalid ID')
         return response, 400
     
-@bp.route('/downloadvideo', methods=['POST'])
+@bp.route('/ajax/downloadvideo', methods=['POST'])
 def download():
     url = [request.form.get('url')]
-    type = request.form.get('type')
-    ext = request.form.get('ext')
-    # filename = request.form.get('filename', 'filename')
-    filename = "%(title).%(ext)s"
-    filepath = os.path.join(request.form.get('output_folder', 'downloads'), filename)
+    type = request.form.get('type', 'Audio')
+    ext = request.form.get('ext', 'mp3')
+    output_format = request.form.get('output_format', f'%(title)s.%(ext)s')
+    bitrate = request.form.get('bitrate', 192)
+    filepath = os.path.join(request.form.get('output_folder', 'downloads'), output_format)
     ffmpeg = Config.get_ffmpeg()
     postprocessors = []
+    format = 'bestaudio/best' if type == 'Audio' else 'bv+ba/b'
     if type == 'Audio':
         postprocessors.append({
             "key": "FFmpegExtractAudio",
             "preferredcodec": ext,
-            "preferredquality": 192
+            "preferredquality": bitrate
         })
     elif type == 'Video':
         postprocessors.append({
-            "key": "FFmpegExtractAudio",
+            "key": "FFmpegVideoConvertor",
             "preferedformat": ext
         })
     ytdl_options = {
-        'format': 'bestvideo+bestaudio/best',
+        'format': format,
         'postprocessors': postprocessors,
+        'ffmpeg_location': ffmpeg,
+        'progress_hooks': [yt.download_hook],
+        'outtmpl': filepath,
+        'noplaylist': True,
+        # 'updatetime': True, 
     }
-    download = yt()
-    download.get_video(url, ytdl_options)
+    yt_instance = yt()
+    yt_instance.get_video(url, ytdl_options)
     return "downloading...", 200

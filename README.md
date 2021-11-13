@@ -128,7 +128,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add it to the PyPi library
 - [ ] Add support for other sites than YouTube
 - [ ] Add support for YouTube playlists
-- [ ] Use Sponsorblock to automatically skip intro and outro
+- [ ] Use Sponsorblock and ffmpeg-python to automatically skip intro and outro
 - [ ] Build a logger
 - [ ] Change metadata of file
 - [ ] Select output type (coding, extension, etc.)
@@ -136,6 +136,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
 - [ ] Add translations
+- [ ] Add in-built file explorer, making paths optional
+- [ ] Switch from AJAX to websockets
 &#xa0;
 
 <a href="#top">Back to top</a>

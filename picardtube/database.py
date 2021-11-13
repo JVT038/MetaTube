@@ -24,6 +24,8 @@ class Templates(db.Model):
     type = db.Column(db.String(64), nullable=True)
     extension = db.Column(db.String(16), nullable=True)
     output_folder = db.Column(db.String(128), nullable=True)
+    output_name = db.Column(db.String(32), nullable=True)
+    bitrate = db.Column(db.Integer)
     
     def check_existing(value):
         return True if Templates.query.filter_by(name = value).count() > 0 else False
@@ -33,7 +35,9 @@ class Templates(db.Model):
             name = data.name,
             type = data.type,
             extension = data.ext,
-            output_folder = data.output_folder
+            output_folder = data.output_folder,
+            output_name = data.output_name,
+            bitrate = data.bitrate
         )
         db.session.add(row)
         db.session.commit()
@@ -52,6 +56,8 @@ class Templates(db.Model):
         self.type = data.type
         self.extension = data.ext
         self.output_folder = data.output_folder
+        self.output_name = data.output_name
+        self.bitrate = data.bitrate
         db.session.commit()
         return True
 
@@ -68,6 +74,7 @@ class Database(db.Model):
     authentication = db.Column(db.Boolean)
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
+    
 
 class Users():
     id = db.Column(db.Integer, primary_key=True)

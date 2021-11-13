@@ -1,4 +1,5 @@
 import yt_dlp, threading
+from picardtube import sockets
     
 class YouTube:
     def is_supported(url):
@@ -16,15 +17,46 @@ class YouTube:
                     info = ytdl.extract_info(url, download=False)
                     return info
                 except Exception as e:
-                    return e
+                    return str(e)
         else:
             raise ValueError("Invalid URL!")
         
-    def __download(self, url, ytdl_options):
-        print(url)
+    def verifytemplate(template):
+        try:
+            yt_dlp.YoutubeDL.validate_outtmpl(template)
+            return True
+        except ValueError as e:
+            return False
+        
+    def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
-            ytdl.download(url)
-            
+            try:
+                ytdl.add_postprocessor_hook(YouTube.postprocessor_hook)
+                ytdl.download(url)
+                
+            except Exception as e:
+                return e
+    
+    def download_hook(d):
+        if d['status'] == 'finished':
+            sockets.overview({'status': 'Finished download'})
+        elif d['status'] == 'downloading':
+            if "total_bytes_estimate" in d:
+                sockets.overview({
+                    'status': 'downloading', 
+                    'downloaded_bytes': d['downloaded_bytes'], 
+                    'total_bytes': d['total_bytes_estimate']
+                })
+            else:
+                sockets.overview({
+                    'status': 'downloading',
+                    'total_bytes': 'Unknown'
+                })
+    def postprocessor_hook(d):
+        if d['status'] == 'processing' or d['status'] == 'started':
+            sockets.overview({'status': 'processing'})
+        elif d['status'] == 'finished':
+            sockets.overview({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath']})
+
     def get_video(self, url, ytdl_options):
         threading.Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
-        

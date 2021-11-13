@@ -2,7 +2,6 @@ from flask_migrate import init, migrate, upgrade
 from picardtube.database import *
 from picardtube import db, database
 from picardtube import Config as env
-from sqlalchemy import create_engine, inspect
 import os
 class Default():
     def __init__(self, app, url):
@@ -35,7 +34,9 @@ class Default():
             name = 'Default',
             type = 'Audio',
             extension = 'mp3',
-            output_folder = 'downloads'
+            output_folder = 'downloads',
+            output_name = f"%(title)s.%(ext)s",
+            bitrate = 192
         )
         db.session.add(template)
         db.session.commit()
@@ -55,7 +56,12 @@ class Default():
             getattr(Default, method)()
         print('Created the database and all necessary tables and rows')
         return True
+    
+    def checklogs():
+        if os.path.exists(os.path.join(env.LOGS_DIR, 'picardtube.log')) is False: 
+            open(os.path.join(env.LOGS_DIR, 'picardtube.log'), 'x')
             
+    
     def check_db(self):
         # return True if Config.query.count() > 0 and Templates.query.count() > 0 else False
         # Check if tables exist

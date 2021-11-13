@@ -85,7 +85,7 @@ $(document).ready(function() {
         return inject;
     }
 
-    function insertMBcol(mbp_data) {
+    function insertAudioCol(mbp_data) {
         let ul = document.createElement('ul');
         ul.classList.add('list-unstyled');
         $.each(mbp_data, function(key_release, value_release) {
@@ -125,7 +125,7 @@ $(document).ready(function() {
                     html = {
                         'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
                         'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
-                        'checkbox': '<div class="input-group-text"><input type="radio" aria-label="Radio button for selecting an item"></div>',
+                        'checkbox': '<div class="input-group-text"><input class="audiocol-checkbox" type="radio" aria-label="Radio button for selecting an item"></div>',
                     }
                     let list = '<li class="media mbp-item" style="cursor: pointer" id="'+release_id+'">'+html['img']+html['desc']+html['checkbox']+'</li>';
                     ul.insertAdjacentHTML('afterbegin', list);
@@ -135,13 +135,13 @@ $(document).ready(function() {
                 }
             })
         });
-        $("#mbpcol").empty();
+        $("#audiocol").empty();
         return ul;
     }
     $("#searchsongbtn").on('click', function() {
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
         $("#ytcol").empty().append(spinner);
-        $("#mbpcol").empty().append(spinner);
+        $("#audiocol").empty().append(spinner);
         var query = $("#query").val()
         var amount = $("#amount").val()
         $.ajax({
@@ -155,14 +155,14 @@ $(document).ready(function() {
                 $("#query_log").empty();
                 info = response;
                 let ytcol = insertYTcol(response.yt, response.segments, response.downloadform);
-                let mbpcol = insertMBcol(response.mbp);
+                let audiocol = insertAudioCol(response.mbp);
                 $("#ytcol").append(ytcol);
-                $("#mbpcol").append(mbpcol);
+                $("#audiocol").append(audiocol);
                 $(".modal-footer").removeClass('d-none')
             }, 
             error: function(error) {
                 $("#ytcol").empty();
-                $("#mbpcol").empty();
+                $("#audiocol").empty();
                 if(error.status == 400) {
                     $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
                 }
@@ -194,39 +194,92 @@ $(document).ready(function() {
                 data = response;
                 $("#extension").val([]);
                 $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
-                $("#type").text(response.type);
-                $("#output_folder").val(response.output_folder)
+                $("#type").val(response.type);
+                $("#output_folder").val(response.output_folder);
+                $("#outputname").val(response.output_name);
+                $("#bitrate").val(response.bitrate);
+                if(response.type == 'Video') {
+                    $("#bitrate").parent().addClass('d-none');
+                } else {
+                    $("#bitrate").parent().removeClass('d-none');
+                }
             }, 
             error: function(error) {
                 $("#ytcol").empty();
-                $("#mbpcol").empty();
+                $("#audiocol").empty();
                 if(error.status == 400) {
                     $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
                 }
             }
         });
     });
-    $("#downloadbtn").on('click', function() {
-        let url = $("#thumbnail_yt").attr('url');
-        let ext = $("#extension").val();
-        let output_folder = $("#output_folder").val();
-        let type = $("#type").val();
+    $("#downloadbtn").on('click', function(e) {
+        if($(".audiocol-checkbox:checked").length < 1) {
+            e.preventDefault();
+            $("#progress_status").removeClass('d-none');
+            $("#progress_status").children('p').text('Select a release on the right side before downloading a video');
+        } else {
+            let url = $("#thumbnail_yt").attr('url');
+            let ext = $("#extension").val();
+            let output_folder = $("#output_folder").val();
+            let type = $("#type").val();
+            let output_format = $("#outputname").val();
+            let bitrate = $("#bitrate").val();
+    
+            $.ajax({
+                url: Flask.url_for('overview.download'),
+                method: 'POST',
+                data: {
+                    url: url,
+                    ext: ext,
+                    output_folder: output_folder,
+                    type: type,
+                    output_format: output_format,
+                    bitrate: bitrate
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            })
+        }
+    });
 
-
-        $.ajax({
-            url: Flask.url_for('overview.download'),
-            method: 'POST',
-            data: {
-                url: url,
-                ext: ext,
-                output_folder: output_folder,
-                type: type
-            },
-            success: function(response) {
-                console.log(response);
-            }, error: function(error) {
-                console.log(error);
+    var socket = io();
+    socket.on('overview', function(msg) {
+        progress_text = $("#progress_status").children('p');
+        if(msg.status == 'downloading') {
+            if(msg.total_bytes != 'Unknown') {
+                let percentage = (msg.downloaded_bytes / msg.total_bytes) * 100;
+                $("#ytdl_progress").parent().removeClass('d-none');
+                $("#ytdl_progress").attr('aria-valuenow', percentage+"%");
+                $("#ytdl_progress").text(percentage);
+                $("#ytdl_progress").css('width', parseInt(percentage)+'%');
+            } else {
+                if($("#progress_status").hasClass('d-none')) {
+                    progress_text.empty();
+                    $("#progress_status").removeClass('d-none');
+                    progress_text.append('Downloading... <br/>');
+                }
             }
-        })
+        }
+        else if(msg.status == 'Finished download') {
+            if(msg.total_bytes != 'Unknown') {
+                $("#ytdl_progress").attr('aria-valuenow', 100);
+                $("#ytdl_progress").text("100%");
+                $("#ytdl_progress").css('width', '100%');
+            } else {
+                progress_text.append('Finished downloading!<br/>');
+            }
+        } else if(msg.status == 'processing') {
+            progress_text.append('Processing and converting file to desired format... <br/>');
+        } else if(msg.status == 'finished_ffmpeg') {
+            progress_text.append('Finished converting!<br/>');
+            let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+            let filepath = msg.filepath;
+            socket.emit('merge', {
+                'release_id': release_id,
+                'filepath': filepath
+            });
+        }
     });
 })

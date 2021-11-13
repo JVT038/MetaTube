@@ -1,26 +1,30 @@
-from flask import Flask
+import engineio
+from flask import Flask, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_jsglue import JSGlue
 from flask_migrate import Migrate
+from flask_socketio import SocketIO
 from config import Config
+import logging
 db = SQLAlchemy()
 migrate = Migrate()
 jsglue = JSGlue()
+socketio = SocketIO()
 
 from picardtube.settings import bp as bp_settings
 from picardtube.overview import bp as bp_overview
 from picardtube.init import init as init_db
 
-def create_app(address, config_class=Config):
+def create_app(config_class=Config):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_class)
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True)
     jsglue.init_app(app)
+    socketio.init_app(app, async_mode='gevent', json=json)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     init_db(app)
-    print(f'Started the PicardTube server on {address}')
     return app
 
 import picardtube.database

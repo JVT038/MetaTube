@@ -9,10 +9,14 @@
             </select>
         </div>
     </div>
-    <div class="row">
+    <div class="form-row">
         <div class="col">
             <label for="#type">Type</label>
-            <input id="type" class="form-control disabled" value="Audio" disabled />
+            <input id="type" class="form-control disabled" value="{{ templates[0].type }}" disabled />
+        </div>
+        <div class="col">
+            <label for="#outputname">Output format**</label>
+            <input type="text" class="form-control" value="{{ templates[0].output_name }}" id="outputname" />
         </div>
         <div class="col">
             <label for="#extension">Extension</label>
@@ -36,9 +40,32 @@
                 </optgroup>
             </select>
         </div>
+    </div>
+    <div class="form-row">
         <div class="col">
             <label for="#output_folder">Output folder</label>
-            <input type="text" id="output_folder" value="downloads" class="form-control" />
+            <input type="text" id="output_folder" value="{{ templates[0].output_folder }}" class="form-control" />
         </div>
+        <div class="col">
+            <label for="#bitrate">Bitrate***</label>
+            <input type="text" class="form-control" id="bitrate" value="{{ templates[0].bitrate }}" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col">
+            <p class="float-left">
+                * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
+                ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#format-selection">here</a>) <br />
+                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>)
+            </p>
+        </div>
+    </div>
+    <div class="form-row">
+        <Div class="col">
+            <div class="progress d-none">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="ytdl_progress" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-none" id="progress_status"><p></p></div>
+        </Div>
     </div>
 </form>

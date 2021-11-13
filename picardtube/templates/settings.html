@@ -58,6 +58,8 @@
                             <th scope="col">Template type</th>
                             <th scope="col">Template extension</th>
                             <th scope="col">Template output folder</th>
+                            <th scope="col">Template name format</th>
+                            <th scope="col">Template bitrate</th>
                             <th scope="col">Edit template</th>
                         </tr>
                     </thead>
@@ -67,7 +69,9 @@
                                 <td class="td_name">{{ template.name }}</td>
                                 <td class="td_type">{{ template.type }}</td>
                                 <td class="td_extension">{{ template.extension }}</td>
+                                <td class="td_output_name">{{ template.output_name }}</td>
                                 <td class="td_output_folder">{{ template.output_folder }}</td>
+                                <td class="td_bitrate">{{ template.bitrate }}</td>
                                 <td>
                                     <button type="button" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
                                     <button type="button" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
@@ -75,7 +79,7 @@
                             </tr>
                         {% endfor %}
                         <tr>
-                            <td colspan="5" class="text-center">Add template <button type="button" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
+                            <td colspan="7" class="text-center">Add template <button type="button" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -131,7 +135,10 @@
                         <div class="col">
                             <label for="#template_folder">Output folder* of the template</label>
                             <input type="text" id="template_folder" class="form-control" />
-                            <p class="float-left">* (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory)</p>
+                        </div>
+                        <div class="col">
+                            <label for="#template_outputname">Output name format**</label>
+                            <input type="text" class="form-control" id="template_outputname" />
                         </div>
                         <div class="col">
                             <label for="#template_type">Output type of the template</label>
@@ -154,6 +161,19 @@
                                     <option value="avi">AVI</option>
                                 </optgroup>
                             </select>
+                        </div>
+                        <div class="col">
+                            <label for="#template_bitrate">Bitrate***</label>
+                            <input type="text" class="form-control" id="template_bitrate" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <p class="float-left">
+                                * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
+                                ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#format-selection">here</a>) <br />
+                                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>)
+                            </p>
                         </div>
                     </div>
                 </form>

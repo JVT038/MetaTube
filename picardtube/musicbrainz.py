@@ -15,3 +15,7 @@ def get_cover(releaseid):
         return musicbrainzngs.get_image_list(releaseid)
     except ResponseError as e:
         return e.message
+    
+    
+def mergedata(filename, releaseid):
+    pass
