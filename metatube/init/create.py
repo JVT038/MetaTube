@@ -1,7 +1,7 @@
 from flask_migrate import init, migrate, upgrade
-from picardtube.database import *
-from picardtube import db, database
-from picardtube import Config as env
+from metatube.database import *
+from metatube import db, database
+from metatube import Config as env
 import os
 class Default():
     def __init__(self, app, url):
@@ -58,8 +58,8 @@ class Default():
         return True
     
     def checklogs():
-        if os.path.exists(os.path.join(env.LOGS_DIR, 'picardtube.log')) is False: 
-            open(os.path.join(env.LOGS_DIR, 'picardtube.log'), 'x')
+        if os.path.exists(os.path.join(env.LOGS_DIR, 'metatube.log')) is False: 
+            open(os.path.join(env.LOGS_DIR, 'metatube.log'), 'x')
             
     
     def check_db(self):

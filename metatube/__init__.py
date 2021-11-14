@@ -1,4 +1,3 @@
-import engineio
 from flask import Flask, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_jsglue import JSGlue
@@ -11,9 +10,9 @@ migrate = Migrate()
 jsglue = JSGlue()
 socketio = SocketIO()
 
-from picardtube.settings import bp as bp_settings
-from picardtube.overview import bp as bp_overview
-from picardtube.init import init as init_db
+from metatube.settings import bp as bp_settings
+from metatube.overview import bp as bp_overview
+from metatube.init import init as init_db
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path='/static')
@@ -27,4 +26,4 @@ def create_app(config_class=Config):
     init_db(app)
     return app
 
-import picardtube.database
+import metatube.database

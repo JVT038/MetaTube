@@ -1,6 +1,6 @@
 import subprocess, os, tempfile
-from picardtube.database import Config
-from picardtube import Config as env
+from metatube.database import Config
+from metatube import Config as env
 import ffmpeg as ffmpeg_python
 
 

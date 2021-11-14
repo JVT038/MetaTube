@@ -1,32 +1,32 @@
 <!-- <div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="Picardtube" />
+  <img src="./.github/app.gif" alt="metatube" />
 
   &#xa0;
 
-  <a href="https://picardtube.netlify.app">Demo</a>
+  <a href="https://metatube.netlify.app">Demo</a>
 </div> -->
-<h1 align="center">Picardtube</h1>
+<h1 align="center">MetaTube</h1>
 
 <p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/JVT038/picardtube">
+  <img alt="Github top language" src="https://img.shields.io/github/languages/top/JVT038/metatube">
 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/JVT038/picardtube">
+  <img alt="Github language count" src="https://img.shields.io/github/languages/count/JVT038/metatube">
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/JVT038/picardtube">
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/JVT038/metatube">
 
-  <img alt="License" src="https://img.shields.io/github/license/JVT038/picardtube">
+  <img alt="License" src="https://img.shields.io/github/license/JVT038/metatube">
 
-  <img alt="Github issues" src="https://img.shields.io/github/issues/JVT038/picardtube" />
+  <img alt="Github issues" src="https://img.shields.io/github/issues/JVT038/metatube" />
 
-  <img alt="Github forks" src="https://img.shields.io/github/forks/JVT038/picardtube" />
+  <img alt="Github forks" src="https://img.shields.io/github/forks/JVT038/metatube" />
 
-  <img alt="Github stars" src="https://img.shields.io/github/stars/JVT038/picardtube" />
+  <img alt="Github stars" src="https://img.shields.io/github/stars/JVT038/metatube" />
 </p>
 
 <h2 align="center">Status</h2>
 
 <h4 align="center"> 
-	🚧  Picardtube 🚀 Under construction...  🚧 <br/>
+	🚧  MetaTube 🚀 Under construction...  🚧 <br/>
 </h4>
 <p>
   It's definitely not finished yet and these features are currently supported:
@@ -91,10 +91,10 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 ## :checkered_flag: Starting ##
 ```bash
 # Clone this project
-$ git clone https://github.com/JVT038/picardtube
+$ git clone https://github.com/JVT038/metatube
 
 # Access
-$ cd picardtube
+$ cd metatube
 
 # Skip these steps if you don't want to use a virtual environment
 # Install virtualenv

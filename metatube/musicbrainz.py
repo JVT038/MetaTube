@@ -1,7 +1,7 @@
 from flask import Request
 import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
-musicbrainzngs.set_useragent("PicardTube", "0.1", Request.base_url)
+musicbrainzngs.set_useragent("metatube", "0.1", Request.base_url)
 def search(query, album = "", artist = "", amount = 5):
     '''
     query = the query to look for

@@ -1,9 +1,9 @@
-from picardtube.settings import bp
-from picardtube.settings.forms import *
-from picardtube.database import *
-from picardtube.ffmpeg import ffmpeg
-from picardtube import Config as env
-from picardtube.youtube import YouTube as youtube
+from metatube.settings import bp
+from metatube.settings.forms import *
+from metatube.database import *
+from metatube.ffmpeg import ffmpeg
+from metatube import Config as env
+from metatube.youtube import YouTube as youtube
 from flask import render_template, flash, request, jsonify
 from mock import Mock
 import os

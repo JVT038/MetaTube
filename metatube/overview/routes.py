@@ -1,12 +1,12 @@
-# from picardtube.ytdl import ytdlp
-# from picardtube.mbp import MBP
-# from picardtube.sponsorblock import sb
-from picardtube.overview import bp
-from picardtube.database import *
-from picardtube.youtube import YouTube as yt
+# from metatube.ytdl import ytdlp
+# from metatube.mbp import MBP
+# from metatube.sponsorblock import sb
+from metatube.overview import bp
+from metatube.database import *
+from metatube.youtube import YouTube as yt
 from math import floor
-import picardtube.sponsorblock as sb
-import picardtube.musicbrainz as musicbrainz
+import metatube.sponsorblock as sb
+import metatube.musicbrainz as musicbrainz
 import os, json
 from flask import render_template, request, jsonify
 

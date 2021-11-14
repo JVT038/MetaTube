@@ -1,4 +1,4 @@
-from picardtube import create_app, socketio
+from metatube import create_app, socketio
 from gevent.pywsgi import WSGIServer
 from gevent.event import Event
 if __name__ == "__main__":

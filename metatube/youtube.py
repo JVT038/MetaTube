@@ -1,7 +1,7 @@
 import yt_dlp
 from threading import Thread
-from picardtube import sockets
-from picardtube import ffmpeg
+from metatube import sockets
+from metatube import ffmpeg
     
 class YouTube:
     def is_supported(url):

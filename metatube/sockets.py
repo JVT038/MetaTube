@@ -1,8 +1,8 @@
-from picardtube import socketio
+from metatube import socketio
 from flask_socketio import emit, send
-from picardtube.musicbrainz import mergedata
-from picardtube.ffmpeg import ffmpeg
-from picardtube import Config
+from metatube.musicbrainz import mergedata
+from metatube.ffmpeg import ffmpeg
+from metatube import Config
 from json import loads
 from threading import Thread
 import os

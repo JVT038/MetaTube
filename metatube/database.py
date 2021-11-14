@@ -1,4 +1,4 @@
-from picardtube import db
+from metatube import db
 
 class Config(db.Model):
     key = db.Column(db.Integer, primary_key=True)
