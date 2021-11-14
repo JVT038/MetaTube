@@ -1,7 +1,7 @@
 $(document).ready(function() {
     // Numeric only control handler
     jQuery.fn.ForceNumericOnly =
-    function()
+    function(extraKeys = [])
     {
         return this.each(function()
         {
@@ -18,6 +18,7 @@ $(document).ready(function() {
                     key == 110 ||
                     (key >= 35 && key <= 40) ||
                     (key >= 48 && key <= 57) ||
+                    (extraKeys.includes(key)) ||
                     (key >= 96 && key <= 105)) ||
                     (key >= 112 && key <= 123);
             });
@@ -55,17 +56,17 @@ $(document).ready(function() {
                 thumbnail += value_thumbnail.url;
             }
         });
-        if(segments != 'error') {
-            segments_array = [];
-            segment_data = segments;
-            $.each(segments, function(key_segments) {
-                json_segment = JSON.parse(segments[key_segments]);
-                if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
-                    let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
-                    segments_array.push(skip_segments);
-                }
-            });
-        }
+        // if(segments != 'error') {
+        //     segments_array = [];
+        //     segment_data = segments;
+        //     $.each(segments, function(key_segments) {
+        //         json_segment = JSON.parse(segments[key_segments]);
+        //         if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
+        //             let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
+        //             segments_array.push(skip_segments);
+        //         }
+        //     });
+        // }
 
         let minutes = Math.floor(data.duration / 60);
         let seconds = data.duration % 60;
@@ -76,9 +77,7 @@ $(document).ready(function() {
         let length = minutes + ":" + seconds;
         let html = {
             'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" url="'+data.webpage_url+'" />',
-            'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>',
-            'input_start': '<div class="form-row"><label class="align-middle" for="input_start_minutes">Start download at</label><div class="col form-group"><input id="input_start_minutes" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_start_seconds" class="form-control num_input" type="text" value="00" pattern="[0-9]" title="seconds" /></div></div>',
-            'input_end': '<div class="form-row"><label class="align-middle" for="input_end_minutes">End download at</label><div class="col form-group"><input id="input_end_minutes" class="form-control num_input" type="text" value="'+minutes+'" pattern="[0-9]" title="minutes" /></div>:<div class="col form-group"><input id="input_end_seconds" class="form-control num_input" type="text" value="'+seconds+'" pattern="[0-9]" title="seconds" /></div></div>'
+            'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>'
         }
         let inject = html['img'] + html['text'] + form;
         $("#ytcol").empty();
@@ -157,6 +156,7 @@ $(document).ready(function() {
                 let ytcol = insertYTcol(response.yt, response.segments, response.downloadform);
                 let audiocol = insertAudioCol(response.mbp);
                 $("#ytcol").append(ytcol);
+                friconix_update();
                 $("#audiocol").append(audiocol);
                 $(".modal-footer").removeClass('d-none')
             }, 
@@ -225,7 +225,20 @@ $(document).ready(function() {
             let type = $("#type").val();
             let output_format = $("#outputname").val();
             let bitrate = $("#bitrate").val();
-    
+            var skipfragments = [];
+            if(!$("#segments_check").is(':checked')) {
+                $.each($('.timestamp_input'), function(key, value) {
+                    if(value.id.slice(0, 12) == 'segmentstart') {
+                        let id = value.id.slice(13);
+                        skipfragments[id] = {'start': value.value}
+                    } else if(value.id.slice(0, 10) == 'segmentend') {
+                        let id = value.id.slice(11);
+                        skipfragments[id].end = value.value;
+                    }
+                });
+                skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
+            }
+            $("#progress_status").siblings('p').empty();
             $.ajax({
                 url: Flask.url_for('overview.download'),
                 method: 'POST',
@@ -235,7 +248,8 @@ $(document).ready(function() {
                     output_folder: output_folder,
                     type: type,
                     output_format: output_format,
-                    bitrate: bitrate
+                    bitrate: bitrate,
+                    segments: skipfragments
                 },
                 error: function(error) {
                     console.log(error);
@@ -274,12 +288,81 @@ $(document).ready(function() {
             progress_text.append('Processing and converting file to desired format... <br/>');
         } else if(msg.status == 'finished_ffmpeg') {
             progress_text.append('Finished converting!<br/>');
+            var filepath = msg.filepath;
+            var length = info.yt.duration;
             let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            let filepath = msg.filepath;
-            socket.emit('merge', {
-                'release_id': release_id,
-                'filepath': filepath
-            });
+            
         }
     });
+    $(document).on('click', ".removesegment", function() {
+        // $.each($(this.parents('.form-row') + " ~ div"), function(key, value) {
+        //     let id = parseInt($(this.parents('.form-row') + " ~ div")[key].id.slice(4)) - 1;
+        //     $(this.parents('.form-row') + " ~ div")[key].id = 'row_' + id;
+        // });
+        $(this).parents('.form-row').remove();
+    });
+    $(document).on('click', "#addsegment", function() {
+        let id = $(this).parents('.form-row').siblings('.timestamp_row').length > 0 ? parseInt($(this).parents('.form-row').siblings('.timestamp_row:last').attr('id').slice(4)) + 1 : parseInt($(this).parents('.form-row').attr('id').slice(4)) + 1;
+
+        let row = document.createElement('div');
+        let startcol = document.createElement('div');
+        let endcol = document.createElement('div');
+        // let startlabel = document.createElement('label');
+        // let endlabel = document.createElement('label');
+        let startinput = document.createElement('input');
+        let endinput = document.createElement('input');
+        let input_group = document.createElement('div');
+        let input_group_append = document.createElement('div');
+        let removebtn = document.createElement('button');
+        let removeicon = document.createElement('i');
+
+        row.classList.add('form-row', 'timestamp_row');
+        row.id = 'row_'+id;
+
+        startcol.classList.add('col');
+        endcol.classList.add('col');
+
+        input_group.classList.add('input-group');
+        input_group_append.classList.add('input-group-append');
+
+        removebtn.classList.add('btn', 'btn-danger', 'bg-danger', 'input-group-text', 'removesegment');
+        removeicon.classList.add('fi-xwsuxl-minus-solid');
+        removeicon.setAttribute('style', 'color: white');
+
+        // startlabel.setAttribute('for', 'segmentstart_'+id);
+        // endlabel.setAttribute('for', 'segmentend_'+id);
+
+        startinput.classList.add('form-control', 'timestamp_input');
+        startinput.id = 'segmentstart_'+id;
+        startinput.type = 'text';
+
+        endinput.classList.add('form-control', 'timestamp_input');
+        endinput.id = 'segmentend_'+id;
+        endinput.type = 'text';
+
+        removebtn.appendChild(removeicon);
+        input_group_append.appendChild(removebtn);
+        input_group.appendChild(endinput);
+        input_group.appendChild(input_group_append);        
+
+        // startcol.appendChild(startlabel);
+        startcol.appendChild(startinput);
+        // endcol.appendChild(endlabel);
+        endcol.appendChild(input_group);
+        row.appendChild(startcol);
+        row.appendChild(endcol);
+
+        $(".timestamp_row:last").after(row);
+        friconix_update();
+    });
+    $(document).on('focus', '.timestamp_input', function() {
+        $(this).ForceNumericOnly();
+    });
+    $(document).on('click', '#segments_check', function() {
+        $(".timestamp_row").toggleClass('d-none');
+        $(".timestamp_caption").parents('.form-row').toggleClass('d-none');
+    });
+    $(document).on('click', 'label[for=\'#segments_check\']', function() {
+        $(this).siblings('input').trigger('click');
+    })
 })

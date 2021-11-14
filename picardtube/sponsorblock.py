@@ -6,7 +6,7 @@ def segments(url):
         segments = client.get_skip_segments(url)
         response = []
         for segment in segments:
-            response.append(json.dumps(segment.data))
+            response.append(segment.data)
         return response
     except Exception as e:
         return str(e)

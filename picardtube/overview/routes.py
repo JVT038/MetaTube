@@ -4,9 +4,10 @@
 from picardtube.overview import bp
 from picardtube.database import *
 from picardtube.youtube import YouTube as yt
+from math import floor
 import picardtube.sponsorblock as sb
 import picardtube.musicbrainz as musicbrainz
-import os
+import os, json
 from flask import render_template, request, jsonify
 
 @bp.route('/')
@@ -28,9 +29,9 @@ def search():
                     amount = amount
                 )
                 templates = Templates.query.all()
-                downloadform = render_template('downloadform.html', templates=templates)
-                segments = sb.segments(video["id"]) if type(sb.segments(video["id"])) == 'list' else 'error'
-                response = jsonify(status='success', yt=video, mbp=mbp["release-list"], segments=segments, downloadform=downloadform)
+                segments = sb.segments(video["id"]) if type(sb.segments(video["id"])) == list else 'error'
+                downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+                response = jsonify(status='success', yt=video, mbp=mbp["release-list"], downloadform=downloadform, segments=segments)
                 return response
             except ValueError as error:
                 return str(error), 400
@@ -55,7 +56,9 @@ def findcover():
 @bp.route('/downloadtemplate')
 def template():
     templates = Templates.query.all()
-    return render_template('downloadform.html', templates=templates)
+    segments = sb.segments('https://www.youtube.com/watch?v=IcrbM1l_BoI')
+    segments_data = segments if type(segments) == list else 'error'
+    return render_template('downloadform.html', templates=templates, segments=segments_data)
 
 @bp.route('/ajax/fetchtemplate')
 def fetchtemplate():
@@ -78,6 +81,7 @@ def fetchtemplate():
     
 @bp.route('/ajax/downloadvideo', methods=['POST'])
 def download():
+    # declare all variables
     url = [request.form.get('url')]
     type = request.form.get('type', 'Audio')
     ext = request.form.get('ext', 'mp3')
@@ -85,8 +89,10 @@ def download():
     bitrate = request.form.get('bitrate', 192)
     filepath = os.path.join(request.form.get('output_folder', 'downloads'), output_format)
     ffmpeg = Config.get_ffmpeg()
+    segments = json.loads(request.form.get('segments', "{}"))
     postprocessors = []
     format = 'bestaudio/best' if type == 'Audio' else 'bv+ba/b'
+    # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
     if type == 'Audio':
         postprocessors.append({
             "key": "FFmpegExtractAudio",
@@ -98,6 +104,16 @@ def download():
             "key": "FFmpegVideoConvertor",
             "preferedformat": ext
         })
+    # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
+    if len(segments) > 0:
+        ranges = []
+        for segment in segments:
+            ranges.append((int(segment["start"]), int(segment["end"])))
+        postprocessors.append({
+            'key': 'ModifyChapters',
+            'remove_ranges': ranges
+        })
+    
     ytdl_options = {
         'format': format,
         'postprocessors': postprocessors,
@@ -109,4 +125,5 @@ def download():
     }
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
+    # Just a return function, otherwise Flask gets angry >:(
     return "downloading...", 200

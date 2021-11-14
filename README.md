@@ -35,11 +35,11 @@
   - Query and fetch results from the Musicbrainz API
   - Set up templates and options for the YouTube download
   - Download YouTube videos based on a selected template
+  - Exclude fragments (such as intros, outros, etc.) from the download
 
   To-Do before the first release:
 
   - Automatically merge metadata from Musicbrainz with the downloaded file
-  - Skip fragments (such as intros, outros, etc.) from the download
   - Store the information about downloaded releases in the database
   - Some decent mobile support
   - Docker support
@@ -61,7 +61,7 @@
 
 ## :dart: About ##
 
-I made this project to download music from YouTube more easily, by automatically fetching music metadata from MusicBrainz Picard. 
+I made this project to download videos from YouTube easier, by automatically fetching music metadata from MusicBrainz Picard. 
 
 ## :sparkles: Features ##
 
@@ -79,7 +79,7 @@ The following tools were used in this project:
 - [Python Musicbrainz](https://python-musicbrainzngs.readthedocs.io)
 - [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
 - [jQuery 3.6.0](https://jquery.com/)
-- [Fricornix](https://friconix.com/)
+- [Friconix](https://friconix.com/)
 - [Youtube-DLP](https://github.com/yt-dlp/yt-dlp)
 - [Sponsorblock.py](https://github.com/wasi-master/sponsorblock.py)
 - [FFmpeg 4.4.1](https://ffmpeg.org/)
@@ -125,7 +125,8 @@ $ flask run
 
 ## :memo: License ##
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.
+This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.<br/>
+I am not responsible for any legal consequences the user may or may not face by using this project.
 
 
 Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038</a>
@@ -143,16 +144,17 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add it to the PyPi library
 - [ ] Add support for other sites than YouTube
 - [ ] Add support for YouTube playlists
-- [ ] Use Sponsorblock and ffmpeg-python to automatically skip intro and outro
+- [X] Use Sponsorblock and ffmpeg-python to automatically skip intro and outro
 - [ ] Build a logger
 - [ ] Change metadata of file
-- [ ] Select output type (coding, extension, etc.)
+- [X] Select output type (coding, extension, etc.)
 - [ ] Add custom YouTube-DLP options
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
 - [ ] Add translations
 - [ ] Add in-built file explorer, making paths optional
 - [ ] Switch from AJAX to websockets
+- [ ] Hardware acceleration with FFmpeg
 &#xa0;
 
 <a href="#top">Back to top</a>

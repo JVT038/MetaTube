@@ -1,5 +1,7 @@
-import yt_dlp, threading
+import yt_dlp
+from threading import Thread
 from picardtube import sockets
+from picardtube import ffmpeg
     
 class YouTube:
     def is_supported(url):
@@ -59,4 +61,4 @@ class YouTube:
             sockets.overview({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath']})
 
     def get_video(self, url, ytdl_options):
-        threading.Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()

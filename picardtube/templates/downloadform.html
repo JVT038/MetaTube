@@ -43,7 +43,7 @@
     </div>
     <div class="form-row">
         <div class="col">
-            <label for="#output_folder">Output folder</label>
+            <label for="#output_folder">Output folder*</label>
             <input type="text" id="output_folder" value="{{ templates[0].output_folder }}" class="form-control" />
         </div>
         <div class="col">
@@ -55,17 +55,76 @@
         <div class="col">
             <p class="float-left">
                 * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
-                ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#format-selection">here</a>) <br />
+                ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#output-template">here</a>) <br />
                 *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>)
             </p>
         </div>
     </div>
+    {% if segments != 'error' %}
+        <div class="form-row">
+            <div class="col">
+                <p class="timestamp_caption">Timestamps from <a href="https://sponsor.ajay.app/" target="_blank">Sponsorblock</a> in seconds: </p>
+            </div>
+        </div>
+        {% for i in range(segments|length) %}
+            <div class="form-row timestamp_row" id="row_{{ i }}">
+                <div class="col">
+                    {% if i == 0 %}
+                        <label for="#segmentstart_{{ i }}">Starting second of segment to skip</label>
+                    {% endif %}
+                    <input type="text" class="form-control timestamp_input" id="segmentstart_{{ i }}" value="{{ segments[i]['segment'][0]|int }}" />
+                </div>
+                <div class="col">
+                    {% if i == 0 %}
+                        <label for="#segmentend_{{ i }}">Ending second of segment to skip</label>
+                    {% endif %}
+                    <div class="input-group">
+                        <input type="text" class="form-control timestamp_input" id="segmentend_{{ i }}" value="{{ segments[i]['segment'][1]|int }}" />
+                        <div class="input-group-append">
+                            {% if i > 0 %}
+                                <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="fi-xwsuxl-minus-solid" style="color: white;"></i></button>
+                            {% else %}
+                                <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="form-row">
+            <div class="col">
+                <p class="timestamp_caption">No timestamps in sponsorblock database. Add your own here in seconds: </p>
+            </div>
+        </div>
+        <div class="form-row timestamp_row" id="row_0">
+            <div class="col">
+                <label for="#segmentstart_0">Starting second of segment to skip</label>
+                <input type="text" class="form-control timestamp_input" id="segmentstart_0"/>
+            </div>
+            <div class="col">
+                <label for="#segmentend_0">Ending second of segment to skip</label>
+                <div class="input-group">
+                    <input type="text" class="form-control timestamp_input" id="segmentend_0"/>
+                    <div class="input-group-append">
+                        <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <div class="form-row">
-        <Div class="col">
+        <div class="col ml-4">
+            <input type="checkbox" class="form-check-input" id="segments_check" value="disable_segments" />
+            <label class="form-check-label" for="#segments_check">Disable segments (download entire video)</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col">
             <div class="progress d-none">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" id="ytdl_progress" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             <div class="d-none" id="progress_status"><p></p></div>
-        </Div>
+        </div>
     </div>
 </form>
