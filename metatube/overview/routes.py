@@ -108,7 +108,10 @@ def download():
     if len(segments) > 0:
         ranges = []
         for segment in segments:
-            ranges.append((int(segment["start"]), int(segment["end"])))
+            if len(segment["start"]) < 1 or len(segment["end"]) < 1:
+                return jsonify('Fill all segment fields!'), 400
+            else:
+                ranges.append((int(segment["start"]), int(segment["end"])))
         postprocessors.append({
             'key': 'ModifyChapters',
             'remove_ranges': ranges

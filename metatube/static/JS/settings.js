@@ -8,30 +8,7 @@ $(document).ready(function() {
             }
         }
     });
-    $(document).on('click', "#addtemplatebtn", function() {
-        let name = $("#template_name").val();
-        let output_folder = $("#template_folder").val();
-        let output_name = $("#template_outputname").val();
-        let output_ext = $("#template_type").val();
-        let bitrate = $("#template_bitrate").val();
-        $.ajax({
-            url: Flask.url_for('settings.template'),
-            method: 'POST',
-            data: {
-                name: name,
-                output_folder: output_folder,
-                output_name: output_name,
-                output_ext: output_ext,
-                bitrate: bitrate,
-                goal: 'add'
-            },
-            success: function(response) {
-                $("#templatemodallog").text(response);
-            }, error: function(error) {
-                $("#templatemodallog").text("ERROR: " + error.responseText.slice(1, error.responseText.length -1));
-            }
-        });
-    });
+    $("#proxy_status").prop('selectedIndex', 0);
     $(".defaultbtn").css('cursor', 'not-allowed');
     $(".defaultbtn").addClass('disabled');
     $(".defaultbtn").attr('disabled', true);
@@ -86,6 +63,7 @@ $(document).ready(function() {
             $("#template_type").children('[label=\''+type+'\']').children('[value=\''+ext+'\']').attr('selected', true);
             $("#addtemplatebtn").attr('id', 'changetemplatebtn');
             $("#changetemplatebtn").text('Change template');
+            $("#changetemplatebtn").attr('goal', 'edit');
             $("#templatesmodal").modal("show");
         }
     });
@@ -98,16 +76,25 @@ $(document).ready(function() {
         $("#template_bitrate").removeClass('d-none');
         $("#changetemplatebtn").attr('id', 'addtemplatebtn');
         $("#addtemplatebtn").text('Add template');
+        $("#addtemplatebtn").attr('goal', 'add');
         $("#templatesmodal").modal("show");
     });
-    $(document).on('click', "#changetemplatebtn", function() {
-        console.log('iets');
+    $(document).on('click', ".templatebtn", function() {
+        let goal = $(this).attr('goal');
         let id = $("#templatesmodal").attr('template_id');
         let name = $("#template_name").val();
         let output_folder = $("#template_folder").val();
         let output_name = $("#template_outputname").val();
         let output_ext = $("#template_type").val();
         let bitrate = $("#template_bitrate").val();
+        let proxy = JSON.stringify({
+            'status': $("#proxy_status").val(),
+            'type': $("#proxy_type").val(),
+            'address': $("#proxy_address").val(),
+            'username': $("#proxy_username").val(),
+            'password': $("#proxy_password").val(),
+            'port': $("#proxy_port").val()
+        });
         $.ajax({
             url: Flask.url_for('settings.template'),
             method: 'POST',
@@ -118,7 +105,8 @@ $(document).ready(function() {
                 output_name: output_name,
                 bitrate: bitrate,
                 id: id,
-                goal: 'edit'
+                proxy: proxy,
+                goal: goal
             },
             success: function(response) {
                 $("#templatemodallog").text(response);
@@ -133,5 +121,16 @@ $(document).ready(function() {
         } else {
             $("#template_bitrate").parent().removeClass('d-none');
         }
+    });
+    $("#advancedtoggle").on('click', function() {
+        if($("#advancedrow").hasClass('d-none')) {
+            $(this).text('Hide advanced');
+        } else {
+            $(this).text('Show advanced');
+        }
+        $("#advancedrow").toggleClass('d-none');
+    });
+    $("#proxy_status").on('change', function() {
+        $("#advancedrow").children('div.col:not(:first)').toggleClass('d-none');
     });
 });

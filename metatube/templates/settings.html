@@ -167,6 +167,44 @@
                             <input type="text" class="form-control" id="template_bitrate" />
                         </div>
                     </div>
+                    <div class="form-row d-none" id="advancedrow">
+                        <div class="col">
+                            <label for="#proxy_status">Enable proxy</label>
+                            <select id="proxy_status" class="custom-select">
+                                <option value="false" selected>False</option>
+                                <option value="true">True</option>
+                            </select>
+                        </div>
+                        <div class="col d-none">
+                            <label for="#proxy_type">Select proxy type</label>
+                            <select id="proxy_type" class="custom-select">
+                                <option value="http" selected>HTTP</option>
+                                <option value="https">HTTPS</option>
+                                <option value="socks5">SOCKS5</option>
+                            </select>
+                        </div>
+                        <div class="col d-none">
+                            <label for="#proxy_address">Enter proxy address</label>
+                            <input type="text" class="form-control" id="proxy_address" />
+                        </div>
+                        <div class="col d-none">
+                            <label for="#proxy_port">Enter proxy port</label>
+                            <input type="text" class="form-control num_input" id="proxy_port" />
+                        </div>
+                        <div class="col d-none">
+                            <label for="#proxy_username">Enter proxy username</label>
+                            <input type="text" class="form-control" id="proxy_username" />
+                        </div>
+                        <div class="col d-none">
+                            <label for="#proxy_password">Enter proxy password</label>
+                            <input type="text" class="form-control" id="proxy_password" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <button type="button" class="btn btn-success" id="advancedtoggle">Show advanced</button>
+                        </div>
+                    </div>
                     <div class="form-row">
                         <div class="col">
                             <p class="float-left">
@@ -179,7 +217,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" id="addtemplatebtn" class="btn btn-primary">Add template</button>
+                <button type="button" id="addtemplatebtn" class="btn templatebtn btn-primary">Add template</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>

@@ -2,6 +2,8 @@ from flask_migrate import init, migrate, upgrade
 from metatube.database import *
 from metatube import db, database
 from metatube import Config as env
+from sqlalchemy.engine import create_engine
+from sqlalchemy import inspect
 import os
 class Default():
     def __init__(self, app, url):
@@ -13,13 +15,10 @@ class Default():
         if Config.query.count() > 0:
             return True
         config = Config(
-            auth = False,
             ffmpeg_directory = "",
-            proxy_status = False,
-            proxy_username = "",
-            proxy_password = "",
-            proxy_address = "",
-            proxy_port = ""
+            auth = False,
+            auth_username = "",
+            auth_password = ""
         )
         db.session.add(config)
         db.session.commit()
@@ -36,7 +35,12 @@ class Default():
             extension = 'mp3',
             output_folder = 'downloads',
             output_name = f"%(title)s.%(ext)s",
-            bitrate = 192
+            bitrate = 192,
+            proxy_status = False,
+            proxy_username = "",
+            proxy_password = "",
+            proxy_address = "",
+            proxy_port = ""
         )
         db.session.add(template)
         db.session.commit()
@@ -57,35 +61,42 @@ class Default():
         print('Created the database and all necessary tables and rows')
         return True
     
-    def checklogs():
-        if os.path.exists(os.path.join(env.LOGS_DIR, 'metatube.log')) is False: 
-            open(os.path.join(env.LOGS_DIR, 'metatube.log'), 'x')
-            
+    def migrations(self):
+        directory = os.path.join(env.BASE_DIR, 'migrations')
+        try:
+            init(directory)
+        except:
+            pass
+        migrate(directory)
+        upgrade(directory)
     
     def check_db(self):
         # return True if Config.query.count() > 0 and Templates.query.count() > 0 else False
         # Check if tables exist
-        # engine = create_engine(self._url)
+        engine = create_engine(self._url)
         # sqlite = sqlite3.connect(self._url.replace('sqlite:///', ''))
         # cursor = sqlite.cursor()
-        # inspector = inspect(engine)
+        inspector = inspect(engine)
         tables = ['Config', 'Database', 'Templates']
         for table in tables:
             if ('__' + table + '__') not in dir(database) and table != 'db':
                 for method in self._methods:
                     getattr(Default, method)()
-                # if inspector.has_table(table):
-                #     # check for columns
-                #     table_instance = getattr(database, table.capitalize())
-                #     columns_db = table_instance.__table__.columns.keys()
-                #     columns_insp = inspector.get_columns(table)
-                #     # for column in inspector.get_columns(table):
-                #     for column in columns_db:
-                #         if column not in columns_insp:
-                #             print(column["name"])
-                #             column_instance = getattr(table_instance, column)
-                #             name = column_instance.name
-                #             type = column_instance.type
+                if inspector.has_table(table):
+                    # check for columns
+                    table_instance = getattr(database, table.capitalize())
+                    columns_db = table_instance.__table__.columns.keys()
+                    columns_insp = inspector.get_columns(table)
+                    # for column in inspector.get_columns(table):
+                    for column in columns_db:
+                        if column not in columns_insp:
+                            self.migrations()
+                            print('Created all columns')
+                            # self.init_db
+                            # print(column["name"])
+                            # column_instance = getattr(table_instance, column)
+                            # name = column_instance.name
+                            # type = column_instance.type
                             
                 #             query = 'ALTER TABLE ' + table + 'ADD COLUMN ' + column['name'] + str(column['type']) + 'NULL DEFAULT ' + column['default']
                 #             cursor.execute(query)

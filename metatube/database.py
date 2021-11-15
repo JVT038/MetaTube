@@ -4,11 +4,9 @@ class Config(db.Model):
     key = db.Column(db.Integer, primary_key=True)
     auth = db.Column(db.Boolean, default=False)
     ffmpeg_directory = db.Column(db.String(128))
-    proxy_status = db.Column(db.Boolean, default=False)
-    proxy_username = db.Column(db.String(128))
-    proxy_password = db.Column(db.String(128))
-    proxy_address = db.Column(db.String(128))
-    proxy_port = db.Column(db.String(128))
+    auth = db.Column(db.Boolean)
+    auth_username = db.Column(db.String(128))
+    auth_password = db.Column(db.String(128))
     
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
@@ -26,6 +24,11 @@ class Templates(db.Model):
     output_folder = db.Column(db.String(128), nullable=True)
     output_name = db.Column(db.String(32), nullable=True)
     bitrate = db.Column(db.Integer)
+    proxy_status = db.Column(db.Boolean, default=False)
+    proxy_username = db.Column(db.String(128))
+    proxy_password = db.Column(db.String(128))
+    proxy_address = db.Column(db.String(128))
+    proxy_port = db.Column(db.Integer)
     
     def check_existing(value):
         return True if Templates.query.filter_by(name = value).count() > 0 else False
@@ -37,7 +40,12 @@ class Templates(db.Model):
             extension = data.ext,
             output_folder = data.output_folder,
             output_name = data.output_name,
-            bitrate = data.bitrate
+            bitrate = data.bitrate,
+            proxy_status = data.proxy["status"],
+            proxy_username = data.proxy["username"],
+            proxy_password = data.proxy["password"],
+            proxy_address = data.proxy["address"],
+            proxy_port = data.proxy["port"]
         )
         db.session.add(row)
         db.session.commit()
@@ -58,7 +66,13 @@ class Templates(db.Model):
         self.output_folder = data.output_folder
         self.output_name = data.output_name
         self.bitrate = data.bitrate
+        self.proxy_status = data.proxy["status"],
+        self.proxy_username = data.proxy["username"],
+        self.proxy_password = data.proxy["password"],
+        self.proxy_address = data.proxy["address"],
+        self.proxy_port = data.proxy["port"]
         db.session.commit()
+        
         return True
 
 class Database(db.Model):
@@ -70,11 +84,7 @@ class Database(db.Model):
     date = db.Column(db.DateTime)
     length = db.Column(db.Integer)
     musicbrainz_id = db.Column(db.Integer, unique=True)
-    youtube_id = db.Column(db.Integer, unique=True)
-    authentication = db.Column(db.Boolean)
-    auth_username = db.Column(db.String(128))
-    auth_password = db.Column(db.String(128))
-    
+    youtube_id = db.Column(db.Integer, unique=True)    
 
 class Users():
     id = db.Column(db.Integer, primary_key=True)
