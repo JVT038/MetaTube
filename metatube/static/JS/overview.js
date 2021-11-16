@@ -1,3 +1,4 @@
+var socket = io();
 $(document).ready(function() {
     // Option to change the query type - disabled at the moment
     $(document).on('change', '#query_type', function() {
@@ -15,7 +16,7 @@ $(document).ready(function() {
         $("#searchsongbtn").trigger('click');
     });
 
-    function insertYTcol(response, segments, form) {
+    function insertYTcol(response, form) {
         var data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
@@ -28,17 +29,6 @@ $(document).ready(function() {
                 thumbnail += value_thumbnail.url;
             }
         });
-        // if(segments != 'error') {
-        //     segments_array = [];
-        //     segment_data = segments;
-        //     $.each(segments, function(key_segments) {
-        //         json_segment = JSON.parse(segments[key_segments]);
-        //         if(json_segment.actionType == 'skip' && (key_segments == 0 || key_segments == segments.length - 1)) {
-        //             let skip_segments = [json_segment.segment[0], json_segment.segment[1]];
-        //             segments_array.push(skip_segments);
-        //         }
-        //     });
-        // }
 
         let minutes = Math.floor(data.duration / 60);
         let seconds = data.duration % 60;
@@ -74,10 +64,8 @@ $(document).ready(function() {
             } else {
                 language = "Unknown"
             }
-            // let language = !"text-representation" in value_release ? "Unknown" : ("language" in value_release["text-represenation"] ? value_release["text-representation"]["language"] : "Unknown");
             $.each(value_release["artist-credit"], function(key_artist, value_artist) {
                 if(typeof(value_artist) == 'object') {
-                    // artists_array[key_artist] = [value_artist.name, value_artist.id]
                     let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a><br/>';
                     artists+=a;
                 }
@@ -113,34 +101,50 @@ $(document).ready(function() {
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
         $("#ytcol").empty().append(spinner);
         $("#audiocol").empty().append(spinner);
-        var query = $("#query").val()
-        var amount = $("#amount").val()
-        $.ajax({
-            url: Flask.url_for('overview.search'),
-            method: 'GET',
-            data: {
-                query: query,
-                amount: amount
-            },
-            success: function(response) {
-                $("#query_log").empty();
-                info = response;
-                let ytcol = insertYTcol(response.yt, response.segments, response.downloadform);
-                let audiocol = insertAudioCol(response.mbp);
-                $("#ytcol").append(ytcol);
-                friconix_update();
-                $("#audiocol").append(audiocol);
-                $(".modal-footer").removeClass('d-none')
-            }, 
-            error: function(error) {
-                $("#ytcol").empty();
-                $("#audiocol").empty();
-                if(error.status == 400) {
-                    $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
-                }
-            }
-        })
+        // YouTube socket
+        let amount = $("#amount").val() != '' ? $("#amount").val() : '5';
+        let query = $("#query").val();
+        socket.emit('ytdl_search', query, amount);
+        
+        // $.ajax({
+        //     url: Flask.url_for('overview.search'),
+        //     method: 'GET',
+        //     data: {
+        //         query: query,
+        //         amount: amount
+        //     },
+        //     success: function(response) {
+        //         $("#query_log").empty();
+        //         info = response;
+        //         let ytcol = insertYTcol(response.yt, response.downloadform);
+        //         let audiocol = insertAudioCol(response.mbp);
+        //         $("#ytcol").append(ytcol);
+        //         friconix_update();
+        //         $("#audiocol").append(audiocol);
+        //         $(".modal-footer").removeClass('d-none')
+        //     }, 
+        //     error: function(error) {
+        //         $("#ytcol").empty();
+        //         $("#audiocol").empty();
+        //         if(error.status == 400) {
+        //             $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
+        //         }
+        //     }
+        // })
     });
+
+    socket.on('ytdl_response', (video, downloadform) => {
+        let ytcol = insertYTcol(video, downloadform);
+        $("#ytcol").append(ytcol);
+        friconix_update();
+        $(".modal-footer").removeClass('d-none')
+    });
+    socket.on('mbp_response', (mbp) => {
+        let audiocol = insertAudioCol(mbp);
+        $("#audiocol").append(audiocol);
+        $(".modal-footer").removeClass('d-none')
+    });
+    
     $(document).on('mouseenter', '.mbp-item', function() {
         $(this).css('filter', 'brightness(50%)');
         $(this).css('background-colour', '#009999');
@@ -231,8 +235,6 @@ $(document).ready(function() {
             })
         }
     });
-
-    var socket = io();
     socket.on('overview', function(msg) {
         progress_text = $("#progress_status").children('p');
         if(msg.status == 'downloading') {
@@ -269,10 +271,6 @@ $(document).ready(function() {
         }
     });
     $(document).on('click', ".removesegment", function() {
-        // $.each($(this.parents('.form-row') + " ~ div"), function(key, value) {
-        //     let id = parseInt($(this.parents('.form-row') + " ~ div")[key].id.slice(4)) - 1;
-        //     $(this.parents('.form-row') + " ~ div")[key].id = 'row_' + id;
-        // });
         $(this).parents('.form-row').remove();
     });
     $(document).on('click', "#addsegment", function() {
@@ -281,8 +279,6 @@ $(document).ready(function() {
         let row = document.createElement('div');
         let startcol = document.createElement('div');
         let endcol = document.createElement('div');
-        // let startlabel = document.createElement('label');
-        // let endlabel = document.createElement('label');
         let startinput = document.createElement('input');
         let endinput = document.createElement('input');
         let input_group = document.createElement('div');
@@ -303,9 +299,6 @@ $(document).ready(function() {
         removeicon.classList.add('fi-xwsuxl-minus-solid');
         removeicon.setAttribute('style', 'color: white');
 
-        // startlabel.setAttribute('for', 'segmentstart_'+id);
-        // endlabel.setAttribute('for', 'segmentend_'+id);
-
         startinput.classList.add('form-control', 'timestamp_input');
         startinput.id = 'segmentstart_'+id;
         startinput.type = 'text';
@@ -319,9 +312,7 @@ $(document).ready(function() {
         input_group.appendChild(endinput);
         input_group.appendChild(input_group_append);        
 
-        // startcol.appendChild(startlabel);
         startcol.appendChild(startinput);
-        // endcol.appendChild(endlabel);
         endcol.appendChild(input_group);
         row.appendChild(startcol);
         row.appendChild(endcol);

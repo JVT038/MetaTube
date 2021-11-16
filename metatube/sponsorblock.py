@@ -1,4 +1,4 @@
-import sponsorblock, json
+import sponsorblock
 from sponsorblock.errors import *
 def segments(url):
     client = sponsorblock.Client()

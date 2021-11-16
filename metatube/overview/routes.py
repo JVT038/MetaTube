@@ -1,14 +1,19 @@
 # from metatube.ytdl import ytdlp
 # from metatube.mbp import MBP
 # from metatube.sponsorblock import sb
+from flask.templating import render_template_string
 from metatube.overview import bp
 from metatube.database import *
 from metatube.youtube import YouTube as yt
+from metatube import socketio
 from math import floor
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import os, json
+from queue import Queue
 from flask import render_template, request, jsonify
+from multiprocessing import Process, Pool
+from itertools import product
 
 @bp.route('/')
 def index():
@@ -16,25 +21,36 @@ def index():
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path)
 
 @bp.route('/ajax/search', methods=['GET'])
-def search():
-    query = request.args.get('query')
-    amount = request.args.get('amount') if len(request.args.get('amount')) > 0 else 5
+@socketio.on('ytdl_search')
+def search(query, amount = 5):
     if query is not None and len(query) > 1:
         if 0 < int(amount) < 100:
-            try:
+
+            try:              
                 video = yt.search(query)
-                mbp = musicbrainz.search(
-                    query = video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
-                    artist = video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
-                    amount = amount
-                )
+                mbp_args = {
+                    'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]), 
+                    'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
+                    'amount': str(amount)
+                }
                 templates = Templates.query.all()
-                segments = sb.segments(video["id"]) if type(sb.segments(video["id"])) == list else 'error'
+                
+                pool = Pool(processes=2)
+                mbp_results = pool.map_async(musicbrainz.search, [mbp_args])
+                segments_results = pool.map_async(sb.segments, [video["id"]])
+                
+                segments = segments_results.get()[0] if type(segments_results.get()[0] == list) else 'error'
+                mbp = mbp_results.get()[0]
+                
                 downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-                response = jsonify(status='success', yt=video, mbp=mbp["release-list"], downloadform=downloadform, segments=segments)
-                return response
+                socketio.emit('mbp_response', mbp["release-list"])
+                socketio.emit('ytdl_response', (video, downloadform))
+                # response = jsonify(status='success', yt=video, mbp=mbp["release-list"], downloadform=downloadform)
+                # return response
+            
             except ValueError as error:
                 return str(error), 400
+            
         else:
             return "Enter a number below 100!", 400
     else:

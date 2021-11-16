@@ -24,7 +24,8 @@ class Templates(db.Model):
     output_folder = db.Column(db.String(128), nullable=True)
     output_name = db.Column(db.String(32), nullable=True)
     bitrate = db.Column(db.Integer)
-    proxy_status = db.Column(db.Boolean, default=False)
+    proxy_status = db.Column(db.Boolean, default=0)
+    proxy_type = db.Column(db.String(16))
     proxy_username = db.Column(db.String(128))
     proxy_password = db.Column(db.String(128))
     proxy_address = db.Column(db.String(128))
@@ -54,6 +55,9 @@ class Templates(db.Model):
     def fetchtemplate(input_id):
         return Templates.query.filter_by(id = input_id).first()
     
+    def fetchalltemplates():
+        return Templates.query.all()
+    
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -66,6 +70,7 @@ class Templates(db.Model):
         self.output_folder = data.output_folder
         self.output_name = data.output_name
         self.bitrate = data.bitrate
+        
         self.proxy_status = data.proxy["status"],
         self.proxy_username = data.proxy["username"],
         self.proxy_password = data.proxy["password"],

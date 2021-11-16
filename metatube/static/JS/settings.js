@@ -64,6 +64,23 @@ $(document).ready(function() {
             $("#addtemplatebtn").attr('id', 'changetemplatebtn');
             $("#changetemplatebtn").text('Change template');
             $("#changetemplatebtn").attr('goal', 'edit');
+            if($(this).parents('tr').siblings("tr#proxy_"+id).find('.td_proxy_status').text() == 'True') {
+                let paragraph = $(this).parents('tr').siblings('tr#proxy_'+id).find('p');
+                let proxy_type = paragraph.children('.td_proxy_type').text();
+                let proxy_address = paragraph.children('.td_proxy_address').text();
+                let proxy_port = paragraph.children('.td_proxy_port').text();
+                let proxy_username = paragraph.children('.td_proxy_username').text() != 'None' ? paragraph.children('.td_proxy_username').text() : '';
+                let proxy_password = paragraph.children('.td_proxy_password').text() != 'None' ? paragraph.children('.td_proxy_password').text() : '';
+                $("#advancedtoggle").text('Hide advanced');
+                $("#advancedrow").removeClass('d-none');
+                $("#proxy_status").val('true').trigger('click')
+                $("#advancedrow").children('.d-none').removeClass('d-none');
+                $("#proxy_type option[value='"+proxy_type+"']").attr('selected', 'selected');
+                $("#proxy_address").val(proxy_address);
+                $("#proxy_port").val(proxy_port)
+                $("#proxy_username").val(proxy_username);
+                $("#proxy_password").val(proxy_password);
+            }
             $("#templatesmodal").modal("show");
         }
     });
@@ -78,6 +95,15 @@ $(document).ready(function() {
         $("#addtemplatebtn").text('Add template');
         $("#addtemplatebtn").attr('goal', 'add');
         $("#templatesmodal").modal("show");
+        $("#advancedtoggle").text('Show advanced');
+        $("#advancedrow").addClass('d-none');
+        $("#proxy_status").val('false').trigger('click');
+        $("#advancedrow").children().not(':first').addClass('d-none');
+        $("#proxy_type").val([]);
+        $("#proxy_address").val("");
+        $("#proxy_port").val("");
+        $("#proxy_username").val("");
+        $("#proxy_password").val("");
     });
     $(document).on('click', ".templatebtn", function() {
         let goal = $(this).attr('goal');
@@ -132,5 +158,9 @@ $(document).ready(function() {
     });
     $("#proxy_status").on('change', function() {
         $("#advancedrow").children('div.col:not(:first)').toggleClass('d-none');
+    });
+    $(".expandtemplatebtn").on('click', function() {
+        let id = $(this).parents('tr').attr('id');
+        $(this).parents('tr').siblings('#proxy_'+id).toggleClass('d-none');
     });
 });

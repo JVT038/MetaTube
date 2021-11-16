@@ -118,7 +118,7 @@ $ pip install -r requirements.txt
 # Before running the server, make sure to enter your environment variables in example.flaskenv and rename example.flaskenv to .flaskenv, so remove 'example'.
 
 # Run the project
-$ flask run
+$ py metatube.py
 
 # The server will initialize in the <http://localhost:3000>
 ```
@@ -155,6 +155,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add in-built file explorer, making paths optional
 - [ ] Switch from AJAX to websockets
 - [ ] Hardware acceleration with FFmpeg
+- [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 &#xa0;
 
 <a href="#top">Back to top</a>

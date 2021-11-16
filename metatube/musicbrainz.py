@@ -2,13 +2,12 @@ from flask import Request
 import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
 musicbrainzngs.set_useragent("metatube", "0.1", Request.base_url)
-def search(query, album = "", artist = "", amount = 5):
-    '''
-    query = the query to look for
-    album = any album to look for
-    artist = name of an artist to look for
-    '''
-    return musicbrainzngs.search_releases(query, artist=artist, limit = amount)
+def search(args):
+    query = args['query']
+    artist = args['artist']
+    limit = int(args['amount'])
+    response = musicbrainzngs.search_releases(query, artist=artist, limit = limit)
+    return response
 
 def get_cover(releaseid):
     try:

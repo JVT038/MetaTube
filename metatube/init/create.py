@@ -64,7 +64,7 @@ class Default():
     def migrations(self):
         directory = os.path.join(env.BASE_DIR, 'migrations')
         try:
-            init(directory)
+            init(directory, compare_type=True)
         except:
             pass
         migrate(directory)
@@ -88,10 +88,12 @@ class Default():
                     columns_db = table_instance.__table__.columns.keys()
                     columns_insp = inspector.get_columns(table)
                     # for column in inspector.get_columns(table):
-                    for column in columns_db:
-                        if column not in columns_insp:
-                            self.migrations()
-                            print('Created all columns')
+                    # for column in columns_db:
+                    #     if column not in columns_insp:
+                    #         self.migrations()
+                    #         print(f'Column named \'{column}\' is missing')
+                    #         print('Created all columns')
+                    #         break
                             # self.init_db
                             # print(column["name"])
                             # column_instance = getattr(table_instance, column)

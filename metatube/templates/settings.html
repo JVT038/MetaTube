@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="{{ url_for('static', filename='JS/settings.js') }}"></script>
-<div class="container">
+<div class="container-fluid">
     <nav>
         <ul class="nav nav-tabs justify-content-center" role="tablist">
             <li class="nav-item">
@@ -75,6 +75,20 @@
                                 <td>
                                     <button type="button" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
                                     <button type="button" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
+                                    <button type="button" class="btn btn-primary expandtemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xwsdxl-caret-solid"></i></button>
+                                </td>
+                            </tr>
+                            <tr id="proxy_{{ template.id }}" class="d-none">
+                                <td class="td_proxy" colspan="7">
+                                    <p>Proxy status: <span class="td_proxy_status">{{ template.proxy_status }}</span> <br/>
+                                    {% if template.proxy_status == 1 %}
+                                        Proxy type: <span class="td_proxy_type">{{ template.proxy_type }}</span> <br/>
+                                        Proxy address: <span class="td_proxy_address">{{ template.proxy_address }}</span> <br/>
+                                        Proxy port: <span class="td_proxy_port">{{ template.proxy_port }}</span> <br/>
+                                        Proxy username: <span class="td_proxy_username">{{ template.proxy_username if template.proxy_username|length > 0 else 'None' }}</span> <br/>
+                                        Proxy password: <span class="td_proxy_password">{{ template.proxy_password if template.proxy_password|length > 0 else 'None' }}</span>
+                                    {% endif %}
+                                    </p>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -178,9 +192,9 @@
                         <div class="col d-none">
                             <label for="#proxy_type">Select proxy type</label>
                             <select id="proxy_type" class="custom-select">
-                                <option value="http" selected>HTTP</option>
-                                <option value="https">HTTPS</option>
-                                <option value="socks5">SOCKS5</option>
+                                <option value="HTTP" selected>HTTP</option>
+                                <option value="HTTPS">HTTPS</option>
+                                <option value="SOCKS5">SOCKS5</option>
                             </select>
                         </div>
                         <div class="col d-none">
