@@ -39,6 +39,7 @@
 
   To-Do before the first release:
 
+  - Use multiprocessing to make the overview page faster (it takes around 50 seconds to load a video :( )
   - Automatically merge metadata from Musicbrainz with the downloaded file
   - Store the information about downloaded releases in the database
   - Some decent mobile support
