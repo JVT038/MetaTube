@@ -1,3 +1,12 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap/bootstrap.min.css') }}" />
+<link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/icon type">
+<script src="{{ url_for('static', filename='JS/libraries/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/friconix.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/libraries/socket.io.min.js') }}"></script>
+<script src="{{ url_for('static', filename='JS/global.js') }}"></script>
+{{ JSGlue.include() }}
 <form>
     <div class="form-row">
         <div class="col">
@@ -117,6 +126,35 @@
         <div class="col ml-4">
             <input type="checkbox" class="form-check-input" id="segments_check" value="disable_segments" />
             <label class="form-check-label" for="#segments_check">Disable segments (download entire video)</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col">
+            <label for="#proxy_type">Select proxy type</label>
+            <select id="proxy_type" class="custom-select">
+                <option value="None" selected>Don't use proxy</option>
+                <option value="HTTP">HTTP</option>
+                <option value="HTTPS">HTTPS</option>
+                <option value="SOCKS5">SOCKS5</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-row d-none" id="proxy_row">
+        <div class="col">
+            <label for="#proxy_address">Enter proxy address</label>
+            <input type="text" class="form-control" id="proxy_address" />
+        </div>
+        <div class="col">
+            <label for="#proxy_port">Enter proxy port</label>
+            <input type="text" class="form-control num_input" id="proxy_port" />
+        </div>
+        <div class="col">
+            <label for="#proxy_username">Enter proxy username</label>
+            <input type="text" class="form-control" id="proxy_username" />
+        </div>
+        <div class="col">
+            <label for="#proxy_password">Enter proxy password</label>
+            <input type="text" class="form-control" id="proxy_password" />
         </div>
     </div>
     <div class="form-row">

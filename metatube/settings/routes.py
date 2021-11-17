@@ -11,14 +11,16 @@ import os, json
 @bp.route('/settings', methods=['GET', 'POST'])
 def settings():
     download_form = DownloadSettingsForm()
-    ffmpeg_form = TestffmpegForm()
     db_config = Config().query.get(1)
     ffmpeg_path = db_config.ffmpeg_directory
+    amount = db_config.amount
     templates = Templates.query.all()
     if download_form.is_submitted() is False:
         download_form.ffmpeg_path.data = ffmpeg_path
+        download_form.amount.data = amount
     if download_form.validate_on_submit():
-        if db_config.ffmpeg(download_form.ffmpeg_path.data):
+        if db_config.ffmpeg_directory != download_form.ffmpeg_path.data:
+            db_config.ffmpeg(download_form.ffmpeg_path.data)
             ffmpeg_instance = ffmpeg()
             if ffmpeg_instance.test():
                 flash('FFmpeg path has succefully been updated and found!')
@@ -26,15 +28,16 @@ def settings():
             else:
                 flash('FFmpeg path has succefully been updated, but the application hasn\'t been found')
                 return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
-        else:
-            flash('Something went wrong while updating the path. Check the logs for more info.')
+        elif db_config.amount != download_form.amount.data:
+            db_config.set_amount(download_form.amount.data)
+            flash('Max amount has succesfully been updated')
             return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
     else:
         for field, error in download_form.errors.items():
             for e in error:
                 print(e)
 
-    return render_template('settings.html', download_form=download_form, current_page='settings', ffmpeg=ffmpeg_form, templates=templates)
+    return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
 
 @bp.route('/ajax/template', methods=['POST'])
 def template():

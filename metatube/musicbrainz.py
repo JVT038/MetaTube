@@ -5,8 +5,8 @@ musicbrainzngs.set_useragent("metatube", "0.1", Request.base_url)
 def search(args):
     query = args['query']
     artist = args['artist']
-    limit = int(args['amount'])
-    response = musicbrainzngs.search_releases(query, artist=artist, limit = limit)
+    max = args['max']
+    response = musicbrainzngs.search_releases(query, artist=artist, limit=max)
     return response
 
 def get_cover(releaseid):

@@ -39,12 +39,16 @@
                 <div class="form-row">
                     <div class="col">
                         <label for="#ffmpeg_path">An absolute path* or relative path from the root directory** to the folder containing ffmpeg. Required to download videos.</label>
-                        {{ download_form.ffmpeg_path(class='form-control', id='ffmpeg_path')}}
+                        {{ download_form.ffmpeg_path(class='form-control', id='ffmpeg_path') }}
+                    </div>
+                    <div class="col">
+                        <label for="#max_amount">Max amount of items to load when searching metadata. Default value is 5. Max amount is 100</label>
+                        {{ download_form.amount(class='form-control', id='max_amount') }}                        
                     </div>
                 </div>
-                {{ download_form.submit(class='btn btn-success', id='submitdownloadform') }}
                 <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
                     ** The root directory is the same directory where <code>metatube.py</code> is located</p>
+                {{ download_form.submit(class='btn btn-success', id='submitdownloadform') }}
             </form>
         </div>
         <div class="tab-pane" id="templatestab">

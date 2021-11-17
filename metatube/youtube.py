@@ -11,7 +11,7 @@ class YouTube:
                 return True
         return False
 
-    def search(url):
+    def fetch_url(url):
         if YouTube.is_supported(url):
             ytdl_options = {}
             with yt_dlp.YoutubeDL(ytdl_options) as ytdl:

@@ -16,6 +16,7 @@ class Default():
             return True
         config = Config(
             ffmpeg_directory = "",
+            amount = 5,
             auth = False,
             auth_username = "",
             auth_password = ""
@@ -54,8 +55,7 @@ class Default():
                 init(directory)
             except:
                 pass
-            migrate(directory)
-            upgrade(directory)
+        self.migrations()
         for method in self._methods:
             getattr(Default, method)()
         print('Created the database and all necessary tables and rows')
@@ -63,10 +63,6 @@ class Default():
     
     def migrations(self):
         directory = os.path.join(env.BASE_DIR, 'migrations')
-        try:
-            init(directory, compare_type=True)
-        except:
-            pass
         migrate(directory)
         upgrade(directory)
     

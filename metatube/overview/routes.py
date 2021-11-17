@@ -7,52 +7,39 @@ from metatube.database import *
 from metatube.youtube import YouTube as yt
 from metatube import socketio
 from math import floor
+from flask import render_template, request, jsonify
+from multiprocessing import Pool
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import os, json
-from queue import Queue
-from flask import render_template, request, jsonify
-from multiprocessing import Process, Pool
-from itertools import product
 
 @bp.route('/')
 def index():
     ffmpeg_path = True if len(Config.query.get(1).ffmpeg_directory) > 0 else False
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path)
 
-@bp.route('/ajax/search', methods=['GET'])
 @socketio.on('ytdl_search')
-def search(query, amount = 5):
+def search(query):
     if query is not None and len(query) > 1:
-        if 0 < int(amount) < 100:
-
-            try:              
-                video = yt.search(query)
-                mbp_args = {
-                    'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]), 
-                    'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
-                    'amount': str(amount)
-                }
-                templates = Templates.query.all()
+        video = yt.fetch_url(query)
+        mbp_args = {
+            'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]), 
+            'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
+            'max': Config.get_max()
+        }
+        templates = Templates.query.all()
+        
+        pool = Pool()
+        mbp_results = pool.map_async(musicbrainz.search, [mbp_args])
+        segments_results = pool.map_async(sb.segments, [video["id"]])
+        
+        segments = segments_results.get()[0] if type(segments_results.get()[0] == list) else 'error'
+        print(segments)
+        mbp = mbp_results.get()[0]
                 
-                pool = Pool(processes=2)
-                mbp_results = pool.map_async(musicbrainz.search, [mbp_args])
-                segments_results = pool.map_async(sb.segments, [video["id"]])
-                
-                segments = segments_results.get()[0] if type(segments_results.get()[0] == list) else 'error'
-                mbp = mbp_results.get()[0]
-                
-                downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-                socketio.emit('mbp_response', mbp["release-list"])
-                socketio.emit('ytdl_response', (video, downloadform))
-                # response = jsonify(status='success', yt=video, mbp=mbp["release-list"], downloadform=downloadform)
-                # return response
-            
-            except ValueError as error:
-                return str(error), 400
-            
-        else:
-            return "Enter a number below 100!", 400
+        downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+        socketio.emit('mbp_response', mbp["release-list"])
+        socketio.emit('ytdl_response', (video, downloadform))
     else:
         return "Enter an URL!", 400
 
@@ -87,7 +74,13 @@ def fetchtemplate():
             "extension": template.extension,
             "output_folder": template.output_folder,
             "output_name": template.output_name,
-            "bitrate": template.bitrate
+            "bitrate": template.bitrate,
+            'proxy_status': template.proxy_status,
+            'proxy_type': template.proxy_type,
+            'proxy_address': template.proxy_address,
+            'proxy_port': template.proxy_port,
+            'proxy_username': template.proxy_username,
+            'proxy_password': template.proxy_password
         }
         response = jsonify(data)
         return response, 200
@@ -96,16 +89,12 @@ def fetchtemplate():
         return response, 400
     
 @bp.route('/ajax/downloadvideo', methods=['POST'])
-def download():
-    # declare all variables
-    url = [request.form.get('url')]
-    type = request.form.get('type', 'Audio')
-    ext = request.form.get('ext', 'mp3')
-    output_format = request.form.get('output_format', f'%(title)s.%(ext)s')
-    bitrate = request.form.get('bitrate', 192)
-    filepath = os.path.join(request.form.get('output_folder', 'downloads'), output_format)
+@socketio.on('ytdl_download')
+def download(url, ext = 'mp3', output_folder = 'downloads', type = 'Audio', output_format = f'%(title)s.%(ext)s', bitrate = 192, skipfragments = "{}", proxy_data = {'proxy_status': False}):
+    proxy = json.loads(proxy_data)
+    filepath = os.path.join(output_folder, output_format)
     ffmpeg = Config.get_ffmpeg()
-    segments = json.loads(request.form.get('segments', "{}"))
+    segments = json.loads(skipfragments)
     postprocessors = []
     format = 'bestaudio/best' if type == 'Audio' else 'bv+ba/b'
     # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
@@ -142,6 +131,16 @@ def download():
         'noplaylist': True,
         # 'updatetime': True, 
     }
+    # Add proxy if proxy is enabled
+    if proxy['proxy_status'] is not None:
+        proxy_string = proxy["proxy_status"].lower() + "://" + proxy["proxy_address"] + ":" + proxy["proxy_port"]
+        if len(proxy["proxy_username"]) > 0:
+            proxy_string += proxy_string + "@" + proxy["proxy_username"]
+        if len(proxy["proxy_username"]) > 0:
+            proxy_string += proxy_string + ":" + proxy["proxy_password"]
+        print(proxy_string)
+        ytdl_options["proxy"] = proxy_string
+        
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
     # Just a return function, otherwise Flask gets angry >:(

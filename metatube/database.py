@@ -4,6 +4,7 @@ class Config(db.Model):
     key = db.Column(db.Integer, primary_key=True)
     auth = db.Column(db.Boolean, default=False)
     ffmpeg_directory = db.Column(db.String(128))
+    amount = db.Column(db.Integer)
     auth = db.Column(db.Boolean)
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
@@ -15,6 +16,14 @@ class Config(db.Model):
     
     def get_ffmpeg():
         return Config.query.get(1).ffmpeg_directory
+    
+    def set_amount(self, amount):
+        self.amount = int(amount)
+        db.session.commit()
+        return True
+    
+    def get_max():
+        return Config.query.get(1).amount
 
 class Templates(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=True)
@@ -24,7 +33,7 @@ class Templates(db.Model):
     output_folder = db.Column(db.String(128), nullable=True)
     output_name = db.Column(db.String(32), nullable=True)
     bitrate = db.Column(db.Integer)
-    proxy_status = db.Column(db.Boolean, default=0)
+    proxy_status = db.Column(db.Boolean, default=False)
     proxy_type = db.Column(db.String(16))
     proxy_username = db.Column(db.String(128))
     proxy_password = db.Column(db.String(128))
@@ -71,10 +80,11 @@ class Templates(db.Model):
         self.output_name = data.output_name
         self.bitrate = data.bitrate
         
-        self.proxy_status = data.proxy["status"],
-        self.proxy_username = data.proxy["username"],
-        self.proxy_password = data.proxy["password"],
-        self.proxy_address = data.proxy["address"],
+        self.proxy_status = data.proxy["status"]
+        self.proxy_type = data.proxy['type']
+        self.proxy_username = data.proxy["username"]
+        self.proxy_password = data.proxy["password"]
+        self.proxy_address = data.proxy["address"]
         self.proxy_port = data.proxy["port"]
         db.session.commit()
         
