@@ -39,7 +39,6 @@
 
   To-Do before the first release:
 
-  - Use multiprocessing to make the overview page faster (it takes around 50 seconds to load a video :( )
   - Automatically merge metadata from Musicbrainz with the downloaded file
   - Store the information about downloaded releases in the database
   - Some decent mobile support
@@ -139,7 +138,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
 - [ ] Make a CLI to download and match music
 - [ ] Store the information of downloaded songs in a SQL database
-- [ ] Add support for the use of proxies to download YouTube videos
+- [X] Add support for the use of proxies to download YouTube videos
 - [ ] Make it mobile-friendly
 - [ ] Add Docker support
 - [ ] Add it to the PyPi library
@@ -153,10 +152,11 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
 - [ ] Add translations
-- [ ] Add in-built file explorer, making paths optional
+- [ ] Add in-built file explorer, making manual paths optional
 - [ ] Switch from AJAX to websockets
 - [ ] Hardware acceleration with FFmpeg
 - [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
+- [X] Use multiprocessing and websockets to make the overview page faster
 &#xa0;
 
 <a href="#top">Back to top</a>
