@@ -1,7 +1,9 @@
-import yt_dlp
+import yt_dlp, flask
 from threading import Thread
-from metatube import sockets
-from metatube import ffmpeg
+from metatube import socketio, sockets
+from metatube.database import Templates
+from metatube import sponsorblock as sb
+from flask import render_template
     
 class YouTube:
     def is_supported(url):
@@ -62,3 +64,13 @@ class YouTube:
 
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        
+def fetch_video(args):
+    from metatube import create_app
+    app = create_app()        
+    segments = sb.segments(args["video"]["id"])
+    with app.app_context():
+        app.config['SERVER_NAME'] = args['server_name']
+        templates = Templates.fetchalltemplates()
+        downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+        socketio.emit('ytdl_response', (args["video"], downloadform))

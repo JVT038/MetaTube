@@ -80,7 +80,13 @@ $(document).ready(function() {
                 success: function(response) {
                     cover = response;
                     let mbp_url = 'https://musicbrainz.org/release/'+release_id;
-                    let mbp_image = response.cover == null ? Flask.url_for('static', {"filename": "images/empty_cover.png"}) : response.cover.images[0].thumbnails.small;
+                    let mbp_image = "";
+                    if("cover" in response && response.cover != "None") {
+                        // "cover" in response ? response.cover.images[0].thumbnails.small : Flask.url_for('static', {"filename": "images/empty_cover.png"});
+                        mbp_image = response.cover.images[0].thumbnails.small;
+                    } else {
+                        mbp_image = Flask.url_for('static', {"filename": "images/empty_cover.png"});
+                    }
                     html = {
                         'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
                         'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
@@ -92,16 +98,68 @@ $(document).ready(function() {
                 error: function(error) {
                     console.log(error)
                 }
-            })
+            });
         });
         $("#audiocol").empty();
-        console.log(ul);
         return ul;
     }
+
+    function addperson() {
+        let addbutton = $(".addperson");
+        let id = addbutton.parents('.personrow').siblings('.personrow').length > 0 ? parseInt(addbutton.parents('.personrow').siblings('.personrow:last').attr('id').slice(addbutton.parents('.personrow').attr('id').length - 1)) + 1 : parseInt(addbutton.parents('.personrow').attr('id').slice(addbutton.parents('.personrow').attr('id').length - 1)) + 1;
+        let row = document.createElement('div');
+        let col_name = document.createElement('div');
+        let col_type = document.createElement('div');
+        let input_group = document.createElement('div');
+        let input_group_append = document.createElement('div');
+        let input_name = document.createElement('input');
+        let input_type = document.createElement('input');
+        let button = document.createElement('button');
+        let icon = document.createElement('i');
+
+        row.classList.add('form-row', 'personrow');
+        row.id = 'personrow' + id;
+
+        col_name.classList.add('col');
+        col_type.classList.add('col');
+
+        input_name.classList.add('form-control', 'artist-relations');
+        input_name.id = 'artist_relations_name' + id;
+        
+        input_type.classList.add('form-control', 'artist-relations');
+        input_type.id = 'artist_relations_type' + id;
+
+        input_group.classList.add('input-group');
+        input_group_append.classList.add('input-group-append');
+        
+        button.classList.add('btn', 'btn-danger', 'bg-danger', 'removeperson');
+        button.type = 'button';
+        
+        icon.classList.add('fi-xwsuxl-minus-solid');
+        icon.setAttribute('style', 'color: white');
+
+        button.appendChild(icon);
+        input_group_append.appendChild(button);
+        input_group.appendChild(input_type);
+        input_group.appendChild(input_group_append);
+        col_type.appendChild(input_group);
+        col_name.appendChild(input_name);
+        row.appendChild(col_name);
+        row.appendChild(col_type);
+        $('.personrow:last').after(row);
+
+        friconix_update();
+        return $('.personrow:last');
+    }
+
     $("#searchsongbtn").on('click', function() {
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
         $("#ytcol").empty().append(spinner);
         $("#audiocol").empty().append(spinner);
+        // Reset the modal
+        $(".modal-footer").addClass('d-none');
+        $(".removeperson").parents('.personrow').remove();
+        $("#metadataview").find('input').val('');
         // YouTube socket
         let query = $("#query").val();
         socket.emit('ytdl_search', query);
@@ -134,42 +192,37 @@ $(document).ready(function() {
     });
     $(document).on('change', '#template', function() {
         let id = $(this).val();
-        $.ajax({
-            url: Flask.url_for('overview.fetchtemplate'),
-            method: 'GET',
-            data: {
-                id: id
-            },
-            success: function(response) {
-                data = response;
-                $("#extension").val([]);
-                $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
-                $("#type").val(response.type);
-                $("#output_folder").val(response.output_folder);
-                $("#outputname").val(response.output_name);
-                $("#bitrate").val(response.bitrate);
-                if(response.proxy_status == true) {
-                    $("#proxy_type").val(response.proxy_type).change();
-                    $("#proxy_address").val(response.proxy_address);
-                    $("#proxy_port").val(response.proxy_port);
-                    $("#proxy_username").val(response.proxy_username);
-                    $("#proxy_password").val(response.proxy_password);
-                    $("#proxy_row").removeClass('d-none');
-                }
-                if(response.type == 'Video') {
-                    $("#bitrate").parent().addClass('d-none');
-                } else {
-                    $("#bitrate").parent().removeClass('d-none');
-                }
-            }, 
-            error: function(error) {
-                $("#ytcol").empty();
-                $("#audiocol").empty();
-                if(error.status == 400) {
-                    $("#query_log").html('<p class="text-center">'+error.responseText+'</p>')
-                }
-            }
-        });
+        socket.emit('fetchtemplate', id)
+    });
+    socket.on('template', (response) => {
+        data = response;
+        response = JSON.parse(response);
+        $("#extension").val([]);
+        $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
+        $("#type").val(response.type);
+        $("#output_folder").val(response.output_folder);
+        $("#outputname").val(response.output_name);
+        $("#bitrate").val(response.bitrate);
+        if(response.proxy_status == true) {
+            $("#proxy_type").val(response.proxy_type).change();
+            $("#proxy_address").val(response.proxy_address);
+            $("#proxy_port").val(response.proxy_port);
+            $("#proxy_username").val(response.proxy_username);
+            $("#proxy_password").val(response.proxy_password);
+            $("#proxy_row").removeClass('d-none');
+        } else {
+            $("#proxy_type").val('None');
+            $("#proxy_address").val("");
+            $("#proxy_port").val("");
+            $("#proxy_username").val("");
+            $("#proxy_password").val("");
+            $("#proxy_row").addClass('d-none');
+        }
+        if(response.type == 'Video') {
+            $("#bitrate").parent().addClass('d-none');
+        } else {
+            $("#bitrate").parent().removeClass('d-none');
+        }
     });
     $("#downloadbtn").on('click', function(e) {
         if($(".audiocol-checkbox:checked").length < 1) {
@@ -202,39 +255,11 @@ $(document).ready(function() {
                 'proxy_port': $("#proxy_port").val(),
                 'proxy_username': $("#proxy_username").val(),
                 'proxy_password': $("#proxy_password").val()
-            })
+            });
             $("#progress_status").siblings('p').empty();
             socket.emit('ytdl_download', 
                 url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data
             );
-            // socket.emit('ytdl_download', {
-            //     url: url,
-            //     ext: ext,
-            //     output_folder: output_folder,
-            //     type: type,
-            //     output_format: output_format,
-            //     bitrate: bitrate,
-            //     segments: skipfragments,
-            //     proxy_data: proxy_data
-            // });
-            // $.ajax({
-            //     url: Flask.url_for('overview.download'),
-            //     method: 'POST',
-            //     data: {
-            //         url: url,
-            //         ext: ext,
-            //         output_folder: output_folder,
-            //         type: type,
-            //         output_format: output_format,
-            //         bitrate: bitrate,
-            //         segments: skipfragments
-            //     },
-            //     error: function(error) {
-            //         $("#progress_status").removeClass('d-none');
-            //         $("#progress_status").children('p').text(error.responseText.slice(1, error.responseText.length - 1));
-                    
-            //     }
-            // })
         }
     });
     socket.on('overview', function(msg) {
@@ -267,9 +292,8 @@ $(document).ready(function() {
         } else if(msg.status == 'finished_ffmpeg') {
             progress_text.append('Finished converting!<br/>');
             var filepath = msg.filepath;
-            var length = info.yt.duration;
             let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            
+            socket.emit('mergedata', filepath, release_id)
         }
     });
     $(document).on('click', ".removesegment", function() {
@@ -343,4 +367,118 @@ $(document).ready(function() {
             $("#bitrate").val("192");
         }
     });
+    $(document).on('click', "#editmetadata", function() {
+        $("#defaultview").toggleClass('d-none');
+        $("#metadataview").toggleClass('d-none');
+        $("#queryform").toggleClass('d-none');
+        $(this).attr('id', 'savemetadata');
+        $(this).text('Save metadata')
+    });
+    $(document).on('click', '#savemetadata', function() {
+        $("#defaultview").toggleClass('d-none');
+        $("#metadataview").toggleClass('d-none');
+        $("#queryform").toggleClass('d-none');
+        $(this).attr('id', 'editmetadata');
+        $(this).text('Edit metadata')
+    });
+    $(document).on('click', '.addperson', function() {
+        addperson(this);
+    });
+    $(document).on('click', '.removeperson', function() {
+        $(this).parents('.personrow').remove();
+    });
+
+    $("#fetchmbpreleasebtn").on('click', function(){
+        let release_id = $("#mbp_releaseid").val();
+        if(release_id.length > 0) {
+            $(".removeperson").parents('.personrow').remove();
+            socket.emit('fetchmbprelease', release_id)
+        } else {
+            $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
+        }
+    });
+
+    $("#proxy_type").on('change', function() {
+        if($(this).val() == 'None') {
+            $("#proxy_row").toggleClass('d-none');
+        } else {
+            $("#proxy_row").toggleClass('d-none');
+        }
+    });
+
+    $("#fetchmbpalbumbtn").on('click', function(){
+        let album_id = $("#md_albumid").val();
+        if(album_id.length > 0) {
+            socket.emit('fetchmbpalbum', album_id)
+        } else {
+            $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
+        }
+    });
+
+    socket.on('foundmbprelease', (data) => {
+        let mbp = JSON.parse(data);
+        let title = mbp["release"].title;
+        let tags = "";
+        let artists = "";
+
+        let album = mbp["release"]["release-group"]["title"];
+        let album_releasedate = mbp["release"]["release-group"]["date"];
+        let album_id = mbp["release"]["release-group"]["id"];
+        
+        $.each(mbp["release"]["artist-credit"], function(key, value) {
+            if(typeof(value) != 'string') {
+                artists += value.artist.name.trim() + "; ";
+            }
+        });
+        $.each(mbp["release"]["release-group"]["tag-list"], function(key, value){
+            tags += value.name.trim() + "; ";
+        });
+        tags = tags.trim().slice(0, tags.trim().length - 1);
+        artists = artists.trim().slice(0, artists.trim().length -1);
+        $("#md_title").val(title);
+        $("#md_artists").val(artists);
+        $("#md_album").val(album);
+        $("#md_album_releasedate").val(album_releasedate);
+        $("#md_albumid").val(album_id);
+
+        if("artist-relation-list" in mbp["release"] && mbp["release"]["artist-relation-list"].length > 0) {
+            $.each(mbp["release"]["artist-relation-list"], function(key, value) {
+                let name = value.artist.name;
+                let type = value.type;
+                if($(".personrow").length > 1 || ($("#artist_relations_name0").val() != "" || $("#artist_relations_type0").val() != "")) {
+                    var row = addperson($(".addperson"));
+                    var rowid = row.attr('id').slice(row.attr('id').length - 1);
+                } else {
+                    var rowid = "0";
+                }
+                
+                $("#artist_relations_name"+rowid).val(name);
+                $("#artist_relations_type"+rowid).val(type);
+            });
+        }
+    });
+    socket.on('foundmbpalbum', (data) => {
+        let mbp = JSON.parse(data);
+        let artists = "";
+        let tracknr = "";
+        let release_cover = mbp["release_cover"]["images"][0]["thumbnails"]["small"];
+        let release_date = mbp["release_group"]["release-group-list"][0]["first-release-date"];
+        $.each(mbp["release_group"]["release-group-list"][0]["artist-credit"], function(key, value) {
+            if(typeof(value) != 'string') {
+                artists += value.artist.name.trim() + "; ";
+            }
+        });
+        $.each(mbp["release_group"]["release-group-list"][0]["release-list"], function(key, value) {
+            if(value.title == mbp["release_group"]["release-group-list"][0].title) {
+                tracknr = key + 1;
+            }
+        });
+        artists = artists.trim().slice(0, artists.trim().length -1);
+        $("#md_cover").val(release_cover);
+        $("#md_album_releasedate").val(release_date);
+        $("#md_album_artists").val(artists);
+        $("#md_album_tracknr").val(tracknr);
+        console.log(mbp);
+    });
+    $("#metadataview").find('input').attr('autocomplete', 'off');
 })

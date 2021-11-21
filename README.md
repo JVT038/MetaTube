@@ -76,7 +76,7 @@ The following tools were used in this project:
 - [Python](https://python.org/)
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 - [JavaScript](https://www.javascript.com/)
-- [Python Musicbrainz](https://python-musicbrainzngs.readthedocs.io)
+- [Python Musicbrainz](https://github.com/alastair/python-musicbrainzngs)
 - [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
 - [jQuery 3.6.0](https://jquery.com/)
 - [Friconix](https://friconix.com/)
@@ -132,31 +132,36 @@ I am not responsible for any legal consequences the user may or may not face by 
 Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038</a>
 
 ## To-Do
-
+- [X] Add support for the use of proxies to download YouTube videos
+- [ ] Add Docker support
+- [ ] Add it to the PyPi library
+- [ ] Add support for sites other than YouTube
+- [ ] Add support for YouTube playlists
+- [ ] Add custom YouTube-DLP options
+- [ ] Add authentication system with an optional reverse proxy
+- [ ] Add support for TheAudioDB
+- [ ] Add support for YouTube Music 
+- [ ] Add support for Last.fm!
+- [ ] Add translations
+- [ ] Add a nice progress bar
+- [ ] Add a function to allow users to download the song onto their device
+- [ ] Add in-built file explorer, making manual paths optional
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
 - [ ] Make a CLI to download and match music
 - [ ] Store the information of downloaded songs in a SQL database
-- [X] Add support for the use of proxies to download YouTube videos
 - [ ] Make it mobile-friendly
-- [ ] Add Docker support
-- [ ] Add it to the PyPi library
-- [ ] Add support for other sites than YouTube
-- [ ] Add support for YouTube playlists
-- [X] Use Sponsorblock and ffmpeg-python to automatically skip intro and outro
+- [X] Use Sponsorblock and yt-dlp to automatically skip intro and outro
 - [ ] Build a logger
-- [ ] Change metadata of file
+- [ ] Manually edit metadata of file, before and after download
 - [X] Select output type (coding, extension, etc.)
-- [ ] Add custom YouTube-DLP options
-- [ ] Add authentication system with an optional reverse proxy
-- [ ] Add support for TheAudioDB
-- [ ] Add translations
-- [ ] Add in-built file explorer, making manual paths optional
 - [ ] Switch from AJAX to websockets
 - [ ] Hardware acceleration with FFmpeg
 - [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
+- [ ] Dark mode support
+- [ ] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 &#xa0;
 
 <a href="#top">Back to top</a>

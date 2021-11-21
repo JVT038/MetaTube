@@ -3,7 +3,6 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 dotenv_path = join(dirname(__file__), '.flaskenv')
-os.environ.setdefault('WERKZEUG_RUN_MAIN', 'true')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 else:

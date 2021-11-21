@@ -19,7 +19,6 @@
                 <th scope="col">Artist</th>
                 <th scope="col">Album</th>
                 <th scope="col">Date</th>
-                <th scope="col">Downloadprogress</th>
             </tr>
         </thead>
     </table>
@@ -49,19 +48,111 @@
                             <div id="query_log"></div>
                         </form>
                     </div>
-                    <div class="row">
+                    <div class="row" id="defaultview">
                         <div class="col-md-6" id="ytcol"></div>
                         <div class="col-md-6" id="audiocol"></div>
+                    </div>
+                    <div id="metadataview" class="d-none">
+                        <div class="form-row">
+                            <div class="col">
+                                <p>* All input fields with an *, are optional</p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#mbp_releaseid">Musicbrainz release id*</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="mbp_releaseid" />
+                                    <div class="input_group_append">
+                                        <button type="button" id="fetchmbpreleasebtn" class="btn btn-primary"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_albumid">Musicbrainz album id*</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="md_albumid" />
+                                    <div class="input_group_append">
+                                        <button type="button" id="fetchmbpalbumbtn" class="btn btn-primary"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_title">Title of the song</label>
+                                <input type="text" class="form-control" id="md_title" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_artists">Artist(s) of the song. Use a semicolon (;) to separate multiple artists</label>
+                                <input type="text" class="form-control" id="md_artists" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_album">Album of the song*</label>
+                                <input type="text" class="form-control" id="md_album" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_album_artists">Artist(s) of the album. Use a semicolon (;) to separate multiple artists*</label>
+                                <input type="text" class="form-control" id="md_album_artists" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_album_tracknr">Number of track in album*</label>
+                                <input type="text" class="form-control" id="md_album_tracknr" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_album_releasedate">Release date of album*</label>
+                                <input type="text" class="form-control" id="md_album_releasedate" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="#md_cover">Cover image for the song*</label>
+                                <input type="text" class="form-control" id="md_cover" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <p>Enter any people related to this song*</p>
+                            </div>
+                        </div>
+                        <div class="form-row personrow" id="personrow0">
+                            <div class="col">
+                                <label for="#artist_relations_name0">Name</label>
+                                <input type="text" class="form-control artist_relations" id="artist_relations_name0" />
+                            </div>
+                            <div class="col">
+                                <label for="#artist_relations_type0">Type</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control artist_relations" id="artist_relations_type0" />
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-success bg-success addperson"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     {% else %}
                     <div class="row">
                         <h3 class="text-center">Select an FFmpeg location in settings before downloading any songs!</h3>
                     </div>
-                    {% endif %}
+                    {% endif %}                    
                 </div>
             </div>
             <div class="modal-footer d-none">
-                <button type="button" class="btn btn-primary" id="downloadbtn">Download</button>
+                <button type="button" class="btn btn-primary" id="editmetadata">Edit metadata manually</button>
+                <button type="button" class="btn btn-success" id="downloadbtn">Download</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
