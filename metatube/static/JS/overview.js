@@ -1,5 +1,6 @@
 var socket = io();
 $(document).ready(function() {
+    $("#metadataview").find('input').attr('autocomplete', 'off');
     // Option to change the query type - disabled at the moment
     // $(document).on('change', '#query_type', function() {
     //     if($(this).val() == 'url') {
@@ -11,11 +12,6 @@ $(document).ready(function() {
     //     }
     // });
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
-    $("#queryform").on('submit', function(e) {
-        e.preventDefault();
-        $("#searchsongbtn").trigger('click');
-    });
-
     function insertYTcol(response, form) {
         var data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
@@ -152,6 +148,11 @@ $(document).ready(function() {
         return $('.personrow:last');
     }
 
+    $("#queryform").on('submit', function(e) {
+        e.preventDefault();
+        $("#searchsongbtn").trigger('click');
+    });
+    
     $("#searchsongbtn").on('click', function() {
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
         $("#ytcol").empty().append(spinner);
@@ -163,20 +164,7 @@ $(document).ready(function() {
         // YouTube socket
         let query = $("#query").val();
         socket.emit('ytdl_search', query);
-    });
-
-    socket.on('ytdl_response', (video, downloadform) => {
-        let ytcol = insertYTcol(video, downloadform);
-        $("#ytcol").append(ytcol);
-        friconix_update();
-        $(".modal-footer").removeClass('d-none')
-    });
-    socket.on('mbp_response', (mbp) => {
-        let audiocol = insertAudioCol(mbp);
-        $("#audiocol").append(audiocol);
-        $(".modal-footer").removeClass('d-none')
-    });
-    
+    });   
     $(document).on('mouseenter', '.mbp-item', function() {
         $(this).css('filter', 'brightness(50%)');
         $(this).css('background-colour', '#009999');
@@ -193,108 +181,6 @@ $(document).ready(function() {
     $(document).on('change', '#template', function() {
         let id = $(this).val();
         socket.emit('fetchtemplate', id)
-    });
-    socket.on('template', (response) => {
-        data = response;
-        response = JSON.parse(response);
-        $("#extension").val([]);
-        $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
-        $("#type").val(response.type);
-        $("#output_folder").val(response.output_folder);
-        $("#outputname").val(response.output_name);
-        $("#bitrate").val(response.bitrate);
-        if(response.proxy_status == true) {
-            $("#proxy_type").val(response.proxy_type).change();
-            $("#proxy_address").val(response.proxy_address);
-            $("#proxy_port").val(response.proxy_port);
-            $("#proxy_username").val(response.proxy_username);
-            $("#proxy_password").val(response.proxy_password);
-            $("#proxy_row").removeClass('d-none');
-        } else {
-            $("#proxy_type").val('None');
-            $("#proxy_address").val("");
-            $("#proxy_port").val("");
-            $("#proxy_username").val("");
-            $("#proxy_password").val("");
-            $("#proxy_row").addClass('d-none');
-        }
-        if(response.type == 'Video') {
-            $("#bitrate").parent().addClass('d-none');
-        } else {
-            $("#bitrate").parent().removeClass('d-none');
-        }
-    });
-    $("#downloadbtn").on('click', function(e) {
-        if($(".audiocol-checkbox:checked").length < 1) {
-            e.preventDefault();
-            $("#progress_status").removeClass('d-none');
-            $("#progress_status").children('p').text('Select a release on the right side before downloading a video');
-        } else {
-            let url = $("#thumbnail_yt").attr('url');
-            let ext = $("#extension").val();
-            let output_folder = $("#output_folder").val();
-            let type = $("#type").val();
-            let output_format = $("#outputname").val();
-            let bitrate = $("#bitrate").val();
-            var skipfragments = [];
-            if(!$("#segments_check").is(':checked')) {
-                $.each($('.timestamp_input'), function(key, value) {
-                    if(value.id.slice(0, 12) == 'segmentstart') {
-                        let id = value.id.slice(13);
-                        skipfragments[id] = {'start': value.value}
-                    } else if(value.id.slice(0, 10) == 'segmentend') {
-                        let id = value.id.slice(11);
-                        skipfragments[id].end = value.value;
-                    }
-                });
-                skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
-            }
-            let proxy_data = JSON.stringify({
-                'proxy_status': $("#proxy_type").val(),
-                'proxy_address': $("#proxy_address").val(),
-                'proxy_port': $("#proxy_port").val(),
-                'proxy_username': $("#proxy_username").val(),
-                'proxy_password': $("#proxy_password").val()
-            });
-            $("#progress_status").siblings('p').empty();
-            socket.emit('ytdl_download', 
-                url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data
-            );
-        }
-    });
-    socket.on('overview', function(msg) {
-        progress_text = $("#progress_status").children('p');
-        if(msg.status == 'downloading') {
-            if(msg.total_bytes != 'Unknown') {
-                let percentage = (msg.downloaded_bytes / msg.total_bytes) * 100;
-                $("#ytdl_progress").parent().removeClass('d-none');
-                $("#ytdl_progress").attr('aria-valuenow', percentage+"%");
-                $("#ytdl_progress").text(percentage);
-                $("#ytdl_progress").css('width', parseInt(percentage)+'%');
-            } else {
-                if($("#progress_status").hasClass('d-none')) {
-                    progress_text.empty();
-                    $("#progress_status").removeClass('d-none');
-                    progress_text.append('Downloading... <br/>');
-                }
-            }
-        }
-        else if(msg.status == 'Finished download') {
-            if(msg.total_bytes != 'Unknown') {
-                $("#ytdl_progress").attr('aria-valuenow', 100);
-                $("#ytdl_progress").text("100%");
-                $("#ytdl_progress").css('width', '100%');
-            } else {
-                progress_text.append('Finished downloading!<br/>');
-            }
-        } else if(msg.status == 'processing') {
-            progress_text.append('Processing and converting file to desired format... <br/>');
-        } else if(msg.status == 'finished_ffmpeg') {
-            progress_text.append('Finished converting!<br/>');
-            var filepath = msg.filepath;
-            let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            socket.emit('mergedata', filepath, release_id)
-        }
     });
     $(document).on('click', ".removesegment", function() {
         $(this).parents('.form-row').remove();
@@ -387,7 +273,44 @@ $(document).ready(function() {
     $(document).on('click', '.removeperson', function() {
         $(this).parents('.personrow').remove();
     });
-
+    $("#downloadbtn").on('click', function(e) {
+        if($(".audiocol-checkbox:checked").length < 1) {
+            e.preventDefault();
+            $("#progress_status").removeClass('d-none');
+            $("#progress_status").children('p').text('Select a release on the right side before downloading a video');
+        } else {
+            let url = $("#thumbnail_yt").attr('url');
+            let ext = $("#extension").val();
+            let output_folder = $("#output_folder").val();
+            let type = $("#type").val();
+            let output_format = $("#outputname").val();
+            let bitrate = $("#bitrate").val();
+            var skipfragments = [];
+            if(!$("#segments_check").is(':checked')) {
+                $.each($('.timestamp_input'), function(key, value) {
+                    if(value.id.slice(0, 12) == 'segmentstart') {
+                        let id = value.id.slice(13);
+                        skipfragments[id] = {'start': value.value}
+                    } else if(value.id.slice(0, 10) == 'segmentend') {
+                        let id = value.id.slice(11);
+                        skipfragments[id].end = value.value;
+                    }
+                });
+                skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
+            }
+            let proxy_data = JSON.stringify({
+                'proxy_status': $("#proxy_type").val(),
+                'proxy_address': $("#proxy_address").val(),
+                'proxy_port': $("#proxy_port").val(),
+                'proxy_username': $("#proxy_username").val(),
+                'proxy_password': $("#proxy_password").val()
+            });
+            $("#progress_status").siblings('p').empty();
+            socket.emit('ytdl_download', 
+                url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data
+            );
+        }
+    });
     $("#fetchmbpreleasebtn").on('click', function(){
         let release_id = $("#mbp_releaseid").val();
         if(release_id.length > 0) {
@@ -414,13 +337,87 @@ $(document).ready(function() {
             $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
         }
     });
-
+    socket.on('overview', function(msg) {
+        progress_text = $("#progress_status").children('p');
+        if(msg.status == 'downloading') {
+            if(msg.total_bytes != 'Unknown') {
+                let percentage = (msg.downloaded_bytes / msg.total_bytes) * 100;
+                $("#ytdl_progress").parent().removeClass('d-none');
+                $("#ytdl_progress").attr('aria-valuenow', percentage+"%");
+                $("#ytdl_progress").text(percentage);
+                $("#ytdl_progress").css('width', parseInt(percentage)+'%');
+            } else {
+                if($("#progress_status").hasClass('d-none')) {
+                    progress_text.empty();
+                    $("#progress_status").removeClass('d-none');
+                    progress_text.append('Downloading... <br/>');
+                }
+            }
+        }
+        else if(msg.status == 'Finished download') {
+            if(msg.total_bytes != 'Unknown') {
+                $("#ytdl_progress").attr('aria-valuenow', 100);
+                $("#ytdl_progress").text("100%");
+                $("#ytdl_progress").css('width', '100%');
+            } else {
+                progress_text.append('Finished downloading!<br/>');
+            }
+        } else if(msg.status == 'processing') {
+            progress_text.append('Processing and converting file to desired format... <br/>');
+        } else if(msg.status == 'finished_ffmpeg') {
+            progress_text.append('Finished converting!<br/>');
+            var filepath = msg.filepath;
+            let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+            socket.emit('mergedata', filepath, release_id)
+        }
+    });
+    socket.on('ytdl_response', (video, downloadform) => {
+        let ytcol = insertYTcol(video, downloadform);
+        $("#ytcol").append(ytcol);
+        friconix_update();
+        $(".modal-footer").removeClass('d-none')
+    });
+    socket.on('mbp_response', (mbp) => {
+        let audiocol = insertAudioCol(mbp);
+        $("#audiocol").append(audiocol);
+        $(".modal-footer").removeClass('d-none')
+    });
+    socket.on('template', (response) => {
+        data = response;
+        response = JSON.parse(response);
+        $("#extension").val([]);
+        $("#extension").children('[label=\''+response.type+'\']').children('[value=\''+response.extension+'\']').prop('selected', true);
+        $("#type").val(response.type);
+        $("#output_folder").val(response.output_folder);
+        $("#outputname").val(response.output_name);
+        $("#bitrate").val(response.bitrate);
+        if(response.proxy_status == true) {
+            $("#proxy_type").val(response.proxy_type).change();
+            $("#proxy_address").val(response.proxy_address);
+            $("#proxy_port").val(response.proxy_port);
+            $("#proxy_username").val(response.proxy_username);
+            $("#proxy_password").val(response.proxy_password);
+            $("#proxy_row").removeClass('d-none');
+        } else {
+            $("#proxy_type").val('None');
+            $("#proxy_address").val("");
+            $("#proxy_port").val("");
+            $("#proxy_username").val("");
+            $("#proxy_password").val("");
+            $("#proxy_row").addClass('d-none');
+        }
+        if(response.type == 'Video') {
+            $("#bitrate").parent().addClass('d-none');
+        } else {
+            $("#bitrate").parent().removeClass('d-none');
+        }
+    });
     socket.on('foundmbprelease', (data) => {
         let mbp = JSON.parse(data);
         let title = mbp["release"].title;
         let tags = "";
         let artists = "";
-
+    
         let album = mbp["release"]["release-group"]["title"];
         let album_releasedate = mbp["release"]["release-group"]["date"];
         let album_id = mbp["release"]["release-group"]["id"];
@@ -440,7 +437,7 @@ $(document).ready(function() {
         $("#md_album").val(album);
         $("#md_album_releasedate").val(album_releasedate);
         $("#md_albumid").val(album_id);
-
+    
         if("artist-relation-list" in mbp["release"] && mbp["release"]["artist-relation-list"].length > 0) {
             $.each(mbp["release"]["artist-relation-list"], function(key, value) {
                 let name = value.artist.name;
@@ -480,5 +477,4 @@ $(document).ready(function() {
         $("#md_album_tracknr").val(tracknr);
         console.log(mbp);
     });
-    $("#metadataview").find('input').attr('autocomplete', 'off');
 })
