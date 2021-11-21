@@ -154,7 +154,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip intro and outro
 - [ ] Build a logger
-- [ ] Manually edit metadata of file, before and after download
+- [X] Manually edit metadata of file, before and after download
 - [X] Select output type (coding, extension, etc.)
 - [ ] Switch from AJAX to websockets
 - [ ] Hardware acceleration with FFmpeg

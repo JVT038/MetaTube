@@ -147,24 +147,6 @@ $(document).ready(function() {
         friconix_update();
         return $('.personrow:last');
     }
-
-    $("#queryform").on('submit', function(e) {
-        e.preventDefault();
-        $("#searchsongbtn").trigger('click');
-    });
-    
-    $("#searchsongbtn").on('click', function() {
-        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
-        $("#ytcol").empty().append(spinner);
-        $("#audiocol").empty().append(spinner);
-        // Reset the modal
-        $(".modal-footer").addClass('d-none');
-        $(".removeperson").parents('.personrow').remove();
-        $("#metadataview").find('input').val('');
-        // YouTube socket
-        let query = $("#query").val();
-        socket.emit('ytdl_search', query);
-    });   
     $(document).on('mouseenter', '.mbp-item', function() {
         $(this).css('filter', 'brightness(50%)');
         $(this).css('background-colour', '#009999');
@@ -273,6 +255,23 @@ $(document).ready(function() {
     $(document).on('click', '.removeperson', function() {
         $(this).parents('.personrow').remove();
     });
+    $("#queryform").on('submit', function(e) {
+        e.preventDefault();
+        $("#searchsongbtn").trigger('click');
+    });
+    
+    $("#searchsongbtn").on('click', function() {
+        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
+        $("#ytcol").empty().append(spinner);
+        $("#audiocol").empty().append(spinner);
+        // Reset the modal
+        $(".modal-footer").addClass('d-none');
+        $(".removeperson").parents('.personrow').remove();
+        $("#metadataview").find('input').val('');
+        // YouTube socket
+        let query = $("#query").val();
+        socket.emit('ytdl_search', query);
+    });   
     $("#downloadbtn").on('click', function(e) {
         if($(".audiocol-checkbox:checked").length < 1) {
             e.preventDefault();
