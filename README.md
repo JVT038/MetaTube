@@ -36,10 +36,11 @@
   - Set up templates and options for the YouTube download
   - Download YouTube videos based on a selected template
   - Exclude fragments (such as intros, outros, etc.) from the download
+  - Metadata from either the user or Musicbrainz can be merged with MP3 files
 
   To-Do before the first release:
 
-  - Automatically merge metadata from Musicbrainz with the downloaded file
+  - Support more extensions to merge metadata with.
   - Store the information about downloaded releases in the database
   - Some decent mobile support
   - Docker support
@@ -164,9 +165,10 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Make a CLI to download and match music
 - [ ] Store the information of downloaded songs in a SQL database
 - [ ] Make it mobile-friendly
-- [X] Use Sponsorblock and yt-dlp to automatically skip intro and outro
+- [X] Use Sponsorblock and yt-dlp to automatically skip fragments
 - [ ] Build a logger
-- [X] Manually edit metadata of file, before and after download
+- [X] Manually edit metadata of file, before the download
+- [ ] Manually edit metadata of file, after the download
 - [X] Select output type (coding, extension, etc.)
 - [ ] Switch from AJAX to websockets
 - [ ] Hardware acceleration with FFmpeg
