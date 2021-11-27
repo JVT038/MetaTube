@@ -1,4 +1,4 @@
-import yt_dlp, flask
+import yt_dlp
 from threading import Thread
 from metatube import socketio, sockets
 from metatube.database import Templates
@@ -43,24 +43,36 @@ class YouTube:
     
     def download_hook(d):
         if d['status'] == 'finished':
-            sockets.overview({'status': 'Finished download'})
+            sockets.downloadprogress({'status': 'Finished download'})
         elif d['status'] == 'downloading':
             if "total_bytes_estimate" in d:
-                sockets.overview({
+                sockets.downloadprogress({
                     'status': 'downloading', 
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes_estimate']
                 })
+            elif 'total_bytes' in d:
+                try:
+                    sockets.downloadprogress({
+                        'status': 'downloading', 
+                        'downloaded_bytes': d['downloaded_bytes'], 
+                        'total_bytes': d['total_bytes']
+                    })
+                except Exception:
+                    sockets.downloadprogress({
+                        'status': 'downloading',
+                        'total_bytes': 'Unknown'
+                    })
             else:
-                sockets.overview({
+                sockets.downloadprogress({
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
     def postprocessor_hook(d):
         if d['status'] == 'processing' or d['status'] == 'started':
-            sockets.overview({'status': 'processing'})
+            sockets.downloadprogress({'status': 'processing'})
         elif d['status'] == 'finished':
-            sockets.overview({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath']})
+            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath']})
 
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()

@@ -1,8 +1,7 @@
-from flask import Request
+# from flask import Request
 import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
-from metatube import socketio as sockets
-musicbrainzngs.set_useragent("metatube", "0.1", Request.base_url)
+musicbrainzngs.set_useragent("metatube", "0.1")
 def search(args):
     query = args['query']
     artist = args['artist']
@@ -12,9 +11,9 @@ def search(args):
     return response
 
 def search_id_release(id):
-    fields = ['artists', 'release-groups', 'recordings', 'isrcs', 'tags', 'media', 'artist-rels', 'labels', 'label-rels', 'work-level-rels', 'work-rels']
+    fields = ['artists', 'release-groups', 'recordings', 'isrcs', 'tags', 'media', 'artist-rels', 'labels', 'label-rels', 'work-level-rels', 'work-rels', 'genres']
     try:
-        response = musicbrainzngs.get_release_by_id(id, includes=fields)
+        response = musicbrainzngs.get_release_by_id(id, includes=fields, release_type='album')
         return response
     except Exception as e:
         return str(e)

@@ -115,6 +115,17 @@ $ cd ../
 # Install dependencies
 $ pip install -r requirements.txt
 
+# We need the latest (unstable) version of python-musicbrainzngs, because the latest stable version doesn't support genres.
+# To do this, first clone their repo:
+$ git clone https://github.com/alastair/python-musicbrainzngs/tree/master
+# Navigate to python-musicbrainzngs
+$ cd python-musicbrainzngs
+# Build the pip package
+$ py setup.py
+# Now move the newly created directory python-musicbrainzngs/build/lib/musicbrainzngs to the directory where all the packages are stored.
+# In a virtual environment, you'll have to move this directory to Lib/site-packages
+# See this thread for more info: https://stackoverflow.com/questions/29980798/where-does-pip-install-its-packages
+
 # Before running the server, make sure to enter your environment variables in example.flaskenv and rename example.flaskenv to .flaskenv, so remove 'example'.
 
 # Run the project
@@ -125,7 +136,7 @@ $ py metatube.py
 
 ## :memo: License ##
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.<br/>
+This project is under license from GNUv3. For more details, see the [LICENSE](LICENSE) file.<br/>
 I am not responsible for any legal consequences the user may or may not face by using this project.
 
 
@@ -146,6 +157,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add a nice progress bar
 - [ ] Add a function to allow users to download the song onto their device
 - [ ] Add in-built file explorer, making manual paths optional
+- [ ] Add some nice animations
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them

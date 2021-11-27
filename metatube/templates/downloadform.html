@@ -81,14 +81,14 @@
                     {% if i == 0 %}
                         <label for="#segmentstart_{{ i }}">Starting second of segment to skip</label>
                     {% endif %}
-                    <input type="text" class="form-control timestamp_input" id="segmentstart_{{ i }}" value="{{ segments[i]['segment'][0]|int }}" />
+                    <input type="text" class="form-control timestamp_input num_input" id="segmentstart_{{ i }}" value="{{ segments[i]['segment'][0]|int }}" />
                 </div>
                 <div class="col">
                     {% if i == 0 %}
                         <label for="#segmentend_{{ i }}">Ending second of segment to skip</label>
                     {% endif %}
                     <div class="input-group">
-                        <input type="text" class="form-control timestamp_input" id="segmentend_{{ i }}" value="{{ segments[i]['segment'][1]|int }}" />
+                        <input type="text" class="form-control timestamp_input num_input" id="segmentend_{{ i }}" value="{{ segments[i]['segment'][1]|int }}" />
                         <div class="input-group-append">
                             {% if i > 0 %}
                                 <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="fi-xwsuxl-minus-solid" style="color: white;"></i></button>
@@ -109,12 +109,12 @@
         <div class="form-row timestamp_row" id="row_0">
             <div class="col">
                 <label for="#segmentstart_0">Starting second of segment to skip</label>
-                <input type="text" class="form-control timestamp_input" id="segmentstart_0"/>
+                <input type="text" class="form-control timestamp_input num_input" id="segmentstart_0"/>
             </div>
             <div class="col">
                 <label for="#segmentend_0">Ending second of segment to skip</label>
                 <div class="input-group">
-                    <input type="text" class="form-control timestamp_input" id="segmentend_0"/>
+                    <input type="text" class="form-control timestamp_input num_input" id="segmentend_0"/>
                     <div class="input-group-append">
                         <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
                     </div>

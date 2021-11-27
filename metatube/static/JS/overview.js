@@ -13,7 +13,7 @@ $(document).ready(function() {
     // });
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
-        var data = response;
+        data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
         let album = 'album' in data ? data.album : "Unknown";
@@ -21,7 +21,8 @@ $(document).ready(function() {
         let id = data.id;
         let thumbnail = "";
         $.each(data.thumbnails, function(key_thumbnail, value_thumbnail) {
-            if(value_thumbnail.height == "480") {
+            if(value_thumbnail.preference == -5) {
+                
                 thumbnail += value_thumbnail.url;
             }
         });
@@ -214,9 +215,6 @@ $(document).ready(function() {
         $(".timestamp_row:last").after(row);
         friconix_update();
     });
-    $(document).on('focus', '.timestamp_input', function() {
-        $(this).ForceNumericOnly();
-    });
     $(document).on('click', '#segments_check', function() {
         
         $(".timestamp_row").toggleClass('d-none');
@@ -236,22 +234,22 @@ $(document).ready(function() {
         }
     });
     $(document).on('click', "#editmetadata", function() {
-        $("#defaultview").toggleClass('d-none');
-        $("#metadataview").toggleClass('d-none');
         $("#queryform").toggleClass('d-none');
+        $("#metadataview").toggleClass('d-none');
+        $("#defaultview").toggleClass('d-none');
         $(this).attr('id', 'savemetadata');
         $(this).text('Save metadata')
     });
     $(document).on('click', '#savemetadata', function() {
+        $("#defaultview").addClass('animate__slideInLeft');
+        $("#metadataview").addClass('animate__slideOutight');
         $("#defaultview").toggleClass('d-none');
         $("#metadataview").toggleClass('d-none');
         $("#queryform").toggleClass('d-none');
         $(this).attr('id', 'editmetadata');
         $(this).text('Edit metadata')
     });
-    $(document).on('click', '.addperson', function() {
-        addperson(this);
-    });
+    $(document).on('click', '.addperson', addperson)
     $(document).on('click', '.removeperson', function() {
         $(this).parents('.personrow').remove();
     });
@@ -295,8 +293,8 @@ $(document).ready(function() {
                         skipfragments[id].end = value.value;
                     }
                 });
-                skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
             }
+            skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
             let proxy_data = JSON.stringify({
                 'proxy_status': $("#proxy_type").val(),
                 'proxy_address': $("#proxy_address").val(),
@@ -336,18 +334,18 @@ $(document).ready(function() {
             $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
         }
     });
-    socket.on('overview', function(msg) {
+    socket.on('downloadprogress', function(msg) {
         progress_text = $("#progress_status").children('p');
         if(msg.status == 'downloading') {
+            progress_text.empty();
             if(msg.total_bytes != 'Unknown') {
-                let percentage = (msg.downloaded_bytes / msg.total_bytes) * 100;
+                let percentage = Math.round((msg.downloaded_bytes / msg.total_bytes) * 100);
                 $("#ytdl_progress").parent().removeClass('d-none');
                 $("#ytdl_progress").attr('aria-valuenow', percentage+"%");
-                $("#ytdl_progress").text(percentage);
+                $("#ytdl_progress").text(percentage + "%");
                 $("#ytdl_progress").css('width', parseInt(percentage)+'%');
             } else {
                 if($("#progress_status").hasClass('d-none')) {
-                    progress_text.empty();
                     $("#progress_status").removeClass('d-none');
                     progress_text.append('Downloading... <br/>');
                 }
@@ -365,9 +363,38 @@ $(document).ready(function() {
             progress_text.append('Processing and converting file to desired format... <br/>');
         } else if(msg.status == 'finished_ffmpeg') {
             progress_text.append('Finished converting!<br/>');
-            var filepath = msg.filepath;
+            let filepath = msg.filepath;
             let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            socket.emit('mergedata', filepath, release_id)
+            let people = {};
+
+            $.each($('.artist_relations'), function() {
+                if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
+                    return;
+                } else {
+                    // Get ID by removing all letters from the ID, so the number remains
+                    let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
+                    if($(this).attr('id').replace(/[0-9]/g, '') == 'artist_relations_name') {
+                        people[id].name = $(this).val();
+                    } else {
+                        people[id].type = $(this).val();
+                    }
+                }
+            });
+
+            let metadata = {
+                'mbp_releaseid': $("#mbp_releaseid").val(),
+                'mbp_albumid': $("#md_albumid").val(),
+                'title': $("#md_title").val(),
+                'artists': $("#md_artists").val(),
+                'album': $("#md_album").val(),
+                'album_artists': $("#md_album_artists").val(),
+                'album_tracknr': $("#md_album_tracknr").val(),
+                'album_releasedate': $("#md_album_releasedate").val(),
+                'cover': $("#md_cover").val(),
+                'people': JSON.stringify(people)
+            };
+            console.log(metadata);
+            socket.emit('mergedata', filepath, release_id, metadata);
         }
     });
     socket.on('ytdl_response', (video, downloadform) => {
@@ -474,6 +501,5 @@ $(document).ready(function() {
         $("#md_album_releasedate").val(release_date);
         $("#md_album_artists").val(artists);
         $("#md_album_tracknr").val(tracknr);
-        console.log(mbp);
     });
 })
