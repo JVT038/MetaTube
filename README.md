@@ -36,12 +36,13 @@
   - Set up templates and options for the YouTube download
   - Download YouTube videos based on a selected template
   - Exclude fragments (such as intros, outros, etc.) from the download
-  - Metadata from either the user or Musicbrainz can be merged with MP3 files
+  - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV & OGG files
 
   To-Do before the first release:
 
   - Support more extensions to merge metadata with.
   - Store the information about downloaded releases in the database
+  - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
   - Some decent mobile support
   - Docker support
 </p>
@@ -125,6 +126,7 @@ $ cd python-musicbrainzngs
 $ py setup.py
 # Now move the newly created directory python-musicbrainzngs/build/lib/musicbrainzngs to the directory where all the packages are stored.
 # In a virtual environment, you'll have to move this directory to Lib/site-packages
+# Outside of a virtual environment, it's in `%appdata%/Python/Python<version>/site-packages, where <version> can differ per user, and version.
 # See this thread for more info: https://stackoverflow.com/questions/29980798/where-does-pip-install-its-packages
 
 # Before running the server, make sure to enter your environment variables in example.flaskenv and rename example.flaskenv to .flaskenv, so remove 'example'.

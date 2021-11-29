@@ -14,8 +14,7 @@ import json
 
 @bp.route('/')
 def index():
-    ffmpeg_path = True if len(Config.query.get(
-        1).ffmpeg_directory) > 0 else False
+    ffmpeg_path = True if len(Config.query.get(1).ffmpeg_directory) > 0 else False
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path)
 
 @socketio.on('ytdl_search')
@@ -35,10 +34,8 @@ def search(query):
         mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
 
         segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
-        # segments = 'error'
         mbp = mbp_results.get()[0]
-        downloadform = render_template(
-            'downloadform.html', templates=templates, segments=segments)
+        downloadform = render_template('downloadform.html', templates=templates, segments=segments)
         socketio.emit('mbp_response', mbp["release-list"])
         socketio.emit('ytdl_response', (video, downloadform))
 
@@ -160,5 +157,14 @@ def mergedata(filepath, release_id, metadata):
     cover_mbp = musicbrainz.get_cover(release_id)
     extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
     data = MetaData.getdata(filepath, metadata_user, metadata_mbp, cover_mbp)
-    if extension == 'MP3':
-        MetaData.MP3(data)
+    data["extension"] = extension
+    if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
+        MetaData.mergeaudiodata(data)
+    elif extension in ['MP4', 'FLV', 'WEBM', 'MKV', 'AVI']:
+        MetaData.mergevideodata(data)
+    elif extension in ['WAV']:
+        MetaData.mergeid3data(data)
+    # if extension == 'MP3':
+    #     MetaData.MP3(data)
+    # elif extension == 'FLAC':
+    #     MetaData.FLAC(data)

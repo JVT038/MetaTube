@@ -68,6 +68,7 @@ class YouTube:
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
+                
     def postprocessor_hook(d):
         if d['status'] == 'processing' or d['status'] == 'started':
             sockets.downloadprogress({'status': 'processing'})

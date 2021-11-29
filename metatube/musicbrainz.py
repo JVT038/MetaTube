@@ -6,14 +6,13 @@ def search(args):
     query = args['query']
     artist = args['artist']
     max = args['max']
-    response = musicbrainzngs.search_releases(query, artist=artist, limit=max)
-    print('Done with searching MBP \n')
+    response = musicbrainzngs.search_releases(query, artistname=artist, limit=max)
     return response
 
 def search_id_release(id):
     fields = ['artists', 'release-groups', 'recordings', 'isrcs', 'tags', 'media', 'artist-rels', 'labels', 'label-rels', 'work-level-rels', 'work-rels', 'genres']
     try:
-        response = musicbrainzngs.get_release_by_id(id, includes=fields, release_type='album')
+        response = musicbrainzngs.get_release_by_id(id, includes=fields)
         return response
     except Exception as e:
         return str(e)

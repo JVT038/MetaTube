@@ -15,5 +15,4 @@ def segments(url):
     response = []
     for segment in segments:
         response.append(segment.data)
-    print('Done with segments \n')
     return response

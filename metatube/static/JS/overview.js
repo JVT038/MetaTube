@@ -234,18 +234,12 @@ $(document).ready(function() {
         }
     });
     $(document).on('click', "#editmetadata", function() {
-        $("#queryform").toggleClass('d-none');
-        $("#metadataview").toggleClass('d-none');
-        $("#defaultview").toggleClass('d-none');
+        $("#defaultview, #metadataview, #queryform, #downloadbtn").toggleClass('d-none');
         $(this).attr('id', 'savemetadata');
         $(this).text('Save metadata')
     });
     $(document).on('click', '#savemetadata', function() {
-        $("#defaultview").addClass('animate__slideInLeft');
-        $("#metadataview").addClass('animate__slideOutight');
-        $("#defaultview").toggleClass('d-none');
-        $("#metadataview").toggleClass('d-none');
-        $("#queryform").toggleClass('d-none');
+        $("#defaultview, #metadataview, #queryform, #downloadbtn").toggleClass('d-none');
         $(this).attr('id', 'editmetadata');
         $(this).text('Edit metadata')
     });
@@ -319,11 +313,7 @@ $(document).ready(function() {
     });
 
     $("#proxy_type").on('change', function() {
-        if($(this).val() == 'None') {
-            $("#proxy_row").toggleClass('d-none');
-        } else {
-            $("#proxy_row").toggleClass('d-none');
-        }
+        $("#proxy_row").toggleClass('d-none');
     });
 
     $("#fetchmbpalbumbtn").on('click', function(){
@@ -393,18 +383,19 @@ $(document).ready(function() {
                 'cover': $("#md_cover").val(),
                 'people': JSON.stringify(people)
             };
-            console.log(metadata);
             socket.emit('mergedata', filepath, release_id, metadata);
         }
     });
     socket.on('ytdl_response', (video, downloadform) => {
         let ytcol = insertYTcol(video, downloadform);
+        ytdata = video;
         $("#ytcol").append(ytcol);
         friconix_update();
         $(".modal-footer").removeClass('d-none')
     });
     socket.on('mbp_response', (mbp) => {
         let audiocol = insertAudioCol(mbp);
+        audiodata = mbp;
         $("#audiocol").append(audiocol);
         $(".modal-footer").removeClass('d-none')
     });

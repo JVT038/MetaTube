@@ -1,12 +1,17 @@
-import mutagen
 from mimetypes import guess_type
-from mutagen.id3 import ID3, TIT2, APIC
-from mutagen.mp3 import EasyMP3
+from mutagen.id3 import (
+    # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
+    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1, TYER
+)
+from mutagen.flac import FLAC, Picture
+from mutagen.aac import AAC
+from mutagen.wave import WAVE
+from mutagen.oggopus import OggOpus
 from mutagen.easyid3 import EasyID3
-from PIL import Image
+from mutagen.oggvorbis import OggVorbis
+from mutagen.mp4 import MP4
 import requests
-from io import BytesIO
-
+import base64
 
 class MetaData:    
     def getdata(filename, metadata_user, metadata_mbp, cover_mbp):
@@ -27,8 +32,9 @@ class MetaData:
         tracknr = ""
         isrc = ""
         length = ""
+        genres = ""
         cover_path = cover_mbp["images"][0]["image"] if len(metadata_user['cover']) < 1 else metadata_user['cover']
-        mime_type = guess_type(cover_path)
+        cover_mime_type = guess_type(cover_path)[0]
         response = requests.get(cover_path)
         image = response.content
         
@@ -38,6 +44,11 @@ class MetaData:
                 mbp_trackid += track["id"]
                 isrc += track["recording"]["isrc-list"][0]
                 length += track["recording"]["length"]
+        genres = ""
+        if "tag_list" in metadata_mbp["release"]["release-group"]:
+            for tag in metadata_mbp["release"]["release-group"]["tag-list"]:
+                genres += tag + "/ "
+        genres = genres.strip()[0:len(genres.strip()) - 1]# if len(metadata_user["genres"]) < 1 else metadata_user["genres"].replace(';', '/')
         
         if metadata_mbp["release"]["release-group"]["type"] == 'Album':
             release_date = metadata_mbp["release"]["release-group"]["first-release-date"] if len(metadata_user['album_releasedate']) < 1 else metadata_user["album_releasedate"]
@@ -59,14 +70,16 @@ class MetaData:
             'isrc': isrc,
             'length': length,
             'cover_path': cover_path,
-            'mime_type': mime_type,
+            'cover_mime_type': cover_mime_type,
             'image': image,
-            'title': title
+            'title': title,
+            'genres': genres
         }
         return data
-    def MP3(data):
+        
+    def mergeaudiodata(data):
         '''
-        Valid fields:
+        Valid fields for EasyID3:
             "album",
             "bpm",
             "compilation",
@@ -122,8 +135,19 @@ class MetaData:
             "musicbrainz_workid",
             "acoustid_fingerprint",
             "acoustid_id"
-        '''        
-        audio = EasyID3(data["filename"])
+        '''
+        if data["extension"] == 'MP3':
+            audio = EasyID3(data["filename"])
+        elif data["extension"] == 'FLAC':
+            audio = FLAC(data["filename"])
+        elif data["extension"] == 'AAC':
+            audio = AAC(data["filename"])
+        elif data["extension"] == 'OPUS':
+            audio = OggOpus(data["filename"])
+        elif data["extension"] == 'OGG':
+            audio = OggVorbis(data["filename"])
+            
+        
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
         audio["barcode"] = data["barcode"]
@@ -133,30 +157,63 @@ class MetaData:
         audio["musicbrainz_releasetrackid"] = data["mbp_releaseid"]
         audio["musicbrainz_releasegroupid"] = data["mbp_albumid"]
         audio["musicbrainz_albumid"] = data["mbp_albumid"]
-        audio["musicbrainz_albumtype"] = 'album'
         audio["date"] = data["release_date"]
+        audio["genre"] = data["genres"]
         
         audio.save()
-        print('Metadata added')
+        print('Metadata added!')
         
-        cover = ID3(data["filename"])
-        cover["APIC"] = APIC(
-            encoding=3,
-            mime=data["mime_type"],
-            type=3,
-            desc=u'Cover',
-            data=data["image"]
-        )
-        cover.save()
-        print('cover added')
+        if data["extension"] == 'MP3':
+            cover = ID3(data["filename"])
+            cover["APIC"] = APIC(
+                encoding=3,
+                mime=data["cover_mime_type"],
+                type=3,
+                desc=u'Cover',
+                data=data["image"]
+            )
+            cover.save()
+        else:
+            cover = Picture()
+            cover.data = data["image"]
+            cover.type = 3
+            cover.mime = data["cover_mime_type"]
+            cover.desc = 'Front cover'
+            if data["extension"] == 'FLAC':
+                audio.add_picture(cover)
+            else:
+                cover_data = cover.write()
+                audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
+                audio.save()
+            
+        print('Cover added!')
     
-    def OggVorbisFlac(filename):
-        pass
-    
-    def AAC(filename):
-        pass
-    
-    def FLAC(filename):
+    def mergeid3data(data):
+        if data["extension"] == 'AAC':
+            audio = AAC(data["filename"])
+        elif data["extension"] == 'WAV':
+            audio = WAVE(data["filename"])
+        else:
+            print('nothing')
+        try:
+            audio.add_tags()
+        except:
+            pass
+        audio.tags.add(TIT2(encoding=3, text=data["title"]))
+        audio.tags.add(TALB(encoding=3, text=data["album"]))
+        audio.tags.add(TCON(encoding=3, text=data["genres"]))
+        audio.tags.add(TLAN(encoding=3, text=data["language"]))
+        audio.tags.add(TRCK(encoding=3, text=data["tracknr"]))
+        audio.tags.add(TSRC(encoding=3, text=data["isrc"]))
+        audio.tags.add(TPE1(encoding=3, text=data["artists"]))
+        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_releasetrackid', text=data["mbp_releaseid"]))
+        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_releasegroupid', text=data['mbp_albumid']))
+        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_albumid', text=data["mbp_albumid"]))
+        audio.tags.add(APIC(encoding=3, mime=data["cover_mime_type"], type=3, desc=u'Cover', data=data["image"]))
+        
+        audio.save()
+        print('Metadata & cover added')
+    def mergevideodata(data):
         pass
     
     def M4A(filename):
