@@ -18,38 +18,45 @@
     <div class="tab-content">
         <div class="tab-pane active" id="downloadtab">
             <h4>Download settings</h4>
-            <form method="post" id="downloadsform">
-                {{ download_form.csrf_token }}
-                <div class="form-row" id="downloadsettingslog">
-                    <div class="col">
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                {% for message in messages %}
-                                    <p class="text-center">{{ message }}</p>
-                                {% endfor %}
-                            {% endif %}
-                        {% endwith %}
-                        {% for field, error in download_form.errors.items() %}
-                            {% for e in error %}
-                                <p class="text-center">{{ field.label }} {{ e }}</p>
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
+            <div class="form-row" id="downloadsettingslog">
+                <div class="col">
+                    <p class="text-center"></p>
                 </div>
-                <div class="form-row">
-                    <div class="col">
-                        <label for="#ffmpeg_path">An absolute path* or relative path from the root directory** to the folder containing ffmpeg. Required to download videos.</label>
-                        {{ download_form.ffmpeg_path(class='form-control', id='ffmpeg_path') }}
-                    </div>
-                    <div class="col">
-                        <label for="#max_amount">Max amount of items to load when searching metadata. Default value is 5. Max amount is 100</label>
-                        {{ download_form.amount(class='form-control', id='max_amount') }}                        
-                    </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label for="#ffmpeg_path">An absolute path* or relative path from the root directory** to the folder containing ffmpeg. Required to download videos.</label>
+                    <input type="text" id="ffmpeg_path" value="{{ ffmpeg }}" class="form-control">
                 </div>
-                <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
-                    ** The root directory is the same directory where <code>metatube.py</code> is located</p>
-                {{ download_form.submit(class='btn btn-success', id='submitdownloadform') }}
-            </form>
+                <div class="col">
+                    <label for="#max_amount">Max amount of items to load when searching metadata. Default value is 5. Max amount is 100</label>
+                    <input type="text" class="form-control" value="{{ amount }}" id="max_amount" />
+                </div>
+            </div>
+            <div class="form-row d-none">
+                <p>These fields will currently do nothing, as hardware acceleration isn't implemented yet on the backend side</p>
+                <div class="col">
+                    <label for="#hardware_acceleration">Whether to use hardware acceleration with FFmpeg; if yes, select the desired method.</label>
+                    <select>
+                        <option selected>None</option>
+                        <option>AMD AMF</option>
+                        <option>Intel Quick Sync</option>
+                        <option>MediaCodec Android</option>
+                        <option>OpenMAX OMX</option>
+                        <option>NVIDIA NVENC</option>
+                        <option>Video Acceleration API (VAAPI)</option>
+                        <option>Video Toolbox</option>
+                    </select>
+                </div>
+                <div class="col d-none">
+                    <label for="#hardware_acceleration">The render node to use for hardware acceleration</label>
+                    <input type="text" class="form-control" id="hw_render_node" />
+                </div>
+            </div>
+            <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
+                ** The root directory is the same directory where <code>metatube.py</code> is located
+            </p>
+            <button type="button" class="btn btn-success" id="submitdownloadform">Update settings</button>
         </div>
         <div class="tab-pane" id="templatestab">
             <h4>Template settings</h4>
@@ -172,6 +179,7 @@
                                 </optgroup>
                                 <optgroup label="Video">
                                     <option value="mp4">MP4</option>
+                                    <option value="m4a">M4A</option>
                                     <option value="flv">Flash Video (FLV)</option>
                                     <option value="webm">WebM</option>
                                     <option value="ogg">Ogg</option>

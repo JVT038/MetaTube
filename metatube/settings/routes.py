@@ -1,8 +1,8 @@
 from metatube.settings import bp
-from metatube.settings.forms import *
 from metatube.database import *
 from metatube.ffmpeg import ffmpeg
 from metatube import Config as env
+from metatube import socketio, sockets
 from metatube.youtube import YouTube as youtube
 from flask import render_template, flash, request, jsonify
 from mock import Mock
@@ -10,34 +10,12 @@ import os, json
 
 @bp.route('/settings', methods=['GET', 'POST'])
 def settings():
-    download_form = DownloadSettingsForm()
     db_config = Config().query.get(1)
     ffmpeg_path = db_config.ffmpeg_directory
     amount = db_config.amount
     templates = Templates.query.all()
-    if download_form.is_submitted() is False:
-        download_form.ffmpeg_path.data = ffmpeg_path
-        download_form.amount.data = amount
-    if download_form.validate_on_submit():
-        if db_config.ffmpeg_directory != download_form.ffmpeg_path.data:
-            db_config.ffmpeg(download_form.ffmpeg_path.data)
-            ffmpeg_instance = ffmpeg()
-            if ffmpeg_instance.test():
-                flash('FFmpeg path has succefully been updated and found!')
-                return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
-            else:
-                flash('FFmpeg path has succefully been updated, but the application hasn\'t been found')
-                return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
-        elif db_config.amount != download_form.amount.data:
-            db_config.set_amount(download_form.amount.data)
-            flash('Max amount has succesfully been updated')
-            return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
-    else:
-        for field, error in download_form.errors.items():
-            for e in error:
-                print(e)
 
-    return render_template('settings.html', download_form=download_form, current_page='settings', templates=templates)
+    return render_template('settings.html', ffmpeg=ffmpeg_path, amount=amount, current_page='settings', templates=templates)
 
 @bp.route('/ajax/template', methods=['POST'])
 def template():
@@ -123,3 +101,18 @@ def deltemplate():
     else:
         response = jsonify('Something went wrong. Please check the logs for more info.')
         return response, 400
+
+@socketio.on('updatesettings')
+def updatesettings(ffmpeg_path, amount):
+    db_config = Config.query.get(1)
+    db_config.ffmpeg(ffmpeg_path)
+    ffmpeg_instance = ffmpeg()
+    if db_config.ffmpeg_directory != ffmpeg_path:
+        if ffmpeg_instance.test():
+            sockets.downloadsettings('FFmpeg path has succefully been updated and found!')
+        else:
+            sockets.downloadsettings('FFmpeg path has succefully been updated, but the application hasn\'t been found')
+            
+    if db_config.amount != amount:
+        db_config.set_amount(amount)
+        sockets.downloadsettings('Max amount has succesfully been updated')

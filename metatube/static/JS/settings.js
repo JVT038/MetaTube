@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var csrf_token = "{{ csrf_token() }}";
+    socket = io()
 
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
@@ -162,5 +162,15 @@ $(document).ready(function() {
     $(".expandtemplatebtn").on('click', function() {
         let id = $(this).parents('tr').attr('id');
         $(this).parents('tr').siblings('#proxy_'+id).toggleClass('d-none');
+    });
+
+    $("#submitdownloadform").on('click', function() {
+        let amount = $("#max_amount").val()
+        let ffmpeg_path = $("#ffmpeg_path").val();
+        socket.emit('updatesettings', ffmpeg_path, amount);
+    });
+
+    socket.on('downloadsettings', function(msg) {
+        $("#downloadsettingslog").find("p").text(msg);
     });
 });

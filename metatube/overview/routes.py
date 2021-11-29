@@ -87,56 +87,8 @@ def fetchtemplate(id):
 
 @socketio.on('ytdl_download')
 def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}):
-    proxy = json.loads(proxy_data)
-    filepath = os.path.join(output_folder, output_format)
     ffmpeg = Config.get_ffmpeg()
-    segments = json.loads(skipfragments)
-    postprocessors = []
-    format = 'bestaudio/best' if type == 'Audio' else 'bv+ba/b'
-    # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
-    if type == 'Audio':
-        postprocessors.append({
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": ext,
-            "preferredquality": bitrate
-        })
-    elif type == 'Video':
-        postprocessors.append({
-            "key": "FFmpegVideoConvertor",
-            "preferedformat": ext
-        })
-    # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
-    if len(segments) > 0:
-        ranges = []
-        for segment in segments:
-            if len(segment["start"]) < 1 or len(segment["end"]) < 1:
-                return jsonify('Fill all segment fields!'), 400
-            else:
-                ranges.append((int(segment["start"]), int(segment["end"])))
-        postprocessors.append({
-            'key': 'ModifyChapters',
-            'remove_ranges': ranges
-        })
-
-    ytdl_options = {
-        'format': format,
-        'postprocessors': postprocessors,
-        'ffmpeg_location': ffmpeg,
-        'progress_hooks': [yt.download_hook],
-        'outtmpl': filepath,
-        'noplaylist': True
-        # 'updatetime': True,
-    }
-    # Add proxy if proxy is enabled
-    if proxy['proxy_status'] != 'None':
-        proxy_string = proxy["proxy_status"].lower(
-        ) + "://" + proxy["proxy_address"] + ":" + proxy["proxy_port"]
-        if len(proxy["proxy_username"]) > 0:
-            proxy_string += proxy_string + "@" + proxy["proxy_username"]
-        if len(proxy["proxy_username"]) > 0:
-            proxy_string += proxy_string + ":" + proxy["proxy_password"]
-        ytdl_options["proxy"] = proxy_string
-    
+    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg)
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
 
@@ -160,11 +112,7 @@ def mergedata(filepath, release_id, metadata):
     data["extension"] = extension
     if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
         MetaData.mergeaudiodata(data)
-    elif extension in ['MP4', 'FLV', 'WEBM', 'MKV', 'AVI']:
+    elif extension in ['MP4', 'M4A']:
         MetaData.mergevideodata(data)
     elif extension in ['WAV']:
         MetaData.mergeid3data(data)
-    # if extension == 'MP3':
-    #     MetaData.MP3(data)
-    # elif extension == 'FLAC':
-    #     MetaData.FLAC(data)

@@ -1,7 +1,7 @@
 from mimetypes import guess_type
 from mutagen.id3 import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
-    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1, TYER
+    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1
 )
 from mutagen.flac import FLAC, Picture
 from mutagen.aac import AAC
@@ -9,7 +9,9 @@ from mutagen.wave import WAVE
 from mutagen.oggopus import OggOpus
 from mutagen.easyid3 import EasyID3
 from mutagen.oggvorbis import OggVorbis
-from mutagen.mp4 import MP4
+from mutagen.mp4 import MP4, MP4Cover
+from hachoir.parser import createParser
+from hachoir.metadata import extractMetadata
 import requests
 import base64
 
@@ -26,7 +28,7 @@ class MetaData:
         language = metadata_mbp["release"]["text-representation"]["language"]
         mbp_releaseid = metadata_mbp["release"]["id"] if len(metadata_user["mbp_releaseid"]) < 1 else metadata_user["mbp_releaseid"]
         mbp_albumid = metadata_mbp["release"]["release-group"]["id"] if len(metadata_user["mbp_albumid"]) < 1 else metadata_user["mbp_albumid"]
-        barcode = metadata_mbp["release"]["barcode"]
+        barcode = metadata_mbp["release"]["barcode"] if "barcode" in metadata_mbp["release"] else ""
         release_date = ""
         mbp_trackid = ""
         tracknr = ""
@@ -37,17 +39,21 @@ class MetaData:
         cover_mime_type = guess_type(cover_path)[0]
         response = requests.get(cover_path)
         image = response.content
+        total_tracks = len(metadata_mbp["release"]["medium-list"][0]["track-list"])
         
         for track in metadata_mbp["release"]["medium-list"][0]["track-list"]:
             if metadata_mbp["release"]["title"] in track["recording"]["title"]:
                 tracknr += track["number"]
                 mbp_trackid += track["id"]
-                isrc += track["recording"]["isrc-list"][0]
-                length += track["recording"]["length"]
+                isrc += track["recording"]["isrc-list"][0] if "isrc-list" in track["recording"] else ''
+                length += track["recording"]["length"] if "length" in track["recording"] else ''
         genres = ""
-        if "tag_list" in metadata_mbp["release"]["release-group"]:
+        if "tag-list" in metadata_mbp["release"]["release-group"]:
             for tag in metadata_mbp["release"]["release-group"]["tag-list"]:
-                genres += tag + "/ "
+                genres += tag['name'] + "; "
+        elif 'tag-list' in metadata_mbp["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]:
+            for tag in metadata_mbp["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]["tag-list"]:
+                genres += tag['name'] + "; "
         genres = genres.strip()[0:len(genres.strip()) - 1]# if len(metadata_user["genres"]) < 1 else metadata_user["genres"].replace(';', '/')
         
         if metadata_mbp["release"]["release-group"]["type"] == 'Album':
@@ -67,6 +73,7 @@ class MetaData:
             'barcode': barcode,
             'release_date': release_date,
             'tracknr': tracknr,
+            'total_tracks': total_tracks,
             'isrc': isrc,
             'length': length,
             'cover_path': cover_path,
@@ -189,12 +196,8 @@ class MetaData:
         print('Cover added!')
     
     def mergeid3data(data):
-        if data["extension"] == 'AAC':
-            audio = AAC(data["filename"])
-        elif data["extension"] == 'WAV':
+        if data["extension"] == 'WAV':
             audio = WAVE(data["filename"])
-        else:
-            print('nothing')
         try:
             audio.add_tags()
         except:
@@ -214,15 +217,26 @@ class MetaData:
         audio.save()
         print('Metadata & cover added')
     def mergevideodata(data):
-        pass
+        print(data["genres"])
+        if data["extension"] in ['M4A', 'MP4']:
+            video = MP4(data["filename"])
+        else:
+            video = createParser(data["filename"])
+            data = extractMetadata(video)
+            
+        # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
+        video["\xa9nam"] = data["title"]
+        video["\xa9alb"] = data["album"]
+        video["\xa9ART"] = data["artists"]
+        video["\xa9gen"] = data["genres"]
+        video["trkn"] = [(int(data["tracknr"]), int(data["total_tracks"]))]
+        video["covr"] = [MP4Cover(data["image"], MP4Cover.FORMAT_JPEG)]
+        
+        video.save()
+        print('Added metadata & cover')
+        
     
     def M4A(filename):
-        pass
-    
-    def OPUS(filename):
-        pass
-    
-    def WAV(filename):
         pass
     
     def MP4(filename):
@@ -239,6 +253,3 @@ class MetaData:
     
     def AVI(filename):
         pass
-    
-    def addmetadata(filename, extension, release_id):
-        getattr(MetaData, extension.upper())()

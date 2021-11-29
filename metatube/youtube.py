@@ -1,4 +1,4 @@
-import yt_dlp
+import yt_dlp, json, os
 from threading import Thread
 from metatube import socketio, sockets
 from metatube.database import Templates
@@ -77,6 +77,57 @@ class YouTube:
 
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        
+    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg):
+        proxy = json.loads(proxy_data)
+        filepath = os.path.join(output_folder, output_format)
+        segments = json.loads(skipfragments)
+        postprocessors = []
+        format = 'ba' if type == 'Audio' else 'b/ba+bv'
+        # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
+        if type == 'Audio':
+            postprocessors.append({
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": ext,
+                "preferredquality": bitrate
+            })
+        elif type == 'Video':
+            postprocessors.append({
+                "key": "FFmpegVideoConvertor",
+                "preferedformat": ext
+            })
+        # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
+        if len(segments) > 0:
+            ranges = []
+            for segment in segments:
+                if len(segment["start"]) < 1 or len(segment["end"]) < 1:
+                    return "Enter all fields!"
+                else:
+                    ranges.append((int(segment["start"]), int(segment["end"])))
+            postprocessors.append({
+                'key': 'ModifyChapters',
+                'remove_ranges': ranges
+            })
+
+        ytdl_options = {
+            'format': format,
+            'postprocessors': postprocessors,
+            'ffmpeg_location': ffmpeg,
+            'progress_hooks': [YouTube.download_hook],
+            'outtmpl': filepath,
+            'noplaylist': True
+        }
+        # Add proxy if proxy is enabled
+        if proxy['proxy_status'] != 'None':
+            proxy_string = proxy["proxy_status"].lower(
+            ) + "://" + proxy["proxy_address"] + ":" + proxy["proxy_port"]
+            if len(proxy["proxy_username"]) > 0:
+                proxy_string += proxy_string + "@" + proxy["proxy_username"]
+            if len(proxy["proxy_username"]) > 0:
+                proxy_string += proxy_string + ":" + proxy["proxy_password"]
+            ytdl_options["proxy"] = proxy_string
+            
+        return ytdl_options
         
 def fetch_video(args):
     from metatube import create_app

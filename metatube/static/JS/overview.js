@@ -225,28 +225,38 @@ $(document).ready(function() {
         $(".timestamp_caption").parents('.form-row').toggleClass('d-none');
         $(this).siblings('input').click();
     })
+    
     $(document).on('change', '#extension', function() {
+        $("#bitrate").parent().toggleClass('d-none');
         if($("#extension option:selected").parent().attr('label') == 'Video') {
-            $("#bitrate").parent().addClass('d-none');
+            $("#type").val('Video');
         } else if($("#extension option:selected").parent().attr('label') == 'Audio') {
-            $("#bitrate").parent().removeClass('d-none');
-            $("#bitrate").val("192");
+            $("#type").val('Audio');
         }
     });
+    
     $(document).on('click', "#editmetadata", function() {
         $("#defaultview, #metadataview, #queryform, #downloadbtn").toggleClass('d-none');
         $(this).attr('id', 'savemetadata');
         $(this).text('Save metadata')
     });
+    
     $(document).on('click', '#savemetadata', function() {
         $("#defaultview, #metadataview, #queryform, #downloadbtn").toggleClass('d-none');
         $(this).attr('id', 'editmetadata');
         $(this).text('Edit metadata')
     });
-    $(document).on('click', '.addperson', addperson)
+
+    $(document).on('click', '.addperson', addperson);
+
     $(document).on('click', '.removeperson', function() {
         $(this).parents('.personrow').remove();
     });
+
+    $(document).on('change', '#proxy_type', function() {
+        $("#proxy_row").toggleClass('d-none');
+    });
+
     $("#queryform").on('submit', function(e) {
         e.preventDefault();
         $("#searchsongbtn").trigger('click');
@@ -310,10 +320,6 @@ $(document).ready(function() {
         } else {
             $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
         }
-    });
-
-    $("#proxy_type").on('change', function() {
-        $("#proxy_row").toggleClass('d-none');
     });
 
     $("#fetchmbpalbumbtn").on('click', function(){
