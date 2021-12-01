@@ -27,6 +27,10 @@ function(extraKeys = [])
         });
     });
 };
+$.fn.hasAttr = function(name) {  
+    return this.attr(name) !== undefined;
+ };
+ 
 $(document).on('focus', '.num_input', function() {
     $(this).ForceNumericOnly()
 });

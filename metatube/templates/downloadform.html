@@ -34,14 +34,14 @@
                     <option value="aac">AAC</option>
                     <option value="flac">FLAC</option>
                     <option value="mp3" selected>MP3</option>
-                    <option value="m4a">M4A</option>
+                    <option value="m4a_audio">M4A</option>
                     <option value="opus">Opus</option>
                     <option value="vorbis">Vorbis</option>
                     <option value="wav">WAV</option>
                 </optgroup>
                 <optgroup label="Video">
                     <option value="mp4">MP4</option>
-                    <option value="m4a">M4A</option>
+                    <option value="m4a_video">M4A</option>
                     <option value="flv">Flash Video (FLV)</option>
                     <option value="webm">WebM</option>
                     <option value="ogg">Ogg</option>
@@ -61,12 +61,33 @@
             <input type="text" class="form-control" id="bitrate" value="{{ templates[0].bitrate }}" />
         </div>
     </div>
+    <div class="form-row d-none" id="videorow">
+        <div class="col">
+            <label for="width">Video width (in pixels)</label>
+            <input type="text" value="1920" class="form-control num_input" id="width" />
+        </div>
+        <div class="col">
+            <label for="height">Video height (in pixels)</label>
+            <input type="text" value="1080" class="form-control num_input" id="height" />
+        </div>
+        <div class="col d-none d-lg-block">
+            <label for="#resolution">Resolution****</label>
+            <select class="custom-select" id="resolution">
+                <option value="7680;4320">8K UHD</option>
+                <option value="3840;2160">4K UHD</option>
+                <option value="1920;1080" selected>FHD</option>
+                <option value="1280;720">HD</option>
+                <option value="720;480">SD</option>
+            </select>
+        </div>
+    </div>
     <div class="form-row">
         <div class="col">
             <p class="float-left">
                 * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
                 ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#output-template">here</a>) <br />
-                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>)
+                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>) <br />
+                **** (More info on resolutions <a target="_blank" href="https://levvvel.com/169-resolutions/">here</a>)
             </p>
         </div>
     </div>

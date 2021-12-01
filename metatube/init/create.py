@@ -17,6 +17,7 @@ class Default():
         config = Config(
             ffmpeg_directory = "",
             amount = 5,
+            hardware_transcoding = "None",
             auth = False,
             auth_username = "",
             auth_password = ""
@@ -37,6 +38,7 @@ class Default():
             output_folder = 'downloads',
             output_name = f"%(title)s.%(ext)s",
             bitrate = 192,
+            resolution = 'None',
             proxy_status = False,
             proxy_username = "",
             proxy_password = "",

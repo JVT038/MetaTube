@@ -1,13 +1,7 @@
 $(document).ready(function() {
-    socket = io()
+    socket = io();
 
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-            }
-        }
-    });
+    $("#hardware_acceleration").children('option[value='+$("#current_hw").val()+']').prop('selected', true);
     $("#proxy_status").prop('selectedIndex', 0);
     $(".defaultbtn").css('cursor', 'not-allowed');
     $(".defaultbtn").addClass('disabled');
@@ -19,68 +13,19 @@ $(document).ready(function() {
             $("#removetemplatemodaltitle").text('Remove modal \''+ $(this).parent().siblings(':first').text() + '\'');
             $("#removetemplatemodal").children().children().children('.modal-footer').children('.btn-danger').attr('id', $(this).parent().parent().attr('id'));
         }
-    })
+    });
     $("#deltemplatebtnmodal").on('click', function(){
         let id = $(this).attr('id');
-        $.ajax({
-            url: Flask.url_for('settings.deltemplate'),
-            method: 'POST',
-            data: {
-                id: id
-            },
-            success: function(response) {
-                $("#templateslog").text(response);
-                $("tr#"+id).remove();
-                $("#removetemplatemodal").modal('hide');
-            }, error: function(error) {
-                $("#templateslog").text(error.responseText);
-                $("#removetemplatemodal").modal('hide');
-            }
-        });
+        socket.emit('deletetemplate', id);
+        $("tr#"+id).remove();
+        $("#removetemplatemodal").modal('hide');
     });
     $(".changetemplatebtn").on('click', function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
         } else {
-            let name = $(this).parent().siblings('.td_name').text();
-            let output_name = $(this).parent().siblings('.td_output_name').text();
-            let bitrate = $(this).parent().siblings('.td_bitrate').text();
-            let output_folder = $(this).parent().siblings('.td_output_folder').text();
-            let ext = $(this).parent().siblings('.td_extension').text();
-            let type = $(this).parent().siblings('.td_type').text();
             let id = $(this).parent().parent().attr('id');
-            $("#templatesmodal").children().children().children('.modal-header').children('h5').text('Edit template \''+name+'\'');
-            $("#templatesmodal").attr('template_id', id);
-            $("#template_name").val(name);
-            $("#template_folder").val(output_folder);
-            $("#template_outputname").val(output_name);
-            if(type == 'Audio') {
-                $("#template_bitrate").val(bitrate);
-            } else {
-                $("#template_bitrate").val("None");
-                $("#template_bitrate").parent().addClass('d-none');
-            }
-            $("#template_type").children('[label=\''+type+'\']').children('[value=\''+ext+'\']').attr('selected', true);
-            $("#addtemplatebtn").attr('id', 'changetemplatebtn');
-            $("#changetemplatebtn").text('Change template');
-            $("#changetemplatebtn").attr('goal', 'edit');
-            if($(this).parents('tr').siblings("tr#proxy_"+id).find('.td_proxy_status').text() == 'True') {
-                let paragraph = $(this).parents('tr').siblings('tr#proxy_'+id).find('p');
-                let proxy_type = paragraph.children('.td_proxy_type').text();
-                let proxy_address = paragraph.children('.td_proxy_address').text();
-                let proxy_port = paragraph.children('.td_proxy_port').text();
-                let proxy_username = paragraph.children('.td_proxy_username').text() != 'None' ? paragraph.children('.td_proxy_username').text() : '';
-                let proxy_password = paragraph.children('.td_proxy_password').text() != 'None' ? paragraph.children('.td_proxy_password').text() : '';
-                $("#advancedtoggle").text('Hide advanced');
-                $("#advancedrow").removeClass('d-none');
-                $("#proxy_status").val('true').trigger('click')
-                $("#advancedrow").children('.d-none').removeClass('d-none');
-                $("#proxy_type option[value='"+proxy_type+"']").attr('selected', 'selected');
-                $("#proxy_address").val(proxy_address);
-                $("#proxy_port").val(proxy_port)
-                $("#proxy_username").val(proxy_username);
-                $("#proxy_password").val(proxy_password);
-            }
+            socket.emit('fetchtemplate', id);
             $("#templatesmodal").modal("show");
         }
     });
@@ -90,7 +35,9 @@ $(document).ready(function() {
         $("#template_name").val("");
         $("#template_folder").val("");
         $("#template_type").val([]);
-        $("#template_bitrate").removeClass('d-none');
+        $("#template_bitrate").val('192');
+        $("#template_height").val('1080');
+        $("#template_width").val('1920');
         $("#changetemplatebtn").attr('id', 'addtemplatebtn');
         $("#addtemplatebtn").text('Add template');
         $("#addtemplatebtn").attr('goal', 'add');
@@ -98,7 +45,7 @@ $(document).ready(function() {
         $("#advancedtoggle").text('Show advanced');
         $("#advancedrow").addClass('d-none');
         $("#proxy_status").val('false').trigger('click');
-        $("#advancedrow").children().not(':first').addClass('d-none');
+        $("#proxyrow").children().not(':first').addClass('d-none');
         $("#proxy_type").val([]);
         $("#proxy_address").val("");
         $("#proxy_port").val("");
@@ -107,13 +54,16 @@ $(document).ready(function() {
     });
     $(document).on('click', ".templatebtn", function() {
         let goal = $(this).attr('goal');
-        let id = $("#templatesmodal").attr('template_id');
+        let id = $("#templatesmodal").hasAttr('template_id') ? $("#templatesmodal").attr('template_id') : "-1";
         let name = $("#template_name").val();
         let output_folder = $("#template_folder").val();
         let output_name = $("#template_outputname").val();
         let output_ext = $("#template_type").val();
         let bitrate = $("#template_bitrate").val();
-        let proxy = JSON.stringify({
+        let width = $("#template_width").val();
+        let height = $("#template_height").val();
+        // let resolution = $("#template_resolution").parent().hasClass('d-none') ? "None" : $("#template_resolution").val();
+        let proxy_json = JSON.stringify({
             'status': $("#proxy_status").val(),
             'type': $("#proxy_type").val(),
             'address': $("#proxy_address").val(),
@@ -121,31 +71,14 @@ $(document).ready(function() {
             'password': $("#proxy_password").val(),
             'port': $("#proxy_port").val()
         });
-        $.ajax({
-            url: Flask.url_for('settings.template'),
-            method: 'POST',
-            data: {
-                name: name,
-                output_folder: output_folder,
-                output_ext: output_ext,
-                output_name: output_name,
-                bitrate: bitrate,
-                id: id,
-                proxy: proxy,
-                goal: goal
-            },
-            success: function(response) {
-                $("#templatemodallog").text(response);
-            }, error: function(error) {
-                $("#templatemodallog").text("ERROR: " + error.responseText.slice(1, error.responseText.length -1));
-            }
-        });
+
+        socket.emit('updatetemplate', name, output_folder, output_ext, output_name, id, goal, bitrate, width, height, proxy_json);
     });
     $("#template_type").on('change', function() {
         if($(':selected', $(this)).parent().attr('label') == 'Video') {
-            $("#template_bitrate").parent().addClass('d-none');
+            $("#bitratecol").siblings().removeClass('d-none');
         } else {
-            $("#template_bitrate").parent().removeClass('d-none');
+            $("#bitratecol").siblings().addClass('d-none');
         }
     });
     $("#advancedtoggle").on('click', function() {
@@ -157,20 +90,85 @@ $(document).ready(function() {
         $("#advancedrow").toggleClass('d-none');
     });
     $("#proxy_status").on('change', function() {
-        $("#advancedrow").children('div.col:not(:first)').toggleClass('d-none');
+        $("#proxyrow").children('div.col:not(:first)').toggleClass('d-none');
     });
     $(".expandtemplatebtn").on('click', function() {
         let id = $(this).parents('tr').attr('id');
         $(this).parents('tr').siblings('#proxy_'+id).toggleClass('d-none');
+        
     });
 
     $("#submitdownloadform").on('click', function() {
-        let amount = $("#max_amount").val()
+        let amount = $("#max_amount").val();
         let ffmpeg_path = $("#ffmpeg_path").val();
-        socket.emit('updatesettings', ffmpeg_path, amount);
+        let hardware_transcoding = $("#hardware_acceleration").val();
+        socket.emit('updatesettings', ffmpeg_path, amount, hardware_transcoding);
+    });
+
+    $("#template_resolution").on('change', function() {
+        let width = $(this).val().split(';')[0];
+        let height = $(this).val().split(';')[1];
+        $("#template_width").val(width);
+        $("#template_height").val(height);
     });
 
     socket.on('downloadsettings', function(msg) {
         $("#downloadsettingslog").find("p").text(msg);
+    });
+
+    socket.on('templatesettings', function(msg) {
+        $("#templateslog").text(msg);
+    });
+    
+    socket.on('changetemplate', function(msg) {
+        $("p#templatemodallog").text(msg);
+    });
+
+    socket.on('template', function(response) {
+        let data = JSON.parse(response);
+        let name = data["name"];
+        let output_name = data["output_name"];
+        let bitrate = data["bitrate"];
+        let resolution = data["resolution"];
+        let output_folder = data["output_folder"];
+        let ext = data["extension"];
+        let type = data["type"];
+        let id = data["id"];
+        $("#templatesmodal").children().children().children('.modal-header').children('h5').text('Edit template \''+name+'\'');
+        $("#templatesmodal").attr('template_id', id);
+        $("#template_name").val(name);
+        $("#template_folder").val(output_folder);
+        $("#template_outputname").val(output_name);
+        if(type == 'Audio') {
+            $("#template_bitrate").val(bitrate);
+            $("#template_resolution").parent().addClass('d-none');
+            $("#template_bitrate").parent().removeClass('d-none');
+        } else {
+            $("#template_bitrate").val("None");
+            $("#template_bitrate").parent().addClass('d-none');
+            $("#template_resolution").parent().removeClass('d-none');
+            $("#template_resolution").children("option[value='"+resolution+"']").prop('selected', true);
+        }
+        $("#template_type").children('[label=\''+type+'\']').children('[value=\''+ext+'\']').attr('selected', true);
+        $("#addtemplatebtn").attr('id', 'changetemplatebtn');
+        $("#changetemplatebtn").text('Change template');
+        $("#changetemplatebtn").attr('goal', 'edit');
+        if(data["proxy_status"] == 'True') {
+            let proxy_type = data["proxy_type"];
+            let proxy_address = data["proxy-address"];
+            let proxy_port = data["proxy_port"];
+            let proxy_username = data["proxy_username"];
+            let proxy_password = data["proxy_password"];
+            $("#advancedtoggle").text('Hide advanced');
+            $("#advancedrow").removeClass('d-none');
+            $("#proxy_status").val('true').trigger('click')
+            $("#advancedrow").children('.d-none').removeClass('d-none');
+            $("#proxy_type option[value='"+proxy_type+"']").attr('selected', 'selected');
+            $("#proxy_address").val(proxy_address);
+            $("#proxy_port").val(proxy_port)
+            $("#proxy_username").val(proxy_username);
+            $("#proxy_password").val(proxy_password);
+        }
+        $("#templatesmodal").modal("show");
     });
 });

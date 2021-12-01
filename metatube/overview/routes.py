@@ -67,12 +67,14 @@ def fetchtemplate(id):
     if id is not None and len(id) > 0:
         template = Templates.fetchtemplate(id)
         data = {
+            "id": template.id,
             "name": template.name,
             "type": template.type,
             "extension": template.extension,
             "output_folder": template.output_folder,
             "output_name": template.output_name,
             "bitrate": template.bitrate,
+            "resolution": template.resolution,
             'proxy_status': template.proxy_status,
             'proxy_type': template.proxy_type,
             'proxy_address': template.proxy_address,
@@ -86,9 +88,10 @@ def fetchtemplate(id):
         socketio.emit('template', {'response': 'Invalid ID'})
 
 @socketio.on('ytdl_download')
-def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}):
+def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}, width=1920, height=1080):
     ffmpeg = Config.get_ffmpeg()
-    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg)
+    hw_transcoding = Config.get_hwt()
+    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, width, height)
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
 

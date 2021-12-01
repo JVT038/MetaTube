@@ -36,10 +36,11 @@
   - Set up templates and options for the YouTube download
   - Download YouTube videos based on a selected template
   - Exclude fragments (such as intros, outros, etc.) from the download
-  - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV & OGG files
+  - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files
+  - Hardware transcoding using NVENC
+  - Manually set height and width, if a video type has been selected
 
   To-Do before the first release:
-
   - Support more extensions to merge metadata with.
   - Store the information about downloaded releases in the database
   - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
@@ -161,6 +162,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add a function to allow users to download the song onto their device
 - [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
+- [ ] Add ability to manually set video width & height, if a video type has been selected
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
@@ -173,7 +175,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Manually edit metadata of file, after the download
 - [X] Select output type (coding, extension, etc.)
 - [ ] Switch from AJAX to websockets
-- [ ] Hardware acceleration with FFmpeg
+- [ ] Hardware transcoding with Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
 - [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
 - [ ] Dark mode support

@@ -78,12 +78,16 @@ class YouTube:
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
         
-    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg):
+    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, width, height):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)
         postprocessors = []
+        postprocessor_args = {}
         format = 'ba' if type == 'Audio' else 'b/ba+bv'
+        
+        if "m4a" in ext:
+            ext = "m4a"
         # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
         if type == 'Audio':
             postprocessors.append({
@@ -96,6 +100,10 @@ class YouTube:
                 "key": "FFmpegVideoConvertor",
                 "preferedformat": ext
             })
+            if len(height) < 1 or len(width) < 1:
+                width = 1920
+                height = 1080
+            postprocessor_args["VideoConvertor"] = ['-vf', "scale=" + str(width) + ":" + str(height), '-b:a', str(bitrate) + "k"]
         # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
         if len(segments) > 0:
             ranges = []
@@ -108,14 +116,21 @@ class YouTube:
                 'key': 'ModifyChapters',
                 'remove_ranges': ranges
             })
-
+        # If hardware transcoding isn't None, add a hardware transcoding thingy to the FFmpeg arguments
+        if hw_transcoding != 'None':
+            if hw_transcoding == 'nvenc':
+                postprocessor_args["default"] = ['-c:v', 'h264_nvenc']
+            # elif hw_transcoding == 'qsv':
+            #     postprocessor_args = {'default': ['-c:v', 'h264_qsv']}
         ytdl_options = {
             'format': format,
             'postprocessors': postprocessors,
+            'postprocessor_args': postprocessor_args,
             'ffmpeg_location': ffmpeg,
             'progress_hooks': [YouTube.download_hook],
             'outtmpl': filepath,
-            'noplaylist': True
+            'noplaylist': True,
+            'verbose': True
         }
         # Add proxy if proxy is enabled
         if proxy['proxy_status'] != 'None':

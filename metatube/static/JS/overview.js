@@ -227,12 +227,18 @@ $(document).ready(function() {
     })
     
     $(document).on('change', '#extension', function() {
-        $("#bitrate").parent().toggleClass('d-none');
         if($("#extension option:selected").parent().attr('label') == 'Video') {
             $("#type").val('Video');
+            $("#videorow").removeClass('d-none');
         } else if($("#extension option:selected").parent().attr('label') == 'Audio') {
+            $("#videorow").addClass('d-none');
             $("#type").val('Audio');
         }
+    });
+
+    $(document).on('change', '#resolution', function() {
+        $("#width").val($(this).val().split(';')[0]);
+        $("#height").val($(this).val().split(';')[1]);
     });
     
     $(document).on('click', "#editmetadata", function() {
@@ -286,6 +292,8 @@ $(document).ready(function() {
             let type = $("#type").val();
             let output_format = $("#outputname").val();
             let bitrate = $("#bitrate").val();
+            let width = $("#width").val();
+            let height = $("#height").val();
             var skipfragments = [];
             if(!$("#segments_check").is(':checked')) {
                 $.each($('.timestamp_input'), function(key, value) {
@@ -308,7 +316,7 @@ $(document).ready(function() {
             });
             $("#progress_status").siblings('p').empty();
             socket.emit('ytdl_download', 
-                url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data
+                url, ext, output_folder, type, output_format, bitrate,skipfragments, proxy_data, width, height
             );
         }
     });
@@ -431,8 +439,14 @@ $(document).ready(function() {
         }
         if(response.type == 'Video') {
             $("#bitrate").parent().addClass('d-none');
+            $("#videorow").removeClass('d-none');
+            $("#resolution").children('option:selected').prop('selected', false);
+            $("#resolution").children("option[value='"+response.resolution+"']").prop('selected', true);
+            $("#width").val(response.resolution.split(';')[0]);
+            $("#height").val(response.resolution.split(';')[1]);
         } else {
             $("#bitrate").parent().removeClass('d-none');
+            $("#videorow").parent().addClass('d-none');
         }
     });
     socket.on('foundmbprelease', (data) => {

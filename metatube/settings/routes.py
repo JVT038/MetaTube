@@ -3,8 +3,7 @@ from metatube.database import *
 from metatube.ffmpeg import ffmpeg
 from metatube import Config as env
 from metatube import socketio, sockets
-from metatube.youtube import YouTube as youtube
-from flask import render_template, flash, request, jsonify
+from flask import render_template, request, jsonify
 from mock import Mock
 import os, json
 
@@ -13,97 +12,92 @@ def settings():
     db_config = Config().query.get(1)
     ffmpeg_path = db_config.ffmpeg_directory
     amount = db_config.amount
+    hw_transcoding = db_config.hardware_transcoding
     templates = Templates.query.all()
 
-    return render_template('settings.html', ffmpeg=ffmpeg_path, amount=amount, current_page='settings', templates=templates)
+    return render_template('settings.html', ffmpeg=ffmpeg_path, amount=amount, current_page='settings', templates=templates, hw_transcoding=hw_transcoding)
 
-@bp.route('/ajax/template', methods=['POST'])
-def template():
-    data = Mock()
-    goal = request.form.get('goal')
-    data.name = request.form.get('name')
-    data.output_folder = request.form.get('output_folder')
-    data.ext = request.form.get('output_ext')
-    data.output_name = request.form.get('output_name')
-    data.bitrate = request.form.get('bitrate')
-    id = request.form.get('id', "0")
-    
-    default_proxy = {
-        'status': False,
-        'type': '',
-        'address': '',
-        'port': '',
-        'username': '',
-        'password': ''
+@socketio.on('updatetemplate')
+def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 192, width = 1920, height = 1080, proxy_json = {'status': False,'type': '','address': '','port': '','username': '','password': ''}):
+    data = {
+        'name': name,
+        'output_folder': output_folder, 
+        'ext': output_ext,
+        'output_name': output_name,
+        'bitrate': bitrate,
+        'width': width,
+        'height': height,
+        'resolution': str(width) + ";" + str(height)
     }
-    proxy = json.loads(request.form.get('proxy', default_proxy))
-    data.proxy = {
-        'status': True if proxy['status'] == 'true' else False,
+    proxy = json.loads(proxy_json)
+    data["proxy"] = {
+        'status': True if str(proxy['status']) == 'true' else False,
         'type': proxy['type'],
         'address': proxy['address'],
         'port': proxy['port'],
         'username': proxy['username'],
         'password': proxy['password']
     }
-    
-    if len(data.name) < 1 or len(data.output_folder) < 1 or len(data.ext) < 1 or len(goal) < 1 or len(id) < 1 or data.name == 'Default' or len(data.bitrate) < 1 or len(data.output_name) < 1:
-        response = jsonify('Enter all fields!')
-        return response, 400
-    elif data.proxy["status"] is True and (len(data.proxy["address"]) < 1 or len(data.proxy["type"]) < 1 or len(data.proxy["port"]) < 1):
-        response = jsonify('Enter all proxy fields!')
-        return response, 400
+    # print(name)
+    # print(output_folder)
+    # print(output_ext)
+    # print(output_name)
+    # print(id)
+    # print(goal)
+    # print(bitrate)
+    # print
+    if len(data["name"]) < 1 or len(data["output_folder"]) < 1 or len(data["ext"]) < 1 or len(goal) < 1 or len(id) < 1 or data["name"] == 'Default' or len(data["output_name"]) < 1:
+        sockets.changetemplate('Enter all fields!')
+    elif data["proxy"]["status"] is True and (len(data["proxy"]["address"]) < 1 or len(data["proxy"]["type"]) < 1 or len(data["proxy"]["port"]) < 1):
+        sockets.changetemplate('Enter all proxy fields!')
     else:
         # check if output folder is absolute or relative
-        if data.output_folder.startswith('/') or (data.output_folder[0].isalpha() and data.output_folder[1].startswith(':\\')):
+        if data["output_folder"].startswith('/') or (data["output_folder"][0].isalpha() and data["output_folder"][1].startswith(':\\')):
             # check if output folder actually exists and if it's a directory
-            if os.path.exists(data.output_folder) is False or os.path.isdir(data.output_folder) is False:
-                response = jsonify('Output directory doesn\'t exist')
-                return response, 400
+            if os.path.exists(data["output_folder"]) is False or os.path.isdir(data["output_folder"]) is False:
+                sockets.changetemplate('Output directory doesn\'t exist')
         else:
-            if os.path.exists(os.path.join(env.BASE_DIR, data.output_folder)) is False or os.path.isdir(os.path.join(env.BASE_DIR, data.output_folder)) is False:
-                response = jsonify('Output directory doesn\'t exist')
-                return response, 400
+            if os.path.exists(os.path.join(env.BASE_DIR, data["output_folder"])) is False or os.path.isdir(os.path.join(env.BASE_DIR, data["output_folder"])) is False:
+                sockets.changetemplate('Output directory doesn\'t exist')
         
-        if data.ext not in ["mp4", "flv", "webm", "ogg", "mkv", "avi", "aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]:
-            response = jsonify('Incorrect extension')
-            return response, 400
+        if data["ext"] not in ["mp4", "flv", "webm", "ogg", "mkv", "avi", "aac", "flac", "mp3", "m4a_audio", "m4a_video", "opus", "vorbis", "wav"]:
+            sockets.changetemplate('Incorrect extension')
         
-        if data.ext in ["aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]:
-            data.type = 'Audio'
+        if data["ext"] in ["aac", "flac", "mp3", "m4a_audio", "opus", "vorbis", "wav"]:
+            data["type"] = 'Audio'
         
-        elif data.ext in ["mp4", "flv", "webm", "ogg", "mkv", "avi"]:
-            data.type = 'Video'
+        elif data["ext"] in ["mp4", "m4a_video", "flv", "webm", "ogg", "mkv", "avi"]:
+            data["type"] = 'Video'
+        
+        if data["type"] == 'Audio' and len(data["bitrate"] < 1):
+            sockets.changetemplate('Enter a bitrate when selecting an audio output type!')
+            
+        if data["type"] == 'Video' and (len(data["width"]) < 1 or len(data["height"]) < 1):
+            sockets.changetemplate('Enter a resolution when selecting an audio output type!')
         
         if goal == 'add':
-            if Templates.check_existing(data.name):
-                response = jsonify('Name is already in use')
-                return response, 400
+            if Templates.check_existing(data["name"]):
+                sockets.changetemplate('Name is already in use')
             Templates.add(data)
-            response = jsonify('Template successfully added')
-            return response, 200
+            sockets.changetemplate('Template successfully added')
         
         elif goal == 'edit':
             template = Templates.fetchtemplate(id)
             template.edit(data)
-            response = jsonify('Template successfully changed')
-            return response, 200
+            sockets.changetemplate('Template successfully changed')
     
-@bp.route('/ajax/deltemplate', methods=['POST'])
-def deltemplate():
-    id = request.form.get('id')
+@socketio.on('deletetemplate')
+def deltemplate(id):
     if len(id) < 1 or int(id) == 0:
-        response = jsonify('Select a valid template')
-        return response, 400
+        sockets.templatesettings('Select a valid template')
     template = Templates.fetchtemplate(input_id=id)
     if template.delete():    
-        response = jsonify('Template successfully removed')
-        return response, 200
+        sockets.templatesettings('Template successfully removed')
     else:
-        response = jsonify('Something went wrong. Please check the logs for more info.')
-        return response, 400
+        sockets.templatesettings('Something went wrong. Please check the logs for more info.')
 
 @socketio.on('updatesettings')
-def updatesettings(ffmpeg_path, amount):
+def updatesettings(ffmpeg_path, amount, hardware_transcoding):
     db_config = Config.query.get(1)
     db_config.ffmpeg(ffmpeg_path)
     ffmpeg_instance = ffmpeg()
@@ -113,6 +107,10 @@ def updatesettings(ffmpeg_path, amount):
         else:
             sockets.downloadsettings('FFmpeg path has succefully been updated, but the application hasn\'t been found')
             
-    if db_config.amount != amount:
+    if int(db_config.amount) != int(amount):
         db_config.set_amount(amount)
         sockets.downloadsettings('Max amount has succesfully been updated')
+        
+    if db_config.hardware_transcoding != hardware_transcoding:
+        db_config.set_hwtranscoding(hardware_transcoding)
+        sockets.downloadsettings('Hardware Transcoding setting has succesfully been updated!')

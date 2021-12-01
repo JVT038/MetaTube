@@ -5,6 +5,7 @@ class Config(db.Model):
     auth = db.Column(db.Boolean, default=False)
     ffmpeg_directory = db.Column(db.String(128))
     amount = db.Column(db.Integer)
+    hardware_transcoding = db.Column(db.String(16), default="None")
     auth = db.Column(db.Boolean)
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
@@ -17,8 +18,16 @@ class Config(db.Model):
     def get_ffmpeg():
         return Config.query.get(1).ffmpeg_directory
     
+    def get_hwt():
+        return Config.query.get(1).hardware_transcoding
+    
     def set_amount(self, amount):
         self.amount = int(amount)
+        db.session.commit()
+        return True
+    
+    def set_hwtranscoding(self, hw_transcoding):
+        self.hardware_transcoding = hw_transcoding
         db.session.commit()
         return True
     
@@ -33,6 +42,7 @@ class Templates(db.Model):
     output_folder = db.Column(db.String(128), nullable=True)
     output_name = db.Column(db.String(32), nullable=True)
     bitrate = db.Column(db.Integer)
+    resolution = db.Column(db.String(16))
     proxy_status = db.Column(db.Boolean, default=False)
     proxy_type = db.Column(db.String(16))
     proxy_username = db.Column(db.String(128))
@@ -45,17 +55,18 @@ class Templates(db.Model):
     
     def add(data):
         row = Templates(
-            name = data.name,
-            type = data.type,
-            extension = data.ext,
-            output_folder = data.output_folder,
-            output_name = data.output_name,
-            bitrate = data.bitrate,
-            proxy_status = data.proxy["status"],
-            proxy_username = data.proxy["username"],
-            proxy_password = data.proxy["password"],
-            proxy_address = data.proxy["address"],
-            proxy_port = data.proxy["port"]
+            name = data["name"],
+            type = data["type"],
+            extension = data["ext"],
+            output_folder = data["output_folder"],
+            output_name = data["output_name"],
+            bitrate = data["bitrate"],
+            resolution = data["resolution"],
+            proxy_status = data["proxy"]["status"],
+            proxy_username = data["proxy"]["username"],
+            proxy_password = data["proxy"]["password"],
+            proxy_address = data["proxy"]["address"],
+            proxy_port = data["proxy"]["port"]
         )
         db.session.add(row)
         db.session.commit()
@@ -73,19 +84,19 @@ class Templates(db.Model):
         return True
     
     def edit(self, data):
-        self.name = data.name
-        self.type = data.type
-        self.extension = data.ext
-        self.output_folder = data.output_folder
-        self.output_name = data.output_name
-        self.bitrate = data.bitrate
-        
-        self.proxy_status = data.proxy["status"]
-        self.proxy_type = data.proxy['type']
-        self.proxy_username = data.proxy["username"]
-        self.proxy_password = data.proxy["password"]
-        self.proxy_address = data.proxy["address"]
-        self.proxy_port = data.proxy["port"]
+        self.name = data["name"]
+        self.type = data["type"]
+        self.extension = data["ext"]
+        self.output_folder = data["output_folder"]
+        self.output_name = data["output_name"]
+        self.bitrate = data["bitrate"]
+        self.resolution = data["resolution"]
+        self.proxy_status = data["proxy"]["status"]
+        self.proxy_type = data["proxy"]['type']
+        self.proxy_username = data["proxy"]["username"]
+        self.proxy_password = data["proxy"]["password"]
+        self.proxy_address = data["proxy"]["address"]
+        self.proxy_port = data["proxy"]["port"]
         db.session.commit()
         
         return True

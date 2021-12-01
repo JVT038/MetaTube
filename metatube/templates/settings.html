@@ -33,19 +33,19 @@
                     <input type="text" class="form-control" value="{{ amount }}" id="max_amount" />
                 </div>
             </div>
-            <div class="form-row d-none">
-                <p>These fields will currently do nothing, as hardware acceleration isn't implemented yet on the backend side</p>
+            <div class="form-row">
                 <div class="col">
+                    <input type="hidden" value="{{ hw_transcoding }}" id="current_hw" />
                     <label for="#hardware_acceleration">Whether to use hardware acceleration with FFmpeg; if yes, select the desired method.</label>
-                    <select>
-                        <option selected>None</option>
-                        <option>AMD AMF</option>
-                        <option>Intel Quick Sync</option>
-                        <option>MediaCodec Android</option>
-                        <option>OpenMAX OMX</option>
-                        <option>NVIDIA NVENC</option>
-                        <option>Video Acceleration API (VAAPI)</option>
-                        <option>Video Toolbox</option>
+                    <select class="custom-select" id="hardware_acceleration">
+                        <option value="None">None</option>
+                        <option class="d-none">AMD AMF</option>
+                        <option value="qsv">Intel Quick Sync</option>
+                        <option class="d-none">MediaCodec Android</option>
+                        <option class="d-none">OpenMAX OMX</option>
+                        <option value="nvenc">NVIDIA NVENC</option>
+                        <option class="d-none">Video Acceleration API (VAAPI)</option>
+                        <option class="d-none">Video Toolbox</option>
                     </select>
                 </div>
                 <div class="col d-none">
@@ -70,7 +70,6 @@
                             <th scope="col">Template extension</th>
                             <th scope="col">Template output folder</th>
                             <th scope="col">Template name format</th>
-                            <th scope="col">Template bitrate</th>
                             <th scope="col">Edit template</th>
                         </tr>
                     </thead>
@@ -82,22 +81,28 @@
                                 <td class="td_extension">{{ template.extension }}</td>
                                 <td class="td_output_name">{{ template.output_name }}</td>
                                 <td class="td_output_folder">{{ template.output_folder }}</td>
-                                <td class="td_bitrate">{{ template.bitrate }}</td>
                                 <td>
                                     <button type="button" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
                                     <button type="button" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
-                                    <button type="button" class="btn btn-primary expandtemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xwsdxl-caret-solid"></i></button>
+                                    <button type="button" class="btn btn-primary expandtemplatebtn"><i class="fi-xwsdxl-caret-solid"></i></button>
                                 </td>
                             </tr>
                             <tr id="proxy_{{ template.id }}" class="d-none">
                                 <td class="td_proxy" colspan="7">
-                                    <p>Proxy status: <span class="td_proxy_status">{{ template.proxy_status }}</span> <br/>
+                                    <p>
+                                    Bitrate: {{ template.bitrate }} <br />
+                                    {% if template.type == 'Video' %}
+                                        {% set resolution = template.resolution.split(';') %}
+                                        Width: {{ resolution[0] }} <br />
+                                        Height: {{ resolution[1] }} <br />
+                                    {% endif %}
+                                    Proxy status: {{ template.proxy_status }} <br/>
                                     {% if template.proxy_status == 1 %}
-                                        Proxy type: <span class="td_proxy_type">{{ template.proxy_type }}</span> <br/>
-                                        Proxy address: <span class="td_proxy_address">{{ template.proxy_address }}</span> <br/>
-                                        Proxy port: <span class="td_proxy_port">{{ template.proxy_port }}</span> <br/>
-                                        Proxy username: <span class="td_proxy_username">{{ template.proxy_username if template.proxy_username|length > 0 else 'None' }}</span> <br/>
-                                        Proxy password: <span class="td_proxy_password">{{ template.proxy_password if template.proxy_password|length > 0 else 'None' }}</span>
+                                        Proxy type: {{ template.proxy_type }} <br/>
+                                        Proxy address: {{ template.proxy_address }} <br/>
+                                        Proxy port: {{ template.proxy_port }} <br/>
+                                        Proxy username: {{ template.proxy_username if template.proxy_username|length > 0 else 'None' }} <br/>
+                                        Proxy password: {{ template.proxy_password if template.proxy_password|length > 0 else 'None' }}
                                     {% endif %}
                                     </p>
                                 </td>
@@ -172,14 +177,14 @@
                                     <option value="aac">AAC</option>
                                     <option value="flac">FLAC</option>
                                     <option value="mp3">MP3</option>
-                                    <option value="m4a">M4A</option>
+                                    <option value="m4a_audio">M4A</option>
                                     <option value="opus">Opus</option>
                                     <option value="vorbis">Vorbis</option>
                                     <option value="wav">WAV</option>
                                 </optgroup>
                                 <optgroup label="Video">
                                     <option value="mp4">MP4</option>
-                                    <option value="m4a">M4A</option>
+                                    <option value="m4a_video">M4A</option>
                                     <option value="flv">Flash Video (FLV)</option>
                                     <option value="webm">WebM</option>
                                     <option value="ogg">Ogg</option>
@@ -188,42 +193,64 @@
                                 </optgroup>
                             </select>
                         </div>
-                        <div class="col">
-                            <label for="#template_bitrate">Bitrate***</label>
-                            <input type="text" class="form-control" id="template_bitrate" />
-                        </div>
                     </div>
-                    <div class="form-row d-none" id="advancedrow">
-                        <div class="col">
-                            <label for="#proxy_status">Enable proxy</label>
-                            <select id="proxy_status" class="custom-select">
-                                <option value="false" selected>False</option>
-                                <option value="true">True</option>
-                            </select>
+                    <div class="d-none" id="advancedrow">
+                        <div class="form-row" id="outputrow">
+                            <div class="col" id="bitratecol">
+                                <label for="#template_bitrate">Audio bitrate***</label>
+                                <input type="text" class="form-control num_input" id="template_bitrate" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="template_width">Video width (in pixels)</label>
+                                <input type="text" class="form-control num_input" id="template_width" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="template_height">Video height (in pixels)</label>
+                                <input type="text" class="form-control num_input" id="template_height" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="#template_resolution">Resolution****</label>
+                                <select class="custom-select" id="template_resolution">
+                                    <option value="7680;4320">8K UHD</option>
+                                    <option value="3840;2160">4K UHD</option>
+                                    <option value="1920;1080" selected>FHD</option>
+                                    <option value="1280;720">HD</option>
+                                    <option value="720;480">SD</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col d-none">
-                            <label for="#proxy_type">Select proxy type</label>
-                            <select id="proxy_type" class="custom-select">
-                                <option value="HTTP" selected>HTTP</option>
-                                <option value="HTTPS">HTTPS</option>
-                                <option value="SOCKS5">SOCKS5</option>
-                            </select>
-                        </div>
-                        <div class="col d-none">
-                            <label for="#proxy_address">Enter proxy address</label>
-                            <input type="text" class="form-control" id="proxy_address" />
-                        </div>
-                        <div class="col d-none">
-                            <label for="#proxy_port">Enter proxy port</label>
-                            <input type="text" class="form-control num_input" id="proxy_port" />
-                        </div>
-                        <div class="col d-none">
-                            <label for="#proxy_username">Enter proxy username</label>
-                            <input type="text" class="form-control" id="proxy_username" />
-                        </div>
-                        <div class="col d-none">
-                            <label for="#proxy_password">Enter proxy password</label>
-                            <input type="text" class="form-control" id="proxy_password" />
+                        <div class="form-row" id="proxyrow">
+                            <div class="col">
+                                <label for="#proxy_status">Enable proxy</label>
+                                <select id="proxy_status" class="custom-select">
+                                    <option value="false" selected>False</option>
+                                    <option value="true">True</option>
+                                </select>
+                            </div>
+                            <div class="col d-none">
+                                <label for="#proxy_type">Select proxy type</label>
+                                <select id="proxy_type" class="custom-select">
+                                    <option value="HTTP" selected>HTTP</option>
+                                    <option value="HTTPS">HTTPS</option>
+                                    <option value="SOCKS5">SOCKS5</option>
+                                </select>
+                            </div>
+                            <div class="col d-none">
+                                <label for="#proxy_address">Enter proxy address</label>
+                                <input type="text" class="form-control" id="proxy_address" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="#proxy_port">Enter proxy port</label>
+                                <input type="text" class="form-control num_input" id="proxy_port" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="#proxy_username">Enter proxy username</label>
+                                <input type="text" class="form-control" id="proxy_username" />
+                            </div>
+                            <div class="col d-none">
+                                <label for="#proxy_password">Enter proxy password</label>
+                                <input type="text" class="form-control" id="proxy_password" />
+                            </div>
                         </div>
                     </div>
                     <div class="form-row">
@@ -236,7 +263,8 @@
                             <p class="float-left">
                                 * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
                                 ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#format-selection">here</a>) <br />
-                                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>)
+                                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>) <br />
+                                **** (More info on resolutions <a target="_blank" href="https://levvvel.com/169-resolutions/">here</a>)
                             </p>
                         </div>
                     </div>

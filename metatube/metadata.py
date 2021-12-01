@@ -43,7 +43,7 @@ class MetaData:
         
         for track in metadata_mbp["release"]["medium-list"][0]["track-list"]:
             if metadata_mbp["release"]["title"] in track["recording"]["title"]:
-                tracknr += track["number"]
+                tracknr += track["number"] if "number" in track and len(track["number"]) > 0 else 1
                 mbp_trackid += track["id"]
                 isrc += track["recording"]["isrc-list"][0] if "isrc-list" in track["recording"] else ''
                 length += track["recording"]["length"] if "length" in track["recording"] else ''
@@ -217,7 +217,6 @@ class MetaData:
         audio.save()
         print('Metadata & cover added')
     def mergevideodata(data):
-        print(data["genres"])
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
         else:
@@ -229,7 +228,10 @@ class MetaData:
         video["\xa9alb"] = data["album"]
         video["\xa9ART"] = data["artists"]
         video["\xa9gen"] = data["genres"]
-        video["trkn"] = [(int(data["tracknr"]), int(data["total_tracks"]))]
+        try:
+            video["trkn"] = [(int(data["tracknr"]), int(data["total_tracks"]))]
+        except:
+            pass
         video["covr"] = [MP4Cover(data["image"], MP4Cover.FORMAT_JPEG)]
         
         video.save()
