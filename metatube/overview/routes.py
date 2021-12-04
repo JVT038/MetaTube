@@ -3,13 +3,12 @@ from metatube.overview import bp
 from metatube.database import *
 
 from metatube.youtube import YouTube as yt
-from metatube import socketio, metadata
+from metatube import socketio, sockets
 from flask import render_template, request, jsonify
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 from multiprocessing import Pool
 from metatube.metadata import MetaData
-import os
 import json
 
 @bp.route('/')
@@ -20,27 +19,30 @@ def index():
 @socketio.on('ytdl_search')
 def search(query):
     if query is not None and len(query) > 1:
-        video = yt.fetch_url(query)
-        templates = Templates.fetchalltemplates()
-        mbp_args = {
-            'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
-            'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
-            'max': Config.get_max(),
-            'type': 'webui'
-        }
+        if yt.is_supported(query):
+            video = yt.fetch_url(query)
+            templates = Templates.fetchalltemplates()
+            mbp_args = {
+                'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
+                'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
+                'max': Config.get_max(),
+                'type': 'webui'
+            }
 
-        pool = Pool()
-        segments_results = pool.map_async(sb.segments, (video["id"], ))
-        mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
+            pool = Pool()
+            segments_results = pool.map_async(sb.segments, (video["id"], ))
+            mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
 
-        segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
-        mbp = mbp_results.get()[0]
-        downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-        socketio.emit('mbp_response', mbp["release-list"])
-        socketio.emit('ytdl_response', (video, downloadform))
+            segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
+            mbp = mbp_results.get()[0]
+            downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+            socketio.emit('mbp_response', mbp["release-list"])
+            socketio.emit('ytdl_response', (video, downloadform))
+        else:
+            sockets.searchvideo('Enter a valid URL!')
 
     else:
-        return "Enter an URL!", 400
+        sockets.searchvideo('Enter an URL!')
 
 @bp.route('/ajax/findcover', methods=['GET'])
 def findcover():
@@ -53,7 +55,7 @@ def findcover():
         except Exception as error:
             return str(error), 400
     if id is None:
-        return "empty", 400
+        sockets.searchvideo('Submit a valid release ID!')
 
 @bp.route('/downloadtemplate')
 def template():
@@ -61,31 +63,6 @@ def template():
     segments = sb.segments('https://www.youtube.com/watch?v=IcrbM1l_BoI')
     segments_data = segments if type(segments) == list else 'error'
     return render_template('downloadform.html', templates=templates, segments=segments_data)
-
-@socketio.on('fetchtemplate')
-def fetchtemplate(id):
-    if id is not None and len(id) > 0:
-        template = Templates.fetchtemplate(id)
-        data = {
-            "id": template.id,
-            "name": template.name,
-            "type": template.type,
-            "extension": template.extension,
-            "output_folder": template.output_folder,
-            "output_name": template.output_name,
-            "bitrate": template.bitrate,
-            "resolution": template.resolution,
-            'proxy_status': template.proxy_status,
-            'proxy_type': template.proxy_type,
-            'proxy_address': template.proxy_address,
-            'proxy_port': template.proxy_port,
-            'proxy_username': template.proxy_username,
-            'proxy_password': template.proxy_password
-        }
-        response = json.dumps(data)
-        socketio.emit('template', response)
-    else:
-        socketio.emit('template', {'response': 'Invalid ID'})
 
 @socketio.on('ytdl_download')
 def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}, width=1920, height=1080):

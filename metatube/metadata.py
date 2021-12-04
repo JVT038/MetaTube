@@ -12,6 +12,7 @@ from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
+from metatube import sockets
 import requests
 import base64
 
@@ -38,6 +39,7 @@ class MetaData:
         cover_path = cover_mbp["images"][0]["image"] if len(metadata_user['cover']) < 1 else metadata_user['cover']
         cover_mime_type = guess_type(cover_path)[0]
         response = requests.get(cover_path)
+        
         image = response.content
         total_tracks = len(metadata_mbp["release"]["medium-list"][0]["track-list"])
         
@@ -168,7 +170,6 @@ class MetaData:
         audio["genre"] = data["genres"]
         
         audio.save()
-        print('Metadata added!')
         
         if data["extension"] == 'MP3':
             cover = ID3(data["filename"])
@@ -192,8 +193,7 @@ class MetaData:
                 cover_data = cover.write()
                 audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
                 audio.save()
-            
-        print('Cover added!')
+        sockets.downloadprogress({'status':'finished_metadata'})
     
     def mergeid3data(data):
         if data["extension"] == 'WAV':
@@ -232,17 +232,11 @@ class MetaData:
             video["trkn"] = [(int(data["tracknr"]), int(data["total_tracks"]))]
         except:
             pass
-        video["covr"] = [MP4Cover(data["image"], MP4Cover.FORMAT_JPEG)]
+        imageformat = MP4Cover.FORMAT_PNG if "png" in data["cover_mime_type"] else MP4Cover.FORMAT_JPEG
+        video["covr"] = [MP4Cover(data["image"], imageformat)]
         
         video.save()
-        print('Added metadata & cover')
-        
-    
-    def M4A(filename):
-        pass
-    
-    def MP4(filename):
-        pass
+        sockets.downloadprogress({'status':'finished_metadata'})
     
     def FLV(filename):
         pass

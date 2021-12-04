@@ -144,9 +144,7 @@ $(document).ready(function() {
             $("#template_resolution").parent().addClass('d-none');
             $("#template_bitrate").parent().removeClass('d-none');
         } else {
-            $("#template_bitrate").val("None");
-            $("#template_bitrate").parent().addClass('d-none');
-            $("#template_resolution").parent().removeClass('d-none');
+            $("#outputrow").children().removeClass('d-none');
             $("#template_resolution").children("option[value='"+resolution+"']").prop('selected', true);
         }
         $("#template_type").children('[label=\''+type+'\']').children('[value=\''+ext+'\']').attr('selected', true);

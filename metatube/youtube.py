@@ -9,7 +9,7 @@ class YouTube:
     def is_supported(url):
         extractors = yt_dlp.extractor.gen_extractors()
         for e in extractors:
-            if e.suitable(url) and e.IE_NAME != 'generic':
+            if e.suitable(url) and e.IE_NAME == 'youtube':
                 return True
         return False
 
@@ -43,7 +43,7 @@ class YouTube:
     
     def download_hook(d):
         if d['status'] == 'finished':
-            sockets.downloadprogress({'status': 'Finished download'})
+            sockets.downloadprogress({'status': 'finished_ytdl'})
         elif d['status'] == 'downloading':
             if "total_bytes_estimate" in d:
                 sockets.downloadprogress({
@@ -52,17 +52,11 @@ class YouTube:
                     'total_bytes': d['total_bytes_estimate']
                 })
             elif 'total_bytes' in d:
-                try:
-                    sockets.downloadprogress({
-                        'status': 'downloading', 
-                        'downloaded_bytes': d['downloaded_bytes'], 
-                        'total_bytes': d['total_bytes']
-                    })
-                except Exception:
-                    sockets.downloadprogress({
-                        'status': 'downloading',
-                        'total_bytes': 'Unknown'
-                    })
+                sockets.downloadprogress({
+                    'status': 'downloading', 
+                    'downloaded_bytes': d['downloaded_bytes'], 
+                    'total_bytes': d['total_bytes']
+                })
             else:
                 sockets.downloadprogress({
                     'status': 'downloading',
@@ -73,7 +67,7 @@ class YouTube:
         if d['status'] == 'processing' or d['status'] == 'started':
             sockets.downloadprogress({'status': 'processing'})
         elif d['status'] == 'finished':
-            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath']})
+            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'info_dict': json.dumps(d["info_dict"])})
 
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
@@ -84,6 +78,7 @@ class YouTube:
         segments = json.loads(skipfragments)
         postprocessors = []
         postprocessor_args = {}
+        proxy_string = ""
         format = 'ba' if type == 'Audio' else 'b/ba+bv'
         
         if "m4a" in ext:
@@ -109,7 +104,8 @@ class YouTube:
             ranges = []
             for segment in segments:
                 if len(segment["start"]) < 1 or len(segment["end"]) < 1:
-                    return "Enter all fields!"
+                    sockets.searchvideo('Enter all fragment fields!')
+                    exit()
                 else:
                     ranges.append((int(segment["start"]), int(segment["end"])))
             postprocessors.append({
@@ -120,8 +116,10 @@ class YouTube:
         if hw_transcoding != 'None':
             if hw_transcoding == 'nvenc':
                 postprocessor_args["default"] = ['-c:v', 'h264_nvenc']
-            # elif hw_transcoding == 'qsv':
-            #     postprocessor_args = {'default': ['-c:v', 'h264_qsv']}
+            elif hw_transcoding == 'qsv':
+                postprocessor_args["default"] = ['-c:v', 'h264_qsv']
+            
+
         ytdl_options = {
             'format': format,
             'postprocessors': postprocessors,
@@ -132,14 +130,14 @@ class YouTube:
             'noplaylist': True,
             'verbose': True
         }
+        
         # Add proxy if proxy is enabled
         if proxy['proxy_status'] != 'None':
-            proxy_string = proxy["proxy_status"].lower(
-            ) + "://" + proxy["proxy_address"] + ":" + proxy["proxy_port"]
-            if len(proxy["proxy_username"]) > 0:
-                proxy_string += proxy_string + "@" + proxy["proxy_username"]
-            if len(proxy["proxy_username"]) > 0:
-                proxy_string += proxy_string + ":" + proxy["proxy_password"]
+            proxy_string = proxy["proxy_status"].lower().strip() + "://"
+            if len(proxy["proxy_username"]) > 0 and len(proxy["proxy_username"]) > 0:
+                proxy_string += proxy["proxy_username"] + ":" + proxy["proxy_password"] + "@" + proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
+            else:
+                proxy_string += proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
             ytdl_options["proxy"] = proxy_string
             
         return ytdl_options

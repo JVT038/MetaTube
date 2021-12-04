@@ -270,6 +270,7 @@ $(document).ready(function() {
     
     $("#searchsongbtn").on('click', function() {
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
+        $("#searchlog").empty();
         $("#ytcol").empty().append(spinner);
         $("#audiocol").empty().append(spinner);
         // Reset the modal
@@ -318,6 +319,8 @@ $(document).ready(function() {
             socket.emit('ytdl_download', 
                 url, ext, output_folder, type, output_format, bitrate,skipfragments, proxy_data, width, height
             );
+            $("#editmetadata, #downloadbtn, #defaultview").addClass('d-none');
+            $("#progressview").removeClass('d-none');
         }
     });
     $("#fetchmbpreleasebtn").on('click', function(){
@@ -338,35 +341,45 @@ $(document).ready(function() {
             $("p:contains('* All input fields with an *, are optional')").after('<p>Enter a Musicbrainz ID!</p>')
         }
     });
-    socket.on('downloadprogress', function(msg) {
-        progress_text = $("#progress_status").children('p');
-        if(msg.status == 'downloading') {
-            progress_text.empty();
-            if(msg.total_bytes != 'Unknown') {
-                let percentage = Math.round((msg.downloaded_bytes / msg.total_bytes) * 100);
-                $("#ytdl_progress").parent().removeClass('d-none');
-                $("#ytdl_progress").attr('aria-valuenow', percentage+"%");
-                $("#ytdl_progress").text(percentage + "%");
-                $("#ytdl_progress").css('width', parseInt(percentage)+'%');
-            } else {
-                if($("#progress_status").hasClass('d-none')) {
-                    $("#progress_status").removeClass('d-none');
-                    progress_text.append('Downloading... <br/>');
-                }
-            }
+
+    $("#addsong").on('click', function() {
+        if($("#progress").text() == '100%') {
+            $("#defaultview, #downloadbtn").removeClass('d-none');
+            $("#progressview").addClass('d-none');
+            $("#progresstext, #progress").text('');
+            $("#progress").attr({
+                'aria-valuenow': '0',
+                'aria-valuemin': '0',
+                'style': ''
+            });
         }
-        else if(msg.status == 'Finished download') {
+
+        $("#downloadmodal").modal('toggle');
+    });
+    socket.on('downloadprogress', function(msg) {
+        var progress_text = $("#progresstext");
+        if(msg.status == 'downloading') {
+            progress_text.text("Downloading...");
+            let percentage = Math.round((msg.downloaded_bytes / msg.total_bytes) * 100) / 3;
+            $("#progress").attr('aria-valuenow', percentage+"%");
+            $("#progress").text(percentage + "%");
+            $("#progress").css('width', parseInt(percentage)+'%');
+        }
+        else if(msg.status == 'finished_ytdl') {
             if(msg.total_bytes != 'Unknown') {
-                $("#ytdl_progress").attr('aria-valuenow', 100);
-                $("#ytdl_progress").text("100%");
-                $("#ytdl_progress").css('width', '100%');
+                $("#progress").attr('aria-valuenow', 33);
+                $("#progress").text("33%");
+                $("#progress").css('width', '33%');
             } else {
-                progress_text.append('Finished downloading!<br/>');
+                progress_text.text('Finished downloading!');
             }
         } else if(msg.status == 'processing') {
-            progress_text.append('Processing and converting file to desired format... <br/>');
+            progress_text.text('Processing and converting file to desired output... ');
         } else if(msg.status == 'finished_ffmpeg') {
-            progress_text.append('Finished converting!<br/>');
+            $("#progress").attr('aria-valuenow', 66);
+            $("#progress").text("66%");
+            $("#progress").css('width', '66%');
+            progress_text.text('Finished converting!');
             let filepath = msg.filepath;
             let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
             let people = {};
@@ -398,6 +411,11 @@ $(document).ready(function() {
                 'people': JSON.stringify(people)
             };
             socket.emit('mergedata', filepath, release_id, metadata);
+        } else if(msg.status == 'finished_metadata') {
+            $("#progress").attr('aria-valuenow', 100);
+            $("#progress").text("100%");
+            $("#progress").css('width', '100%');
+            progress_text.text('Finished adding metadata!');
         }
     });
     socket.on('ytdl_response', (video, downloadform) => {
@@ -446,7 +464,7 @@ $(document).ready(function() {
             $("#height").val(response.resolution.split(';')[1]);
         } else {
             $("#bitrate").parent().removeClass('d-none');
-            $("#videorow").parent().addClass('d-none');
+            $("#videorow").addClass('d-none');
         }
     });
     socket.on('foundmbprelease', (data) => {
@@ -512,5 +530,10 @@ $(document).ready(function() {
         $("#md_album_releasedate").val(release_date);
         $("#md_album_artists").val(artists);
         $("#md_album_tracknr").val(tracknr);
+    });
+    socket.on('searchvideo', (data) => {
+        $("#defaultview").find(".spinner-border").parent('.d-flex').remove();
+        $("#searchlog").text(data);
+        $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
     });
 })

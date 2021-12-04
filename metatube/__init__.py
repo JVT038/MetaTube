@@ -26,7 +26,4 @@ def create_app(config_class=Config):
     init_db(app)
     return app
 
-def get_app():
-    return create_app()
-
-import metatube.database
+import metatube.database, metatube.routes

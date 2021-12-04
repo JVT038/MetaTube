@@ -78,13 +78,13 @@
                             <tr id="{{ template.id }}">
                                 <td class="td_name">{{ template.name }}</td>
                                 <td class="td_type">{{ template.type }}</td>
-                                <td class="td_extension">{{ template.extension }}</td>
+                                <td class="td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') }}</td>
                                 <td class="td_output_name">{{ template.output_name }}</td>
                                 <td class="td_output_folder">{{ template.output_folder }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
-                                    <button type="button" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
-                                    <button type="button" class="btn btn-primary expandtemplatebtn"><i class="fi-xwsdxl-caret-solid"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Show more info" class="btn btn-primary expandtemplatebtn"><i class="fi-xwsdxl-caret-solid"></i></button>
                                 </td>
                             </tr>
                             <tr id="proxy_{{ template.id }}" class="d-none">
@@ -109,7 +109,7 @@
                             </tr>
                         {% endfor %}
                         <tr>
-                            <td colspan="7" class="text-center">Add template <button type="button" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
+                            <td colspan="7" class="text-center"><button type="button" data-toggle="tooltip" data-placement="top" title="Add template" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
                         </tr>
                     </tbody>
                 </table>

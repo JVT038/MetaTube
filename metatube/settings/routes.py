@@ -69,7 +69,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 1
         elif data["ext"] in ["mp4", "m4a_video", "flv", "webm", "ogg", "mkv", "avi"]:
             data["type"] = 'Video'
         
-        if data["type"] == 'Audio' and len(data["bitrate"] < 1):
+        if data["type"] == 'Audio' and len(data["bitrate"]) < 1:
             sockets.changetemplate('Enter a bitrate when selecting an audio output type!')
             
         if data["type"] == 'Video' and (len(data["width"]) < 1 or len(data["height"]) < 1):

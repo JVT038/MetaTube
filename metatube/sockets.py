@@ -11,3 +11,6 @@ def changetemplate(message):
     
 def templatesettings(message):
     socketio.emit('templatesettings', message)
+    
+def searchvideo(message):
+    socketio.emit('searchvideo', message)

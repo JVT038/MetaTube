@@ -149,6 +149,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 ## To-Do
 - [X] Add support for the use of proxies to download YouTube videos
 - [ ] Add Docker support
+- [ ] Add Github action / workflow thing, to automatically create Docker image upon a new commit
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
 - [ ] Add support for YouTube playlists
@@ -158,11 +159,11 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
 - [ ] Add translations
-- [ ] Add a nice progress bar
+- [X] Add a nice progress bar
 - [ ] Add a function to allow users to download the song onto their device
 - [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
-- [ ] Add ability to manually set video width & height, if a video type has been selected
+- [X] Add ability to manually set video width & height, if a video type has been selected
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them

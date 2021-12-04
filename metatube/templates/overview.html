@@ -6,7 +6,7 @@
     <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name">
         <div class="input-group-append">
-            <button type="button" id="addsong" class="btn btn-success input-group-text bg-success" data-toggle="modal" data-target="#downloadmodal"><i class="fi-xwsuxl-plus-solid"></i></button>
+            <button type="button" id="addsong" class="btn btn-success input-group-text bg-success"><span data-toggle="tooltip" data-placement="top" title="Add a song"><i class="fi-xwsuxl-plus-solid"></i></span></button>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fi-xnsuxl-three-bars-solid"></i>
             </button>
@@ -37,7 +37,6 @@
                     {% if ffmpeg_path is sameas True %}
                     <div class="row">
                         <form id="queryform" class="form-group" style="width: 100%;">
-                            <!-- <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" id="supportedsitesanchor">Supported sites can be viewed here</a> -->
                             <p>Only YouTube URLs are currently supported</p>
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" id="query" placeholder="Enter URL to download" aria-describedby="basic-addon2">
@@ -45,7 +44,7 @@
                                     <button type="button" id="searchsongbtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
                                 </div>
                             </div>
-                            <div id="query_log"></div>
+                            <p class="text-center" id="searchlog"></p>
                         </form>
                     </div>
                     <div class="row animate__animated" id="defaultview">
@@ -139,6 +138,20 @@
                                     <div class="input-group-append">
                                         <button type="button" class="btn btn-success bg-success addperson"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="progressview" class="d-none">
+                        <div class="form-row">
+                            <div class="col">
+                                <p id="progresstext" class="text-center"></p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <div class="progress" id="progressdownload">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
