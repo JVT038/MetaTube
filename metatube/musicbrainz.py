@@ -10,7 +10,7 @@ def search(args):
     return response
 
 def search_id_release(id):
-    fields = ['artists', 'release-groups', 'recordings', 'isrcs', 'tags', 'media', 'artist-rels', 'labels', 'label-rels', 'work-level-rels', 'work-rels', 'genres']
+    fields = ['artists', 'release-groups', 'recordings', 'isrcs', 'tags', 'media', 'artist-rels', 'labels', 'label-rels', 'work-level-rels', 'work-rels']
     try:
         response = musicbrainzngs.get_release_by_id(id, includes=fields)
         return response

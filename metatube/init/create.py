@@ -1,4 +1,4 @@
-from flask_migrate import init, migrate, upgrade
+from flask_migrate import init, migrate, upgrade, stamp
 from metatube.database import *
 from metatube import db, database
 from metatube import Config as env
@@ -65,47 +65,6 @@ class Default():
     
     def migrations(self):
         directory = os.path.join(env.BASE_DIR, 'migrations')
+        stamp(directory)
         migrate(directory)
         upgrade(directory)
-    
-    def check_db(self):
-        # return True if Config.query.count() > 0 and Templates.query.count() > 0 else False
-        # Check if tables exist
-        engine = create_engine(self._url)
-        # sqlite = sqlite3.connect(self._url.replace('sqlite:///', ''))
-        # cursor = sqlite.cursor()
-        inspector = inspect(engine)
-        tables = ['Config', 'Database', 'Templates']
-        for table in tables:
-            if ('__' + table + '__') not in dir(database) and table != 'db':
-                for method in self._methods:
-                    getattr(Default, method)()
-                if inspector.has_table(table):
-                    # check for columns
-                    table_instance = getattr(database, table.capitalize())
-                    columns_db = table_instance.__table__.columns.keys()
-                    columns_insp = inspector.get_columns(table)
-                    # for column in inspector.get_columns(table):
-                    # for column in columns_db:
-                    #     if column not in columns_insp:
-                    #         self.migrations()
-                    #         print(f'Column named \'{column}\' is missing')
-                    #         print('Created all columns')
-                    #         break
-                            # self.init_db
-                            # print(column["name"])
-                            # column_instance = getattr(table_instance, column)
-                            # name = column_instance.name
-                            # type = column_instance.type
-                            
-                #             query = 'ALTER TABLE ' + table + 'ADD COLUMN ' + column['name'] + str(column['type']) + 'NULL DEFAULT ' + column['default']
-                #             cursor.execute(query)
-                #             sqlite.commit()
-                #             sqlite.close()
-            else:
-                print(f'Table {table} doesn\'t exist')
-                db.create_all()
-                print('Created all missing tables')
-                for method in self._methods:
-                    getattr(Default, method)()
-        return True

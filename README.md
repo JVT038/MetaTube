@@ -37,7 +37,7 @@
   - Download YouTube videos based on a selected template
   - Exclude fragments (such as intros, outros, etc.) from the download
   - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files
-  - Hardware transcoding using NVENC
+  - Hardware transcoding using NVENC and Intel QSV.
   - Manually set height and width, if a video type has been selected
 
   To-Do before the first release:
@@ -87,6 +87,8 @@ The following tools were used in this project:
 - [Sponsorblock.py](https://github.com/wasi-master/sponsorblock.py)
 - [FFmpeg 4.4.1](https://ffmpeg.org/)
 
+For a complete list, visit the [Dependencies overview](https://github.com/JVT038/MetaTube/network/dependencies#requirements.txt) in the Insights.
+
 ## :white_check_mark: Requirements ##
 
 Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python](https://python.org) installed.
@@ -118,25 +120,27 @@ $ cd ../
 # Install dependencies
 $ pip install -r requirements.txt
 
-# We need the latest (unstable) version of python-musicbrainzngs, because the latest stable version doesn't support genres.
-# To do this, first clone their repo:
-$ git clone https://github.com/alastair/python-musicbrainzngs/tree/master
-# Navigate to python-musicbrainzngs
-$ cd python-musicbrainzngs
-# Build the pip package
-$ py setup.py
-# Now move the newly created directory python-musicbrainzngs/build/lib/musicbrainzngs to the directory where all the packages are stored.
-# In a virtual environment, you'll have to move this directory to Lib/site-packages
-# Outside of a virtual environment, it's in `%appdata%/Python/Python<version>/site-packages, where <version> can differ per user, and version.
-# See this thread for more info: https://stackoverflow.com/questions/29980798/where-does-pip-install-its-packages
-
-# Before running the server, make sure to enter your environment variables in example.flaskenv and rename example.flaskenv to .flaskenv, so remove 'example'.
-
 # Run the project
 $ py metatube.py
 
 # The server will initialize in the <http://localhost:3000>
 ```
+
+Additionally, you can set the following environment variables:
+Name | Description | Default value
+---|---|---
+Port|Set the port on which the MetaTube server will be available|5000
+Host|Set the address on which the MetaTube server will run | 127.0.0.1
+Debug|Whether to enable debug mode or not | False
+Database_url | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
+```bash
+# On Windows 10, you can set an environment variable like this: 
+$ set ENVIRONMENT_VARIABLE = Value
+
+# On Linux and MacOS, you can set an environment variable like this:
+$ export ENVIRONMENT_VARIABLE = Value
+```
+
 
 ## :memo: License ##
 
@@ -167,6 +171,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
+- [ ] Support MySQL
 - [ ] Make a CLI to download and match music
 - [ ] Store the information of downloaded songs in a SQL database
 - [ ] Make it mobile-friendly

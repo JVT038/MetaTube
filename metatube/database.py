@@ -110,7 +110,7 @@ class Database(db.Model):
     date = db.Column(db.DateTime)
     length = db.Column(db.Integer)
     musicbrainz_id = db.Column(db.Integer, unique=True)
-    youtube_id = db.Column(db.Integer, unique=True)    
+    youtube_id = db.Column(db.Integer, unique=True)
 
 class Users():
     id = db.Column(db.Integer, primary_key=True)

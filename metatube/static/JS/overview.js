@@ -380,9 +380,9 @@ $(document).ready(function() {
             $("#progress").text("66%");
             $("#progress").css('width', '66%');
             progress_text.text('Finished converting!');
-            let filepath = msg.filepath;
-            let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            let people = {};
+            var filepath = msg.filepath;
+            var release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+            var people = {};
 
             $.each($('.artist_relations'), function() {
                 if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
@@ -416,6 +416,7 @@ $(document).ready(function() {
             $("#progress").text("100%");
             $("#progress").css('width', '100%');
             progress_text.text('Finished adding metadata!');
+            socket.emit('insertdata', filepath, )
         }
     });
     socket.on('ytdl_response', (video, downloadform) => {
