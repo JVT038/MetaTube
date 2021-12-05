@@ -72,7 +72,7 @@ class YouTube:
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
         
-    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, width, height):
+    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)
@@ -118,7 +118,14 @@ class YouTube:
                 postprocessor_args["default"] = ['-c:v', 'h264_nvenc']
             elif hw_transcoding == 'qsv':
                 postprocessor_args["default"] = ['-c:v', 'h264_qsv']
-            
+            elif hw_transcoding == 'videotoolbox':
+                postprocessor_args["default"] = ['-c:v', 'h264_videotoolbox']
+            elif 'vaapi' in hw_transcoding:
+                postprocessor_args["default"] = ['-vaapi_device', vaapi_device, '-c:v', 'h264_videotoolbox']
+            elif hw_transcoding == 'amd':
+                postprocessor_args["default"] = ['-c:v', 'h264_amf']
+            elif hw_transcoding == 'omx':
+                postprocessor_args["default"] = ['-c:v', 'h264_omx']
 
         ytdl_options = {
             'format': format,

@@ -42,14 +42,17 @@
                     <label for="#hardware_acceleration">Whether to use hardware acceleration with FFmpeg; if yes, select the desired method.</label>
                     <select class="custom-select" id="hardware_acceleration">
                         <option value="None">None</option>
-                        <option class="d-none">AMD AMF</option>
+                        <option value="amd">AMD AMF</option>
                         <option value="qsv">Intel Quick Sync</option>
-                        <option class="d-none">MediaCodec Android</option>
-                        <option class="d-none">OpenMAX OMX</option>
+                        <option value="omx">OpenMAX OMX</option>
                         <option value="nvenc">NVIDIA NVENC</option>
-                        <option class="d-none">Video Acceleration API (VAAPI)</option>
-                        <option class="d-none">Video Toolbox</option>
+                        <option value="vaapi">Video Acceleration API (VAAPI)</option>
+                        <option value="videotoolbox">Video Toolbox</option>
                     </select>
+                </div>
+                <div class="col d-none">
+                    <label for="#vaapi_device">Enter path to VAAPI device</label>
+                    <input type="text" id="vaapi_device" class="form-control" />
                 </div>
                 <div class="col d-none">
                     <label for="#hardware_acceleration">The render node to use for hardware acceleration</label>

@@ -1,11 +1,20 @@
 $(document).ready(function() {
     socket = io();
 
-    $("#hardware_acceleration").children('option[value='+$("#current_hw").val()+']').prop('selected', true);
     $("#proxy_status").prop('selectedIndex', 0);
     $(".defaultbtn").css('cursor', 'not-allowed');
     $(".defaultbtn").addClass('disabled');
     $(".defaultbtn").attr('disabled', true);
+
+    if($("#current_hw").val().includes('vaapi')) {
+        $("#vaapi_device").parent().removeClass('d-none');
+        let vaapi_device = $("#current_hw").val().split(';')[1];
+        $("#vaapi_device").val(vaapi_device);
+        $("#hardware_acceleration").children('option[value=\'vaapi\']').prop('selected', true);
+    } else {
+        $("#hardware_acceleration").children('option[value='+$("#current_hw").val()+']').prop('selected', true);
+    }
+
     $(".deltemplatebtn").on('click', function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
@@ -102,7 +111,18 @@ $(document).ready(function() {
         let amount = $("#max_amount").val();
         let ffmpeg_path = $("#ffmpeg_path").val();
         let hardware_transcoding = $("#hardware_acceleration").val();
+        if(hardware_transcoding == 'vaapi') {
+            hardware_transcoding += ';'+$("#vaapi_device").val();
+        }
         socket.emit('updatesettings', ffmpeg_path, amount, hardware_transcoding);
+    });
+
+    $("#hardware_acceleration").on('change', function() {
+        if($(this).val() == 'vaapi') {
+            $("#vaapi_device").parent().removeClass('d-none');
+        } else {
+            $("#vaapi_device").parent().addClass('d-none');
+        }
     });
 
     $("#template_resolution").on('change', function() {

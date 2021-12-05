@@ -37,7 +37,8 @@
   - Download YouTube videos based on a selected template
   - Exclude fragments (such as intros, outros, etc.) from the download
   - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files
-  - Hardware transcoding using NVENC and Intel QSV.
+  - Hardware encoding using NVENC, Intel Quick Sync
+  - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF, OpenMax OMX
   - Manually set height and width, if a video type has been selected
 
   To-Do before the first release:
@@ -181,7 +182,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Manually edit metadata of file, after the download
 - [X] Select output type (coding, extension, etc.)
 - [ ] Switch from AJAX to websockets
-- [ ] Hardware transcoding with Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
+- [X] Hardware transcoding with NVENC, Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
 - [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
 - [ ] Dark mode support

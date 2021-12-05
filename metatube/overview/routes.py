@@ -68,7 +68,9 @@ def template():
 def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}, width=1920, height=1080):
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
-    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, width, height)
+    vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
+    print(vaapi_device)
+    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height)
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
 
