@@ -12,9 +12,11 @@ from metatube.metadata import MetaData
 import json
 
 @bp.route('/')
+@bp.route('/index')
 def index():
     ffmpeg_path = True if len(Config.query.get(1).ffmpeg_directory) > 0 else False
-    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path)
+    records = Database.getrecords()
+    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records)
 
 @socketio.on('ytdl_search')
 def search(query):
@@ -98,3 +100,9 @@ def mergedata(filepath, release_id, metadata):
         MetaData.mergevideodata(data)
     elif extension in ['WAV']:
         MetaData.mergeid3data(data)
+        
+@socketio.on('insertdata')
+def insertdata(data, ytid):
+    data["ytid"] = ytid
+    if Database.insert(data):
+        sockets.overview('inserted_song')

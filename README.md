@@ -58,6 +58,7 @@
   <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
   <a href="#memo-license">License</a> &#xa0; | &#xa0;
+  <a href="#disclaimer">Disclaimer</a> &#xa0; | &#xa0; 
   <a href="https://github.com/JVT038" target="_blank">Author</a>
 </p>
 
@@ -189,5 +190,12 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Dark mode support
 - [ ] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 &#xa0;
+
+## Disclaimer
+I made this project to educate myself about Python, and to learn how metadata works in combination with files.
+Additionally, I want to emphasize I do NOT encourage any pirating, or any other illegal activities.
+This project's purpose isn't to illegally download content from YouTube; its purpose is to educate and enlighten myself (and others viewing the source code) about Python, how Python interacts with metadata in files, and  metadata works, and how yt-dlp works.
+I am not responsible if the user downloads illegal content, or faces any (legal) consequences.
+
 
 <a href="#top">Back to top</a>

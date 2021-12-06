@@ -16,7 +16,18 @@ from metatube import sockets
 import requests
 import base64
 
-class MetaData:    
+class MetaData:
+    def getresponse(data):
+        return {
+            'filename': data["filename"],
+            'name': data["title"],
+            'artist': data["artists"],
+            'album': data["album"],
+            'date': data["release_date"],
+            'length': data["length"],
+            'musicbrainz_id': data["mbp_releaseid"]
+        }
+    
     def getdata(filename, metadata_user, metadata_mbp, cover_mbp):
         album = metadata_mbp["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         artist_list = ""
@@ -193,7 +204,8 @@ class MetaData:
                 cover_data = cover.write()
                 audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
                 audio.save()
-        sockets.downloadprogress({'status':'finished_metadata'})
+        response = MetaData.getresponse(data)
+        sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
     def mergeid3data(data):
         if data["extension"] == 'WAV':
@@ -214,8 +226,8 @@ class MetaData:
         audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_albumid', text=data["mbp_albumid"]))
         audio.tags.add(APIC(encoding=3, mime=data["cover_mime_type"], type=3, desc=u'Cover', data=data["image"]))
         
-        audio.save()
-        print('Metadata & cover added')
+        response = MetaData.getresponse(data)
+        sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     def mergevideodata(data):
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
@@ -236,7 +248,8 @@ class MetaData:
         video["covr"] = [MP4Cover(data["image"], imageformat)]
         
         video.save()
-        sockets.downloadprogress({'status':'finished_metadata'})
+        response = MetaData.getresponse(data)
+        sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
     def FLV(filename):
         pass

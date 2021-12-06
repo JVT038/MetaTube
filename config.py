@@ -5,8 +5,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 dotenv_path = join(dirname(__file__), '.flaskenv')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-else:
-    os.environ.setdefault('FLASK_APP', 'metatube.py')
 class Config(object):
     ''' All environment variables are stored here ''' 
     SECRET_KEY = os.environ.get('SECRET_KEY')  or 's44wzgFU9zNCQa3z'

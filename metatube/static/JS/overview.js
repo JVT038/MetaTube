@@ -13,7 +13,7 @@ $(document).ready(function() {
     // });
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     async function insertYTcol(response, form) {
-        data = response;
+        let data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
         let album = 'album' in data ? data.album : "Unknown";
@@ -35,7 +35,7 @@ $(document).ready(function() {
         
         let length = minutes + ":" + seconds;
         let html = {
-            'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" url="'+data.webpage_url+'" />',
+            'img': '<img class="img-fluid d-none d-md-block" id="thumbnail_yt" ytid="'+data.id+'" src="'+thumbnail+'" title="Click to watch video" alt="Thumbnail for video '+id+'" onclick="window.open(\''+data.webpage_url+'\', \'_blank\')" style="cursor: pointer" url="'+data.webpage_url+'" />',
             'text': '<p>Video title: '+data.title+'</br>Channel: '+channel+'<br/>Length: '+length+'</br/>Track name: '+track+'<br/>Artist: '+artist+'<br/>Album: '+album+'</p>'
         }
         let inject = html['img'] + html['text'] + form;
@@ -380,7 +380,7 @@ $(document).ready(function() {
             $("#progress").attr('aria-valuenow', 66);
             $("#progress").text("66%");
             $("#progress").css('width', '66%');
-            progress_text.text('Finished converting!');
+            progress_text.text('Adding metadata...');
             var filepath = msg.filepath;
             var release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
             var people = {};
@@ -417,7 +417,8 @@ $(document).ready(function() {
             $("#progress").text("100%");
             $("#progress").css('width', '100%');
             progress_text.text('Finished adding metadata!');
-            socket.emit('insertdata', filepath, )
+            let ytid = $("#thumbnail_yt").attr('ytid')
+            socket.emit('insertdata', msg.data, ytid)
         }
     });
     socket.on('ytdl_response', async (video, downloadform) => {

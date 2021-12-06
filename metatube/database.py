@@ -1,4 +1,6 @@
 from metatube import db
+from datetime import datetime
+from dateutil import parser
 
 class Config(db.Model):
     key = db.Column(db.Integer, primary_key=True)
@@ -111,6 +113,23 @@ class Database(db.Model):
     length = db.Column(db.Integer)
     musicbrainz_id = db.Column(db.Integer, unique=True)
     youtube_id = db.Column(db.Integer, unique=True)
+    
+    def getrecords():
+        return Database.query.all()
+    
+    def insert(data):
+        row = Database(
+            filename = data["filename"],
+            name = data["name"],
+            artist = data["artist"],
+            album = data["album"],
+            date = parser.parse(data["date"]),
+            musicbrainz_id = data["musicbrainz_id"],
+            youtube_id = data["ytid"]
+        )
+        db.session.add(row)
+        db.session.commit()
+        return True
 
 class Users():
     id = db.Column(db.Integer, primary_key=True)
