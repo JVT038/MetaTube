@@ -38,7 +38,7 @@
   - Exclude fragments (such as intros, outros, etc.) from the download
   - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files
   - Hardware encoding using NVENC, Intel Quick Sync
-  - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF, OpenMax OMX
+  - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX
   - Manually set height and width, if a video type has been selected
 
   To-Do before the first release:
@@ -124,7 +124,7 @@ $ pip install -r requirements.txt
 # Run the project
 $ py metatube.py
 
-# The server will initialize in the <http://localhost:3000>
+# The server will initialize in the <http://localhost:5000>
 ```
 
 Additionally, you can set the following environment variables:

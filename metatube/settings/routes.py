@@ -112,5 +112,9 @@ def updatesettings(ffmpeg_path, amount, hardware_transcoding):
         sockets.downloadsettings('Max amount has succesfully been updated')
         
     if db_config.hardware_transcoding != hardware_transcoding:
+        if "vaapi" in hardware_transcoding:
+            if len(hardware_transcoding.split(';')[1]) < 1:
+                sockets.downloadsettings('Enter a VAAPI device path!')
+                exit()
         db_config.set_hwtranscoding(hardware_transcoding)
         sockets.downloadsettings('Hardware Transcoding setting has succesfully been updated!')
