@@ -12,7 +12,7 @@ $(document).ready(function() {
     //     }
     // });
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
-    function insertYTcol(response, form) {
+    async function insertYTcol(response, form) {
         data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
         let track = 'track' in data ? data.track : "Unknown";
@@ -41,9 +41,10 @@ $(document).ready(function() {
         let inject = html['img'] + html['text'] + form;
         $("#ytcol").empty();
         return inject;
+        
     }
 
-    function insertAudioCol(mbp_data) {
+    async function insertAudioCol(mbp_data) {
         let ul = document.createElement('ul');
         ul.classList.add('list-unstyled');
         $.each(mbp_data, function(key_release, value_release) {
@@ -419,15 +420,17 @@ $(document).ready(function() {
             socket.emit('insertdata', filepath, )
         }
     });
-    socket.on('ytdl_response', (video, downloadform) => {
-        let ytcol = insertYTcol(video, downloadform);
+    socket.on('ytdl_response', async (video, downloadform) => {
+        let ytcol = await insertYTcol(video, downloadform);
         ytdata = video;
         $("#ytcol").append(ytcol);
         friconix_update();
         $(".modal-footer").removeClass('d-none')
     });
-    socket.on('mbp_response', (mbp) => {
-        let audiocol = insertAudioCol(mbp);
+
+    // socket.on('ytdl_response', (video, downloadform) => insertYTcol(video, downloadform));
+    socket.on('mbp_response', async (mbp) => {
+        let audiocol = await insertAudioCol(mbp);
         audiodata = mbp;
         $("#audiocol").append(audiocol);
         $(".modal-footer").removeClass('d-none')

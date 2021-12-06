@@ -130,10 +130,10 @@ $ py metatube.py
 Additionally, you can set the following environment variables:
 Name | Description | Default value
 ---|---|---
-Port|Set the port on which the MetaTube server will be available|5000
-Host|Set the address on which the MetaTube server will run | 127.0.0.1
-Debug|Whether to enable debug mode or not | False
-Database_url | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
+PORT|Set the port on which the MetaTube server will be available|5000
+HOST|Set the address on which the MetaTube server will run | 127.0.0.1
+DEBUG|Whether to enable debug mode or not | False
+DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -141,7 +141,8 @@ $ set ENVIRONMENT_VARIABLE = Value
 # On Linux and MacOS, you can set an environment variable like this:
 $ export ENVIRONMENT_VARIABLE = Value
 ```
-
+Additionally you can create a file called `.flaskenv` and set the environment variables in there.
+An example is provided in [example.flaskenv](example.flaskenv). You can use that template and rename the file to `.flaskenv`.
 
 ## :memo: License ##
 

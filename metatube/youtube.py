@@ -121,7 +121,7 @@ class YouTube:
             elif hw_transcoding == 'videotoolbox':
                 postprocessor_args["default"] = ['-c:v', 'h264_videotoolbox']
             elif 'vaapi' in hw_transcoding:
-                postprocessor_args["default"] = ['-vaapi_device', vaapi_device, '-c:v', 'h264_videotoolbox']
+                postprocessor_args["default"] = ['-vaapi_device', vaapi_device, '-c:v', 'h264_vaapi']
             elif hw_transcoding == 'amd':
                 postprocessor_args["default"] = ['-c:v', 'h264_amf']
             elif hw_transcoding == 'omx':

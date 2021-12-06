@@ -3,6 +3,7 @@ import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
 musicbrainzngs.set_useragent("metatube", "0.1")
 def search(args):
+    
     query = args['query']
     artist = args['artist']
     max = args['max']
