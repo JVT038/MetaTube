@@ -4,12 +4,17 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='CSS/overview.css') }}" />
 <div class="container">
     <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Enter downloaded song..." aria-label="Downloaded song name">
+        <input type="text" class="form-control" placeholder="Search for downloaded video..." aria-label="Downloaded video name">
         <div class="input-group-append">
-            <button type="button" id="addsong" class="btn btn-success input-group-text bg-success"><span data-toggle="tooltip" data-placement="top" title="Add a song"><i class="fi-xwsuxl-plus-solid"></i></span></button>
+            <button type="button" id="addvideo" class="btn btn-success input-group-text bg-success" data-toggle="tooltip" data-placement="top" title="Download an item"><i class="fi-xwsuxl-plus-solid"></i></button>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fi-xnsuxl-three-bars-solid"></i>
             </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p class="text-center" id="overviewlog"></p>
         </div>
     </div>
     <table class="table table-hover" id="recordstable">
@@ -26,12 +31,18 @@
             {% for record in records %}
                 <tr id="{{ record.id }}">
                     <td>{{ record.name }}</td>
-                    <td>{{ record.artist }}</td>
+                    <td>{{ record.artist.replace('/', ';') }}</td>
                     <td>{{ record.album }}</td>
                     <td>{{ record.date.strftime('%d-%m-%Y') }}</td>
                     <td>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="Edit item" class="btn btn-success edititembtn"><i class="fi-xnsuxl-edit-solid"></i></button>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="Delete item" class="btn btn-danger deleteitembtn" data-toggle="modal" data-target="#deleterecordmodal"><i class="fi-xnsuxl-trash-bin"></i></button>
+                        {% if path_exists(record.filepath) %}
+                            <button type="button" data-toggle="tooltip" data-placement="top" title="Edit item" class="btn btn-success edititembtn"><i class="fi-xnsuxl-edit-solid"></i></button>
+                            <button type="button" data-toggle="tooltip" data-placement="top" title="Download item" class="btn btn-primary downloaditembtn"><i class="fi-xwsrxl-sign-in-solid"></i></button>
+                            <button type="button" data-toggle="tooltip" data-placement="top" title="View YouTube video" class="btn btn-info" onclick="window.open('https:\/\/youtu.be/{{ record.youtube_id }}', '__blank')"><i style="color: red;" class="fi-xwsuxl-youtube"></i></button>
+                            <button type="button" data-toggle="tooltip" data-placement="top" title="Delete item" class="btn btn-danger deleteitembtn"><i class="fi-xnsuxl-trash-bin"></i></button>
+                        {% else %}
+                            File has been moved or deleted.
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
@@ -178,9 +189,30 @@
                     {% endif %}                    
                 </div>
             </div>
-            <div class="modal-footer d-none">
+            <div class="modal-footer d-none" id="searchvideomodalfooter">
                 <button type="button" class="btn btn-primary" id="editmetadata">Edit metadata manually</button>
                 <button type="button" class="btn btn-success" id="downloadbtn">Download</button>
+                <button type="button" class="btn btn-primary d-none" id="downloadfilebtn">Download file</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeitemmodal" tabindex="-1" role="dialog" aria-labelledby="remove item modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="removeitemmodaltitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this item?</p>
+                <p>This action will delete the file itself too!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="delitembtnmodal">Delete item</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>

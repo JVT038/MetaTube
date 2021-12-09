@@ -1,7 +1,7 @@
 from flask.templating import render_template_string
 from metatube.overview import bp
 from metatube.database import *
-
+from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
 from metatube import socketio, sockets
 from flask import render_template, request, jsonify
@@ -10,6 +10,7 @@ import metatube.musicbrainz as musicbrainz
 from multiprocessing import Pool
 from metatube.metadata import MetaData
 import json
+import os
 
 @bp.route('/')
 @bp.route('/index')
@@ -23,23 +24,26 @@ def search(query):
     if query is not None and len(query) > 1:
         if yt.is_supported(query):
             video = yt.fetch_url(query)
-            templates = Templates.fetchalltemplates()
-            mbp_args = {
-                'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
-                'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
-                'max': Config.get_max(),
-                'type': 'webui'
-            }
+            if Database.checkyt(video["id"]) is None:
+                templates = Templates.fetchalltemplates()
+                mbp_args = {
+                    'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
+                    'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
+                    'max': Config.get_max(),
+                    'type': 'webui'
+                }
 
-            pool = Pool()
-            segments_results = pool.map_async(sb.segments, (video["id"], ))
-            mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
+                pool = Pool()
+                segments_results = pool.map_async(sb.segments, (video["id"], ))
+                mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
 
-            segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
-            mbp = mbp_results.get()[0]
-            downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-            socketio.emit('mbp_response', mbp["release-list"])
-            socketio.emit('ytdl_response', (video, downloadform))
+                segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
+                mbp = mbp_results.get()[0]
+                downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+                socketio.emit('mbp_response', mbp["release-list"])
+                socketio.emit('ytdl_response', (video, downloadform))
+            else:
+                sockets.searchvideo('This video has already been downloaded!')
         else:
             sockets.searchvideo('Enter a valid URL!')
 
@@ -59,19 +63,11 @@ def findcover():
     if id is None:
         sockets.searchvideo('Submit a valid release ID!')
 
-@bp.route('/downloadtemplate')
-def template():
-    templates = Templates.query.all()
-    segments = sb.segments('https://www.youtube.com/watch?v=IcrbM1l_BoI')
-    segments_data = segments if type(segments) == list else 'error'
-    return render_template('downloadform.html', templates=templates, segments=segments_data)
-
 @socketio.on('ytdl_download')
 def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}, width=1920, height=1080):
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
-    print(vaapi_device)
     ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height)
     yt_instance = yt()
     yt_instance.get_video(url, ytdl_options)
@@ -104,5 +100,47 @@ def mergedata(filepath, release_id, metadata):
 @socketio.on('insertdata')
 def insertdata(data, ytid):
     data["ytid"] = ytid
-    if Database.insert(data):
-        sockets.overview('inserted_song')
+    id = Database.insert(data)
+    data["id"] = id
+    sockets.overview({'msg': 'inserted_song', 'data': data})
+        
+@socketio.on('deleteitem')
+def deleteitem(id):
+    item = Database.fetchitem(id)
+    os.unlink(item.filepath)
+    item.delete()    
+    sockets.overview({'msg': 'Item succesfully deleted!'})
+    
+@socketio.on('edititem')
+def edititem(data):
+    pass
+
+@socketio.on('downloaditem')
+def downloaditem(input):
+    item = Database.fetchitem(input)
+    if item is None:
+        item = Database.checkfile(input)
+        if item is None:
+            sockets.overview({'msg': 'Filepath invalid'})
+    path = item.filepath
+    if os.path.exists(path) and os.path.isfile(path):
+        if Database.checkfile(path) is not None:
+            extension = path.split('.')[len(path.split('.')) - 1]
+            filename = str(item.name) + "." + str(extension)
+            mimetype = guess_type(path)
+            with open(path, 'rb') as file:
+                content = file.read()
+            sockets.overview({'msg': 'download_file', 'data': content, 'filename': filename, 'mimetype': mimetype})
+        else:
+            sockets.overview({'msg': 'Filepath invalid'})
+    else:
+        sockets.overview({'msg': 'Filepath invalid'})
+
+def path_exists(path):
+    return os.path.exists(path)
+
+@bp.context_processor
+def utility_processor():
+    def path_exists(path):
+        return os.path.exists(path)
+    return dict(path_exists=path_exists)

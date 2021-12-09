@@ -1,14 +1,8 @@
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+@media (max-width: @screen-xs) {
+  body{font-size: 10px;}
 }
 
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
+@media (max-width: @screen-sm) {
+  body{font-size: 14px;}
 }
-th {
-    width: 20%;
-}
+

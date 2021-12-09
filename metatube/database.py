@@ -1,5 +1,4 @@
 from metatube import db
-from datetime import datetime
 from dateutil import parser
 
 class Config(db.Model):
@@ -15,7 +14,6 @@ class Config(db.Model):
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
         db.session.commit()
-        return True
     
     def get_ffmpeg():
         return Config.query.get(1).ffmpeg_directory
@@ -26,12 +24,10 @@ class Config(db.Model):
     def set_amount(self, amount):
         self.amount = int(amount)
         db.session.commit()
-        return True
     
     def set_hwtranscoding(self, hw_transcoding):
         self.hardware_transcoding = hw_transcoding
         db.session.commit()
-        return True
     
     def get_max():
         return Config.query.get(1).amount
@@ -72,7 +68,6 @@ class Templates(db.Model):
         )
         db.session.add(row)
         db.session.commit()
-        return True
     
     def fetchtemplate(input_id):
         return Templates.query.filter_by(id = input_id).first()
@@ -83,7 +78,6 @@ class Templates(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-        return True
     
     def edit(self, data):
         self.name = data["name"]
@@ -101,37 +95,45 @@ class Templates(db.Model):
         self.proxy_port = data["proxy"]["port"]
         db.session.commit()
         
-        return True
-
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(64), unique=True)
+    filepath = db.Column(db.String(64), unique=True)
     name = db.Column(db.String(64))
     artist = db.Column(db.String(64))
     album = db.Column(db.String(64))
     date = db.Column(db.DateTime)
     length = db.Column(db.Integer)
-    musicbrainz_id = db.Column(db.Integer, unique=True)
-    youtube_id = db.Column(db.Integer, unique=True)
+    cover = db.Column(db.LargeBinary)
+    musicbrainz_id = db.Column(db.String(128), unique=True)
+    youtube_id = db.Column(db.String(16), unique=True)
     
     def getrecords():
         return Database.query.all()
     
+    def fetchitem(input_id):
+        return Database.query.filter_by(id = input_id).first()
+    
+    def checkfile(filepath_input):
+        return Database.query.filter_by(filepath = filepath_input).first()
+    
+    def checkyt(youtube_id_input):
+        return Database.query.filter_by(youtube_id = youtube_id_input).first()
+    
     def insert(data):
         row = Database(
-            filename = data["filename"],
+            filepath = data["filepath"],
             name = data["name"],
             artist = data["artist"],
             album = data["album"],
             date = parser.parse(data["date"]),
+            cover = data["image"],
             musicbrainz_id = data["musicbrainz_id"],
             youtube_id = data["ytid"]
         )
         db.session.add(row)
         db.session.commit()
-        return True
-
-class Users():
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
-    password_hash = db.Column(db.String(128))
+        return row.id
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

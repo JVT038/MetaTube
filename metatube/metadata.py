@@ -12,19 +12,19 @@ from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
-from metatube import sockets
-import requests
-import base64
+from metatube import sockets, Config
+import requests, base64, os
 
 class MetaData:
     def getresponse(data):
         return {
-            'filename': data["filename"],
+            'filepath': os.path.join(Config.BASE_DIR, data["filename"]),
             'name': data["title"],
             'artist': data["artists"],
             'album': data["album"],
             'date': data["release_date"],
             'length': data["length"],
+            'image': data["image"],
             'musicbrainz_id': data["mbp_releaseid"]
         }
     
@@ -49,7 +49,11 @@ class MetaData:
         genres = ""
         cover_path = cover_mbp["images"][0]["image"] if len(metadata_user['cover']) < 1 else metadata_user['cover']
         cover_mime_type = guess_type(cover_path)[0]
-        response = requests.get(cover_path)
+        try:
+            response = requests.get(cover_path)
+        except:
+            sockets.searchvideo('Cover URL is invalid')
+            exit()
         
         image = response.content
         total_tracks = len(metadata_mbp["release"]["medium-list"][0]["track-list"])

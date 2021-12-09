@@ -9,7 +9,7 @@ __pycache__
 .vscode
 .flaskenv
 bootstrap 4.0
-app.db
+*.db
 migrations
 bin
 downloads/*

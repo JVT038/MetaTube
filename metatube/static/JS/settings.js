@@ -20,7 +20,8 @@ $(document).ready(function() {
             e.preventDefault();
         } else {
             $("#removetemplatemodaltitle").text('Remove modal \''+ $(this).parent().siblings(':first').text() + '\'');
-            $("#removetemplatemodal").children().children().children('.modal-footer').children('.btn-danger').attr('id', $(this).parent().parent().attr('id'));
+            $("#removetemplatemodal").find('.btn-danger').attr('id', $(this).parent().parent().attr('id'));
+            $("#removetemplatemodal").modal('show');
         }
     });
     $("#deltemplatebtnmodal").on('click', function(){
@@ -71,7 +72,6 @@ $(document).ready(function() {
         let bitrate = $("#template_bitrate").val();
         let width = $("#template_width").val();
         let height = $("#template_height").val();
-        // let resolution = $("#template_resolution").parent().hasClass('d-none') ? "None" : $("#template_resolution").val();
         let proxy_json = JSON.stringify({
             'status': $("#proxy_status").val(),
             'type': $("#proxy_type").val(),
@@ -81,13 +81,19 @@ $(document).ready(function() {
             'port': $("#proxy_port").val()
         });
 
+        if($("#template_type option:selected").parent().attr('label') == 'Video' && output_ext == 'm4a') {
+            output_ext = 'm4a_video';
+        } else if(output_ext == 'm4a') {
+            output_ext = 'm4a_audio';
+        }
+
         socket.emit('updatetemplate', name, output_folder, output_ext, output_name, id, goal, bitrate, width, height, proxy_json);
     });
     $("#template_type").on('change', function() {
         if($(':selected', $(this)).parent().attr('label') == 'Video') {
-            $("#bitratecol").siblings().removeClass('d-none');
+            $(".videocol").removeClass('d-none');
         } else {
-            $("#bitratecol").siblings().addClass('d-none');
+            $(".videocol").addClass('d-none');
         }
     });
     $("#advancedtoggle").on('click', function() {
@@ -133,7 +139,7 @@ $(document).ready(function() {
     });
 
     socket.on('downloadsettings', function(msg) {
-        $("#downloadsettingslog").find("p").text(msg);
+        $("#downloadsettingslog").find("p").html(msg);
     });
 
     socket.on('templatesettings', function(msg) {
@@ -149,6 +155,8 @@ $(document).ready(function() {
         let name = data["name"];
         let output_name = data["output_name"];
         let bitrate = data["bitrate"];
+        let width = data["resolution"].split(';')[0];
+        let height = data["resolution"].split(';')[1];
         let resolution = data["resolution"];
         let output_folder = data["output_folder"];
         let ext = data["extension"];
@@ -159,12 +167,13 @@ $(document).ready(function() {
         $("#template_name").val(name);
         $("#template_folder").val(output_folder);
         $("#template_outputname").val(output_name);
+        $("#template_bitrate").val(bitrate);
         if(type == 'Audio') {
-            $("#template_bitrate").val(bitrate);
-            $("#template_resolution").parent().addClass('d-none');
-            $("#template_bitrate").parent().removeClass('d-none');
+            $(".videocol").addClass('d-none');
         } else {
-            $("#outputrow").children().removeClass('d-none');
+            $(".videocol").removeClass('d-none');
+            $("#template_width").val(width);
+            $("#template_height").val(height);
             $("#template_resolution").children("option[value='"+resolution+"']").prop('selected', true);
         }
         $("#template_type").children('[label=\''+type+'\']').children('[value=\''+ext+'\']').attr('selected', true);

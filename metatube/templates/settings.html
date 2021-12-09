@@ -71,8 +71,8 @@
                             <th scope="col">Template name</th>
                             <th scope="col">Template type</th>
                             <th scope="col">Template extension</th>
-                            <th scope="col">Template output folder</th>
                             <th scope="col">Template name format</th>
+                            <th scope="col">Template output folder</th>
                             <th scope="col">Edit template</th>
                         </tr>
                     </thead>
@@ -86,7 +86,7 @@
                                 <td class="td_output_folder">{{ template.output_folder }}</td>
                                 <td>
                                     <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}" data-toggle="modal" data-target="#removetemplatemodal"><i class="fi-xnsuxl-trash-bin"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-trash-bin"></i></button>
                                     <button type="button" data-toggle="tooltip" data-placement="top" title="Show more info" class="btn btn-primary expandtemplatebtn"><i class="fi-xwsdxl-caret-solid"></i></button>
                                 </td>
                             </tr>
@@ -200,15 +200,15 @@
                                 <label for="#template_bitrate">Audio bitrate***</label>
                                 <input type="text" class="form-control num_input" id="template_bitrate" />
                             </div>
-                            <div class="col d-none">
+                            <div class="col videocol d-none">
                                 <label for="template_width">Video width (in pixels)</label>
                                 <input type="text" class="form-control num_input" id="template_width" />
                             </div>
-                            <div class="col d-none">
+                            <div class="col videocol d-none">
                                 <label for="template_height">Video height (in pixels)</label>
                                 <input type="text" class="form-control num_input" id="template_height" />
                             </div>
-                            <div class="col d-none">
+                            <div class="col videocol d-none">
                                 <label for="#template_resolution">Resolution****</label>
                                 <select class="custom-select" id="template_resolution">
                                     <option value="7680;4320">8K UHD</option>

@@ -38,14 +38,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 1
         'username': proxy['username'],
         'password': proxy['password']
     }
-    # print(name)
-    # print(output_folder)
-    # print(output_ext)
-    # print(output_name)
-    # print(id)
-    # print(goal)
-    # print(bitrate)
-    # print
+    
     if len(data["name"]) < 1 or len(data["output_folder"]) < 1 or len(data["ext"]) < 1 or len(goal) < 1 or len(id) < 1 or data["name"] == 'Default' or len(data["output_name"]) < 1:
         sockets.changetemplate('Enter all fields!')
     elif data["proxy"]["status"] is True and (len(data["proxy"]["address"]) < 1 or len(data["proxy"]["type"]) < 1 or len(data["proxy"]["port"]) < 1):
@@ -91,30 +84,39 @@ def deltemplate(id):
     if len(id) < 1 or int(id) == 0:
         sockets.templatesettings('Select a valid template')
     template = Templates.fetchtemplate(input_id=id)
-    if template.delete():    
-        sockets.templatesettings('Template successfully removed')
-    else:
-        sockets.templatesettings('Something went wrong. Please check the logs for more info.')
+    template.delete()
+    sockets.templatesettings('Template successfully removed')
 
 @socketio.on('updatesettings')
 def updatesettings(ffmpeg_path, amount, hardware_transcoding):
     db_config = Config.query.get(1)
-    db_config.ffmpeg(ffmpeg_path)
-    ffmpeg_instance = ffmpeg()
+    response = ""
+    
     if db_config.ffmpeg_directory != ffmpeg_path:
-        if ffmpeg_instance.test():
-            sockets.downloadsettings('FFmpeg path has succefully been updated and found!')
+        ffmpeg_path = os.path.join(env.BASE_DIR, ffmpeg_path)
+        if os.path.exists(ffmpeg_path):
+            if os.path.isfile(ffmpeg_path):
+                ffmpeg_path = os.path.dirname(ffmpeg_path)
+            if db_config.ffmpeg_directory != ffmpeg_path:
+                db_config.ffmpeg(ffmpeg_path)
+                ffmpeg_instance = ffmpeg()
+                if ffmpeg_instance.test():
+                    response += 'FFmpeg path has succefully been updated and found! <br />'
+                else:
+                    response += 'FFmpeg path has succefully been updated, but the application hasn\'t been found <br />'
         else:
-            sockets.downloadsettings('FFmpeg path has succefully been updated, but the application hasn\'t been found')
+            response += 'FFmpeg path doesn\'t exist <br/>'
             
-    if int(db_config.amount) != int(amount):
+    if str(db_config.amount) != str(amount):
         db_config.set_amount(amount)
-        sockets.downloadsettings('Max amount has succesfully been updated')
+        response += 'Max amount has succesfully been updated <br />'
         
-    if db_config.hardware_transcoding != hardware_transcoding:
+    if str(db_config.hardware_transcoding) != str(hardware_transcoding):
         if "vaapi" in hardware_transcoding:
             if len(hardware_transcoding.split(';')[1]) < 1:
-                sockets.downloadsettings('Enter a VAAPI device path!')
+                response += 'Enter a VAAPI device path! <br />'
                 exit()
         db_config.set_hwtranscoding(hardware_transcoding)
-        sockets.downloadsettings('Hardware Transcoding setting has succesfully been updated!')
+        response += 'Hardware Transcoding setting has succesfully been updated! <br />'
+        
+    sockets.downloadsettings(response)

@@ -35,9 +35,7 @@ class YouTube:
     def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
-                ytdl.add_postprocessor_hook(YouTube.postprocessor_hook)
                 ytdl.download(url)
-                
             except Exception as e:
                 return e
     
@@ -68,9 +66,6 @@ class YouTube:
             sockets.downloadprogress({'status': 'processing'})
         elif d['status'] == 'finished':
             sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'info_dict': json.dumps(d["info_dict"])})
-
-    def get_video(self, url, ytdl_options):
-        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
         
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height):
         proxy = json.loads(proxy_data)
@@ -98,7 +93,23 @@ class YouTube:
             if len(height) < 1 or len(width) < 1:
                 width = 1920
                 height = 1080
-            postprocessor_args["VideoConvertor"] = ['-vf', "scale=" + str(width) + ":" + str(height), '-b:a', str(bitrate) + "k"]
+            postprocessor_args["videoconvertor"] = ['-vf', "scale=" + str(width) + ":" + str(height), '-b:a', str(bitrate) + "k"]
+            
+            # If hardware transcoding isn't None, add a hardware transcoding thingy to the FFmpeg arguments
+            if hw_transcoding != 'None':
+                if hw_transcoding == 'nvenc':
+                    postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_nvenc'])
+                elif hw_transcoding == 'qsv':
+                    postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_qsv'])
+                elif hw_transcoding == 'videotoolbox':
+                    postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_videotoolbox'])
+                elif 'vaapi' in hw_transcoding:
+                    postprocessor_args["videoconvertor"].extend(['-vaapi_device', vaapi_device, '-c:v', 'h264_vaapi'])
+                elif hw_transcoding == 'amd':
+                    postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_amf'])
+                elif hw_transcoding == 'omx':
+                    postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_omx'])
+                    
         # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
         if len(segments) > 0:
             ranges = []
@@ -112,20 +123,6 @@ class YouTube:
                 'key': 'ModifyChapters',
                 'remove_ranges': ranges
             })
-        # If hardware transcoding isn't None, add a hardware transcoding thingy to the FFmpeg arguments
-        if hw_transcoding != 'None':
-            if hw_transcoding == 'nvenc':
-                postprocessor_args["default"] = ['-c:v', 'h264_nvenc']
-            elif hw_transcoding == 'qsv':
-                postprocessor_args["default"] = ['-c:v', 'h264_qsv']
-            elif hw_transcoding == 'videotoolbox':
-                postprocessor_args["default"] = ['-c:v', 'h264_videotoolbox']
-            elif 'vaapi' in hw_transcoding:
-                postprocessor_args["default"] = ['-vaapi_device', vaapi_device, '-c:v', 'h264_vaapi']
-            elif hw_transcoding == 'amd':
-                postprocessor_args["default"] = ['-c:v', 'h264_amf']
-            elif hw_transcoding == 'omx':
-                postprocessor_args["default"] = ['-c:v', 'h264_omx']
 
         ytdl_options = {
             'format': format,
@@ -133,9 +130,9 @@ class YouTube:
             'postprocessor_args': postprocessor_args,
             'ffmpeg_location': ffmpeg,
             'progress_hooks': [YouTube.download_hook],
+            'postprocessor_hooks': [YouTube.postprocessor_hook],
             'outtmpl': filepath,
-            'noplaylist': True,
-            'verbose': True
+            'noplaylist': True
         }
         
         # Add proxy if proxy is enabled
@@ -146,15 +143,7 @@ class YouTube:
             else:
                 proxy_string += proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
             ytdl_options["proxy"] = proxy_string
-            
         return ytdl_options
-        
-def fetch_video(args):
-    from metatube import create_app
-    app = create_app()        
-    segments = sb.segments(args["video"]["id"])
-    with app.app_context():
-        app.config['SERVER_NAME'] = args['server_name']
-        templates = Templates.fetchalltemplates()
-        downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-        socketio.emit('ytdl_response', (args["video"], downloadform))
+
+    def get_video(self, url, ytdl_options):
+        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()

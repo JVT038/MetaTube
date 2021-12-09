@@ -35,5 +35,8 @@ $(document).ready(function() {
     $(document).on('focus', '.num_input', function() {
         $(this).ForceNumericOnly()
     });
-    $('[data-toggle="tooltip"]').tooltip();
+
+    $('body').tooltip({
+        selector: '[data-toggle=tooltip]'
+    });
 });

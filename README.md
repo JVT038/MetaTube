@@ -106,7 +106,6 @@ $ cd metatube
 # Skip these steps if you don't want to use a virtual environment
 # Install virtualenv
 $ pip install virtualenv
-
 # Create virtual environment in current directory
 $ virtualenv .
 # Activate environment
@@ -161,13 +160,14 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for sites other than YouTube
 - [ ] Add support for YouTube playlists
 - [ ] Add custom YouTube-DLP options
+- [ ] Add support for x265 / HEVC
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
 - [ ] Add translations
 - [X] Add a nice progress bar
-- [ ] Add a function to allow users to download the song onto their device
+- [X] Add a function to allow users to download the song onto their device
 - [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
 - [X] Add ability to manually set video width & height, if a video type has been selected
@@ -176,7 +176,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
 - [ ] Support MySQL
 - [ ] Make a CLI to download and match music
-- [ ] Store the information of downloaded songs in a SQL database
+- [X] Store the information of downloaded songs in a SQL database
 - [ ] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip fragments
 - [ ] Build a logger
@@ -185,10 +185,11 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Select output type (coding, extension, etc.)
 - [ ] Switch from AJAX to websockets
 - [X] Hardware transcoding with NVENC, Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
-- [ ] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
+- [X] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
 - [ ] Dark mode support
 - [ ] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
+- [ ] Make sure the search for downloaded song field works
 &#xa0;
 
 ## Disclaimer

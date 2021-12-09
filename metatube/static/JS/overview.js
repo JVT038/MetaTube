@@ -1,16 +1,7 @@
 var socket = io();
 $(document).ready(function() {
     $("#metadataview").find('input').attr('autocomplete', 'off');
-    // Option to change the query type - disabled at the moment
-    // $(document).on('change', '#query_type', function() {
-    //     if($(this).val() == 'url') {
-    //         $("#query").attr('placeholder', 'Enter URL to download')
-    //         $("#supportedsitesanchor").show();
-    //     } else if ($(this).val() == 'mbq') {
-    //         $("#query").attr('placeholder', 'Enter MusicBrainz ID to download')
-    //         $("#supportedsitesanchor").hide();
-    //     }
-    // });
+    
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     async function insertYTcol(response, form) {
         let data = response;
@@ -149,6 +140,85 @@ $(document).ready(function() {
         friconix_update();
         return $('.personrow:last');
     }
+
+    function additem(data) {
+        let itemdata = data.data;
+        let tr = document.createElement('tr');
+        let td_name = document.createElement('td');
+        let td_artist = document.createElement('td');
+        let td_album = document.createElement('td');
+        let td_date = document.createElement('td');
+        let td_actions = document.createElement('td');
+        let editbtn = document.createElement('button');
+        let deletebtn = document.createElement('button');
+        let downloadbtn = document.createElement('button');
+        let viewbtn = document.createElement('button');
+        let i_edit = document.createElement('i');
+        let i_delete = document.createElement('i');
+        let i_view = document.createElement('i');
+        let i_download = document.createElement('i');
+        
+        td_name.innerText = itemdata["name"]
+        td_artist.innerText = itemdata["artist"].replace('/', ';')
+        td_album.innerText = itemdata["album"]
+        td_date.innerText = itemdata["date"]
+        
+        editbtn.classList.add('btn', 'btn-success', 'edititembtn', 'mr-1');
+        viewbtn.classList.add('btn', 'btn-info', 'mr-1');
+        downloadbtn.classList.add('btn', 'btn-primary', 'downloaditembtn', 'mr-1');
+        deletebtn.classList.add('btn', 'btn-danger', 'deleteitembtn');
+        
+        i_edit.classList.add('fi-xnsuxl-edit-solid');
+        i_delete.classList.add('fi-xnsuxl-trash-bin');
+        i_view.classList.add('fi-xwsuxl-youtube');
+        i_download.classList.add('fi-xwsrxl-sign-in-solid');
+        
+        tr.id = itemdata["id"];
+
+        editbtn.setAttribute('data-toggle', 'tooltip');
+        editbtn.setAttribute('data-placement', 'top');
+        editbtn.setAttribute('title', 'Edit item');
+
+        deletebtn.setAttribute('data-toggle', 'tooltip');
+        deletebtn.setAttribute('data-placement', 'top');
+        deletebtn.setAttribute('title', 'Delete item');
+
+        viewbtn.setAttribute('data-toggle', 'tooltip');
+        viewbtn.setAttribute('data-placement', 'top');
+        viewbtn.setAttribute('title', 'View YouTube video');
+        viewbtn.setAttribute('onclick', 'window.open(\'https://youtu.be/'+itemdata["ytid"]+'\', target=\'__blank\')');
+        
+        downloadbtn.setAttribute('data-toggle', 'tooltip');
+        downloadbtn.setAttribute('data-placement', 'top');
+        downloadbtn.setAttribute('title', 'Download item');
+
+        i_view.setAttribute('style', 'color: red');
+
+        deletebtn.appendChild(i_delete);
+        editbtn.appendChild(i_edit);
+        viewbtn.appendChild(i_view);
+        downloadbtn.appendChild(i_download);
+
+        td_actions.appendChild(editbtn);
+        td_actions.appendChild(downloadbtn);
+        td_actions.appendChild(viewbtn);
+        td_actions.appendChild(deletebtn);
+
+        tr.append(td_name, td_artist, td_album, td_date, td_actions);
+        $("#recordstable").children("tbody").append(tr);
+        friconix_update();
+    }
+
+    function downloadURI(uri, name) {
+        var link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        delete link;
+    }
+
     $(document).on('mouseenter', '.mbp-item', function() {
         $(this).css('filter', 'brightness(50%)');
         $(this).css('background-colour', '#009999');
@@ -264,23 +334,47 @@ $(document).ready(function() {
         $("#proxy_row").toggleClass('d-none');
     });
 
+    
+    $(document).on('click', ".deleteitembtn", function() {
+        $("#removeitemmodal").find('.btn-danger').attr('id', $(this).parent().parent().attr('id'));
+        $("#removeitemmodaltitle").text('Delete ' + $(this).parents('tr').children(':first').text())
+        $("#removeitemmodal").modal('show');
+    });
+
+    $(document).on('click', '.edititembtn', function() {
+
+    });
+
+    $(document).on('click', '.downloaditembtn', function() {
+        let id = $(this).parents('tr').attr('id');
+        socket.emit('downloaditem', id)
+    });
+
+    $("#delitembtnmodal").on('click', function() {
+        let id = $(this).attr('id');
+        $("tr#"+id).remove();
+        $("#removeitemmodal").modal('hide');
+        socket.emit('deleteitem', id);
+    });
+
     $("#queryform").on('submit', function(e) {
         e.preventDefault();
         $("#searchsongbtn").trigger('click');
     });
     
     $("#searchsongbtn").on('click', function() {
-        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
-        $("#searchlog").empty();
-        $("#ytcol").empty().append(spinner);
-        $("#audiocol").empty().append(spinner);
-        // Reset the modal
-        $(".modal-footer").addClass('d-none');
-        $(".removeperson").parents('.personrow').remove();
-        $("#metadataview").find('input').val('');
-        // YouTube socket
+        // Send request to the server
         let query = $("#query").val();
         socket.emit('ytdl_search', query);
+        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
+        $("#searchlog, #progresstext").empty();
+        $("#defaultview").removeClass('d-none');
+        $("#ytcol, #audiocol").empty().append(spinner);
+        // Reset the modal
+        $("#progress").attr('aria-valuenow', "0").css('width', '0');
+        $("#searchvideomodalfooter, #metadataview, #progressview").addClass('d-none');
+        $(".removeperson").parents('.personrow').remove();
+        $("#metadataview").find('input').val('');
     });   
     $("#downloadbtn").on('click', function(e) {
         if($(".audiocol-checkbox:checked").length < 1) {
@@ -343,10 +437,10 @@ $(document).ready(function() {
         }
     });
 
-    $("#addsong").on('click', function() {
+    $("#addvideo").on('click', function() {
         if($("#progress").text() == '100%') {
-            $("#defaultview, #downloadbtn").removeClass('d-none');
-            $("#progressview").addClass('d-none');
+            $("#defaultview, #downloadbtn, #editmetadata").removeClass('d-none');
+            $("#progressview, #downloadfilebtn").addClass('d-none');
             $("#progresstext, #progress").text('');
             $("#progress").attr({
                 'aria-valuenow': '0',
@@ -357,6 +451,11 @@ $(document).ready(function() {
 
         $("#downloadmodal").modal('toggle');
     });
+
+    $("#downloadfilebtn").on('click', function() {
+        socket.emit('downloaditem', $(this).attr('filepath'));
+    });
+
     socket.on('downloadprogress', function(msg) {
         var progress_text = $("#progresstext");
         if(msg.status == 'downloading') {
@@ -382,8 +481,8 @@ $(document).ready(function() {
             $("#progress").css('width', '66%');
             progress_text.text('Adding metadata...');
             var filepath = msg.filepath;
-            var release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-            var people = {};
+            let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+            let people = {};
 
             $.each($('.artist_relations'), function() {
                 if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
@@ -417,25 +516,30 @@ $(document).ready(function() {
             $("#progress").text("100%");
             $("#progress").css('width', '100%');
             progress_text.text('Finished adding metadata!');
-            let ytid = $("#thumbnail_yt").attr('ytid')
-            socket.emit('insertdata', msg.data, ytid)
+            let ytid = $("#thumbnail_yt").attr('ytid');
+            $("#downloadfilebtn").removeClass('d-none');
+            $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
+            socket.emit('insertdata', msg.data, ytid);
+        } else {
+            socketdata = msg;
         }
     });
+
     socket.on('ytdl_response', async (video, downloadform) => {
         let ytcol = await insertYTcol(video, downloadform);
         ytdata = video;
         $("#ytcol").append(ytcol);
         friconix_update();
-        $(".modal-footer").removeClass('d-none')
+        $(".modal-footer").removeClass('d-none').children().not('#downloadfilebtn').removeClass('d-none');
     });
 
-    // socket.on('ytdl_response', (video, downloadform) => insertYTcol(video, downloadform));
     socket.on('mbp_response', async (mbp) => {
         let audiocol = await insertAudioCol(mbp);
         audiodata = mbp;
         $("#audiocol").append(audiocol);
         $(".modal-footer").removeClass('d-none')
     });
+
     socket.on('template', (response) => {
         data = response;
         response = JSON.parse(response);
@@ -461,17 +565,16 @@ $(document).ready(function() {
             $("#proxy_row").addClass('d-none');
         }
         if(response.type == 'Video') {
-            $("#bitrate").parent().addClass('d-none');
             $("#videorow").removeClass('d-none');
             $("#resolution").children('option:selected').prop('selected', false);
             $("#resolution").children("option[value='"+response.resolution+"']").prop('selected', true);
             $("#width").val(response.resolution.split(';')[0]);
             $("#height").val(response.resolution.split(';')[1]);
         } else {
-            $("#bitrate").parent().removeClass('d-none');
             $("#videorow").addClass('d-none');
         }
     });
+
     socket.on('foundmbprelease', (data) => {
         let mbp = JSON.parse(data);
         let title = mbp["release"].title;
@@ -536,9 +639,23 @@ $(document).ready(function() {
         $("#md_album_artists").val(artists);
         $("#md_album_tracknr").val(tracknr);
     });
+
     socket.on('searchvideo', (data) => {
         $("#defaultview").find(".spinner-border").parent('.d-flex').remove();
         $("#searchlog").text(data);
         $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+    });
+
+    socket.on('overview', (data) => {
+        if(data.msg == 'inserted_song') {
+            additem(data)
+        } else if(data.msg == 'download_file') {
+            filedata = data.data;
+            let blob = new Blob([filedata], {'type': data.mimetype})
+            let uri = URL.createObjectURL(blob)
+            downloadURI(uri, data.filename)
+        } else {
+            $("#overviewlog").text(data.msg)
+        }
     });
 })

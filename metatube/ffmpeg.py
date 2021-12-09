@@ -1,4 +1,4 @@
-import subprocess, os, tempfile
+import subprocess, os
 from metatube.database import Config
 from metatube import Config as env
 import ffmpeg as ffmpeg_python
@@ -7,13 +7,17 @@ import ffmpeg as ffmpeg_python
 class ffmpeg():
     def __init__(self):
         ffmpeg_path = Config.query.get(1).ffmpeg_directory
-        if ffmpeg_path.startswith('/') or (ffmpeg_path[0].isalpha() and ffmpeg_path[1].startswith(':\\')):
-            self.ffmpeg_path = ffmpeg_path
+        if len(ffmpeg_path) > 0:
+            if (ffmpeg_path.startswith('/') or (ffmpeg_path[0].isalpha() and ffmpeg_path[1].startswith(':\\'))) and len(ffmpeg_path) > 0:
+                self.ffmpeg_path = ffmpeg_path
+            else:
+                self.ffmpeg_path = os.path.join(env.BASE_DIR, ffmpeg_path)
         else:
-            self.ffmpeg_path = os.path.join(env.BASE_DIR, ffmpeg_path)
+            self.ffmpeg_path = ""
     def test(self):
+        print(self.ffmpeg_path)
         try:
-            p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True)
+            p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True, stdout=subprocess.DEVNULL)
             p.wait()
             return True
         except Exception as e:

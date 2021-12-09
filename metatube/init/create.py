@@ -4,6 +4,7 @@ from metatube import db, database
 from metatube import Config as env
 from sqlalchemy.engine import create_engine
 from sqlalchemy import inspect
+import sqlite3
 import os
 class Default():
     def __init__(self, app, url):
@@ -53,10 +54,9 @@ class Default():
     def init_db(self, db_exists = True):
         if db_exists is False:
             directory = os.path.join(env.BASE_DIR, 'migrations')
-            try:
-                init(directory)
-            except:
-                pass
+            if os.path.exists(directory):
+                init(directory)    
+                self.removealembic()
         self.migrations()
         for method in self._methods:
             getattr(Default, method)()
@@ -68,3 +68,9 @@ class Default():
         stamp(directory)
         migrate(directory)
         upgrade(directory)
+        
+    def removealembic(self):
+        conn = sqlite3.connect(self._url.replace('sqlite:///', ''))
+        conn.execute('DROP TABLE IF EXISTS alembic_version;')
+        conn.commit()
+        conn.close()
