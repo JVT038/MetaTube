@@ -15,7 +15,6 @@ class ffmpeg():
         else:
             self.ffmpeg_path = ""
     def test(self):
-        print(self.ffmpeg_path)
         try:
             p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True, stdout=subprocess.DEVNULL)
             p.wait()
@@ -55,12 +54,10 @@ class ffmpeg():
         streams = []
         files = []
         # tmpfile = tempfile.NamedTemporaryFile(delete=False)
-        tmpfile = open('streams.txt', 'w')
         ext = filepath.split('.')[len(filepath.split('.')) - 1]
         output_name = filepath[0:len(filepath) - (len(ext) + 1)]
         for i in range(len(segments)):
             filename = output_name + str(i) + "." + ext
-            print(filename)
             if i == 0:
                 (
                 ffmpeg_python

@@ -1,4 +1,4 @@
-from metatube import db
+from metatube import db, logger
 from dateutil import parser
 
 class Config(db.Model):
@@ -132,6 +132,7 @@ class Database(db.Model):
         )
         db.session.add(row)
         db.session.commit()
+        logger.info('Inserted item %s into database', data["name"])
         return row.id
     
     def delete(self):

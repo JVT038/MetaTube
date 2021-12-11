@@ -1,9 +1,8 @@
-import yt_dlp, json, os
+import yt_dlp, json, os, sys
 from threading import Thread
-from metatube import socketio, sockets
-from metatube.database import Templates
-from metatube import sponsorblock as sb
+from metatube import sockets, logger, sponsorblock
 from flask import render_template
+from metatube.database import Templates
     
 class YouTube:
     def is_supported(url):
@@ -30,6 +29,7 @@ class YouTube:
             yt_dlp.YoutubeDL.validate_outtmpl(template)
             return True
         except ValueError as e:
+            logger.error('Error in metatube/youtube.py: ' + str(e))
             return False
         
     def __download(self, url: list, ytdl_options: dict):
@@ -66,7 +66,7 @@ class YouTube:
             sockets.downloadprogress({'status': 'processing'})
         elif d['status'] == 'finished':
             sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'info_dict': json.dumps(d["info_dict"])})
-        
+            
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
@@ -116,7 +116,7 @@ class YouTube:
             for segment in segments:
                 if len(segment["start"]) < 1 or len(segment["end"]) < 1:
                     sockets.searchvideo('Enter all fragment fields!')
-                    exit()
+                    return False
                 else:
                     ranges.append((int(segment["start"]), int(segment["end"])))
             postprocessors.append({
@@ -131,8 +131,9 @@ class YouTube:
             'ffmpeg_location': ffmpeg,
             'progress_hooks': [YouTube.download_hook],
             'postprocessor_hooks': [YouTube.postprocessor_hook],
+            'logger': logger,
             'outtmpl': filepath,
-            'noplaylist': True
+            'noplaylist': True,
         }
         
         # Add proxy if proxy is enabled

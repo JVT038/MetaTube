@@ -40,10 +40,10 @@
   - Hardware encoding using NVENC, Intel Quick Sync
   - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX
   - Manually set height and width, if a video type has been selected
+  - Store the information about downloaded releases in the database, to edit the downloaded content later after the download
 
   To-Do before the first release:
   - Support more extensions to merge metadata with.
-  - Store the information about downloaded releases in the database
   - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
   - Some decent mobile support
   - Docker support
@@ -134,6 +134,7 @@ PORT|Set the port on which the MetaTube server will be available|5000
 HOST|Set the address on which the MetaTube server will run | 127.0.0.1
 DEBUG|Whether to enable debug mode or not | False
 DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
+FFMPEG | An absolute path to the folder containing ffmpeg. | Empty
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -160,7 +161,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for sites other than YouTube
 - [ ] Add support for YouTube playlists
 - [ ] Add custom YouTube-DLP options
-- [ ] Add support for x265 / HEVC
+- [ ] Add support for H.265 / HEVC
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music 
@@ -170,7 +171,12 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add a function to allow users to download the song onto their device
 - [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
+- [ ] Add a cancel download button when the video is being downloaded
+- [ ] Add button in settings to download the entire SQlite3 Database
+- [ ] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
+- [X] Build a logger
+- [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [ ] Catch and show errors properly
 - [ ] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
@@ -179,16 +185,15 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Store the information of downloaded songs in a SQL database
 - [ ] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip fragments
-- [ ] Build a logger
 - [X] Manually edit metadata of file, before the download
 - [ ] Manually edit metadata of file, after the download
 - [X] Select output type (coding, extension, etc.)
-- [ ] Switch from AJAX to websockets
+- [X] Switch from AJAX to websockets
 - [X] Hardware transcoding with NVENC, Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
 - [X] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
 - [ ] Dark mode support
-- [ ] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
+- [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [ ] Make sure the search for downloaded song field works
 &#xa0;
 

@@ -1,14 +1,13 @@
 import sponsorblock
 from sponsorblock.errors import *
-from metatube.database import Templates
-from metatube import socketio
-from flask import render_template
+from metatube import logger
 def segments(url):
     client = sponsorblock.Client()
+    logger.info('Fetching sponsorblock segments for %s', url)
     try:
         segments = client.get_skip_segments(url)    
     except Exception as e:
-        print(str(e))
+        logger.error("Error in metatube/sponsorblock.py: " + str(e))
         return str(e)
     
     response = []

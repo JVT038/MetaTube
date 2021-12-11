@@ -38,58 +38,42 @@ $(document).ready(function() {
     async function insertAudioCol(mbp_data) {
         let ul = document.createElement('ul');
         ul.classList.add('list-unstyled');
-        $.each(mbp_data, function(key_release, value_release) {
-            let release_id = value_release.id;
-            let title = value_release.title;
-            let artists = value_release['artist-credit'].length > 1 ? "Artists: <br />" : "Artist: ";
-            let date = value_release.date;
-            let language = ""
-            if("text-representation" in value_release) {
-                if("language" in value_release["text-representation"]) {
-                    language =  value_release["text-representation"]["language"]
-                } else {
-                    language = "Unknown"
-                }
+        let release_id = mbp_data.id;
+        let title = mbp_data.title;
+        let artists = mbp_data['artist-credit'].length > 1 ? "Artists: <br />" : "Artist: ";
+        let date = mbp_data.date;
+        let language = ""
+        if("text-representation" in mbp_data) {
+            if("language" in mbp_data["text-representation"]) {
+                language =  mbp_data["text-representation"]["language"]
             } else {
                 language = "Unknown"
             }
-            $.each(value_release["artist-credit"], function(key_artist, value_artist) {
-                if(typeof(value_artist) == 'object') {
-                    let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a><br/>';
-                    artists+=a;
-                }
-            });
-            let release_type = value_release["release-group"].type;
-            $.ajax({
-                url: Flask.url_for('overview.findcover'),
-                method: 'GET',
-                data: {
-                    id: release_id
-                },
-                success: function(response) {
-                    cover = response;
-                    let mbp_url = 'https://musicbrainz.org/release/'+release_id;
-                    let mbp_image = "";
-                    if("cover" in response && response.cover != "None") {
-                        // "cover" in response ? response.cover.images[0].thumbnails.small : Flask.url_for('static', {"filename": "images/empty_cover.png"});
-                        mbp_image = response.cover.images[0].thumbnails.small;
-                    } else {
-                        mbp_image = Flask.url_for('static', {"filename": "images/empty_cover.png"});
-                    }
-                    html = {
-                        'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
-                        'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
-                        'checkbox': '<div class="input-group-text"><input class="audiocol-checkbox" type="radio" aria-label="Radio button for selecting an item"></div>',
-                    }
-                    let list = '<li class="media mbp-item" style="cursor: pointer" id="'+release_id+'">'+html['img']+html['desc']+html['checkbox']+'</li>';
-                    ul.insertAdjacentHTML('beforeend', list);
-                }, 
-                error: function(error) {
-                    console.log(error)
-                }
-            });
+        } else {
+            language = "Unknown"
+        }
+        $.each(mbp_data["artist-credit"], function(key_artist, value_artist) {
+            if(typeof(value_artist) == 'object') {
+                let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a><br/>';
+                artists+=a;
+            }
         });
-        $("#audiocol").empty();
+        let release_type = mbp_data["release-group"].type;
+        let mbp_url = 'https://musicbrainz.org/release/'+release_id;
+        let mbp_image = "";
+        if("cover" in mbp_data && mbp_data.cover != "None") {
+            mbp_image = mbp_data.cover.images[0].thumbnails.small;
+        } else {
+            mbp_image = Flask.url_for('static', {"filename": "images/empty_cover.png"});
+        }
+        html = {
+            'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
+            'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
+            'checkbox': '<div class="input-group-text"><input class="audiocol-checkbox" type="radio" aria-label="Radio button for selecting an item"></div>',
+        }
+        let list = '<li class="media mbp-item" style="cursor: pointer" id="'+release_id+'">'+html['img']+html['desc']+html['checkbox']+'</li>';
+        ul.insertAdjacentHTML('beforeend', list);
+        $(".spinner-border").parent().remove();
         return ul;
     }
 
@@ -342,7 +326,7 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.edititembtn', function() {
-
+        
     });
 
     $(document).on('click', '.downloaditembtn', function() {
@@ -379,8 +363,7 @@ $(document).ready(function() {
     $("#downloadbtn").on('click', function(e) {
         if($(".audiocol-checkbox:checked").length < 1) {
             e.preventDefault();
-            $("#progress_status").removeClass('d-none');
-            $("#progress_status").children('p').text('Select a release on the right side before downloading a video');
+            $("#searchlog").text('Select a release on the right side before downloading a video');
         } else {
             let url = $("#thumbnail_yt").attr('url');
             let ext = $("#extension").val();
@@ -414,8 +397,6 @@ $(document).ready(function() {
             socket.emit('ytdl_download', 
                 url, ext, output_folder, type, output_format, bitrate,skipfragments, proxy_data, width, height
             );
-            $("#editmetadata, #downloadbtn, #defaultview").addClass('d-none');
-            $("#progressview").removeClass('d-none');
         }
     });
     $("#fetchmbpreleasebtn").on('click', function(){
@@ -457,6 +438,9 @@ $(document).ready(function() {
     });
 
     socket.on('downloadprogress', function(msg) {
+        $("#editmetadata, #downloadbtn, #defaultview").addClass('d-none');
+        $("#progressview").removeClass('d-none');
+        $("#searchlog").empty();
         var progress_text = $("#progresstext");
         if(msg.status == 'downloading') {
             progress_text.text("Downloading...");
@@ -465,15 +449,10 @@ $(document).ready(function() {
             $("#progress").text(percentage + "%");
             $("#progress").css('width', parseInt(percentage)+'%');
         }
-        else if(msg.status == 'finished_ytdl') {
-            if(msg.total_bytes != 'Unknown') {
-                $("#progress").attr('aria-valuenow', 33);
-                $("#progress").text("33%");
-                $("#progress").css('width', '33%');
-            } else {
-                progress_text.text('Finished downloading!');
-            }
-        } else if(msg.status == 'processing') {
+        else if(msg.status == 'finished_ytdl' || msg.status == 'processing') {
+            $("#progress").attr('aria-valuenow', 33);
+            $("#progress").text("33%");
+            $("#progress").css('width', '33%');
             progress_text.text('Processing and converting file to desired output... ');
         } else if(msg.status == 'finished_ffmpeg') {
             $("#progress").attr('aria-valuenow', 66);
@@ -519,9 +498,12 @@ $(document).ready(function() {
             let ytid = $("#thumbnail_yt").attr('ytid');
             $("#downloadfilebtn").removeClass('d-none');
             $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
-            socket.emit('insertdata', msg.data, ytid);
-        } else {
-            socketdata = msg;
+            try {
+                socket.emit('insertdata', msg.data, ytid);
+                console.info('something went good asdfasdf');
+            } catch (error) {
+                console.error(error);
+            }
         }
     });
 
@@ -648,6 +630,7 @@ $(document).ready(function() {
 
     socket.on('overview', (data) => {
         if(data.msg == 'inserted_song') {
+            console.log('asdgsadf')
             additem(data)
         } else if(data.msg == 'download_file') {
             filedata = data.data;

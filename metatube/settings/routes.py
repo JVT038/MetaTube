@@ -4,7 +4,6 @@ from metatube.ffmpeg import ffmpeg
 from metatube import Config as env
 from metatube import socketio, sockets
 from flask import render_template, request, jsonify
-from mock import Mock
 import os, json
 
 @bp.route('/settings', methods=['GET', 'POST'])

@@ -10,9 +10,7 @@ from mutagen.oggopus import OggOpus
 from mutagen.easyid3 import EasyID3
 from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover
-from hachoir.parser import createParser
-from hachoir.metadata import extractMetadata
-from metatube import sockets, Config
+from metatube import sockets, Config, logger
 import requests, base64, os
 
 class MetaData:
@@ -209,6 +207,7 @@ class MetaData:
                 audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
                 audio.save()
         response = MetaData.getresponse(data)
+        logger.info('Finished adding metadata to %s', data["title"])
         sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
     def mergeid3data(data):
@@ -231,13 +230,11 @@ class MetaData:
         audio.tags.add(APIC(encoding=3, mime=data["cover_mime_type"], type=3, desc=u'Cover', data=data["image"]))
         
         response = MetaData.getresponse(data)
+        logger.info('Finished adding metadata to %s', data["title"])
         sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     def mergevideodata(data):
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
-        else:
-            video = createParser(data["filename"])
-            data = extractMetadata(video)
             
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
         video["\xa9nam"] = data["title"]
@@ -253,6 +250,7 @@ class MetaData:
         
         video.save()
         response = MetaData.getresponse(data)
+        logger.info('Finished adding metadata to %s', data["title"])
         sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
     def FLV(filename):

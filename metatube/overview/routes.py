@@ -4,7 +4,7 @@ from metatube.database import *
 from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
 from metatube import socketio, sockets
-from flask import render_template, request, jsonify
+from flask import render_template
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 from multiprocessing import Pool
@@ -40,8 +40,10 @@ def search(query):
                 segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
                 mbp = mbp_results.get()[0]
                 downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-                socketio.emit('mbp_response', mbp["release-list"])
-                socketio.emit('ytdl_response', (video, downloadform))
+                sockets.youtuberesults(video, downloadform)
+                for release in mbp["release-list"]:
+                    release["cover"] = musicbrainz.get_cover(release["id"])
+                    sockets.musicbrainzresults(release)
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
@@ -50,27 +52,15 @@ def search(query):
     else:
         sockets.searchvideo('Enter an URL!')
 
-@bp.route('/ajax/findcover', methods=['GET'])
-def findcover():
-    id = request.args.get('id')
-    if id is not None:
-        try:
-            cover = musicbrainz.get_cover(id)
-            response = jsonify(status='Success', cover=cover)
-            return response
-        except Exception as error:
-            return str(error), 400
-    if id is None:
-        sockets.searchvideo('Submit a valid release ID!')
-
 @socketio.on('ytdl_download')
 def download(url, ext='mp3', output_folder='downloads', type='Audio', output_format=f'%(title)s.%(ext)s', bitrate=192, skipfragments="{}", proxy_data={'proxy_status': False}, width=1920, height=1080):
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height)
-    yt_instance = yt()
-    yt_instance.get_video(url, ytdl_options)
+    if ytdl_options is not False:
+        yt_instance = yt()
+        yt_instance.get_video(url, ytdl_options)
 
 @socketio.on('fetchmbprelease')
 def fetchmbprelease(release_id):
@@ -98,7 +88,7 @@ def mergedata(filepath, release_id, metadata):
         MetaData.mergeid3data(data)
         
 @socketio.on('insertdata')
-def insertdata(data, ytid):
+def inserttodb(data, ytid):
     data["ytid"] = ytid
     id = Database.insert(data)
     data["id"] = id
@@ -107,8 +97,11 @@ def insertdata(data, ytid):
 @socketio.on('deleteitem')
 def deleteitem(id):
     item = Database.fetchitem(id)
-    os.unlink(item.filepath)
-    item.delete()    
+    try:
+        os.unlink(item.filepath)
+    except:
+        pass
+    item.delete()
     sockets.overview({'msg': 'Item succesfully deleted!'})
     
 @socketio.on('edititem')
@@ -135,9 +128,6 @@ def downloaditem(input):
             sockets.overview({'msg': 'Filepath invalid'})
     else:
         sockets.overview({'msg': 'Filepath invalid'})
-
-def path_exists(path):
-    return os.path.exists(path)
 
 @bp.context_processor
 def utility_processor():

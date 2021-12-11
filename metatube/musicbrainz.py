@@ -1,13 +1,15 @@
 # from flask import Request
 import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
+from metatube import logger
 musicbrainzngs.set_useragent("metatube", "0.1")
 def search(args):
     
     query = args['query']
     artist = args['artist']
     max = args['max']
-    response = musicbrainzngs.search_releases(query, artistname=artist, limit=max)
+    response = musicbrainzngs.search_releases(query, artistname=artist, limit=max, type='Album')
+    logger.info('Fetched info for %s', query)
     return response
 
 def search_id_release(id):
@@ -18,8 +20,8 @@ def search_id_release(id):
     except Exception as e:
         return str(e)
 
-def search_id_recording(id):
-    response = musicbrainzngs.search_recordings(rgid=id)
+def search_id_recording(query):
+    response = musicbrainzngs.search_recordings(query)
     return response
 
 def search_id_release_group(id):

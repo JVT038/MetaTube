@@ -6,7 +6,8 @@ def init(app):
     db_url = Config.SQLALCHEMY_DATABASE_URI
     if db_url.startswith('sqlite:///'):
         relative_url = 'sqlite:///' + os.path.join('metatube', db_url.replace('sqlite:///', ''))
-        default = Default(app, relative_url)
+        ffmpeg = app.config["FFMPEG"]
+        default = Default(app, relative_url, ffmpeg)
         if os.path.exists(os.path.join(Config.BASE_DIR, 'migrations')) and os.path.isdir(os.path.join(Config.BASE_DIR, 'migrations')):
             default.init_db()
         else:

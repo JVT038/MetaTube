@@ -1,22 +1,23 @@
 from flask_migrate import init, migrate, upgrade, stamp
 from metatube.database import *
-from metatube import db, database
+from metatube import db, logger
 from metatube import Config as env
 from sqlalchemy.engine import create_engine
 from sqlalchemy import inspect
 import sqlite3
 import os
 class Default():
-    def __init__(self, app, url):
+    def __init__(self, app, url, ffmpeg):
         self._app = app
         app.app_context().push()
         self._url = url
         self._methods = ['config', 'templates']
-    def config():
+        self._ffmpeg = ffmpeg
+    def config(self):
         if Config.query.count() > 0:
             return True
         config = Config(
-            ffmpeg_directory = "",
+            ffmpeg_directory = self._ffmpeg,
             amount = 5,
             hardware_transcoding = "None",
             auth = False,
@@ -25,10 +26,10 @@ class Default():
         )
         db.session.add(config)
         db.session.commit()
-        print('Created default Config row')
+        logger.info('Created default rows for the configuration table')
         return True
 
-    def templates():
+    def templates(self):
         if Templates.query.count() > 0:
             return True
         template = Templates(
@@ -48,7 +49,7 @@ class Default():
         )
         db.session.add(template)
         db.session.commit()
-        print('Created default Template row')
+        logger.info('Created default rows for the Templates table')
         return True
         
     def init_db(self, db_exists = True):
@@ -59,8 +60,8 @@ class Default():
                 self.removealembic()
         self.migrations()
         for method in self._methods:
-            getattr(Default, method)()
-        print('Created the database and all necessary tables and rows')
+            getattr(self, method)()
+        logger.info('Created the database and all necessary tables and rows')
         return True
     
     def migrations(self):
@@ -74,3 +75,4 @@ class Default():
         conn.execute('DROP TABLE IF EXISTS alembic_version;')
         conn.commit()
         conn.close()
+        logger.info('Deleted alembic table')

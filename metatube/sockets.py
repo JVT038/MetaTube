@@ -17,3 +17,9 @@ def searchvideo(message):
     
 def overview(message):
     socketio.emit('overview', message)
+    
+def musicbrainzresults(data):
+    socketio.emit('mbp_response', data)
+    
+def youtuberesults(data, form):
+    socketio.emit('ytdl_response', (data, form))

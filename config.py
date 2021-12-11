@@ -13,7 +13,9 @@ class Config(object):
         'sqlite:///' + os.path.join(basedir, 'metatube/app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD = True
-    FLASK_DEBUG= os.environ.get('DEBUG') or False
-    FLASK_ENV = os.environ.get('FLASK_ENV') or 'production'
+    FLASK_DEBUG= False
+    FLASK_ENV = 'production'
     BASE_DIR = basedir
+    LOGGER = os.environ.get('LOG') or False
     PORT = os.environ.get('PORT') or 5000
+    FFMPEG =  os.environ.get('FFMPEG') or ""
