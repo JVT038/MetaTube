@@ -52,12 +52,15 @@ class Default():
         logger.info('Created default rows for the Templates table')
         return True
         
-    def init_db(self, db_exists = True):
+    def init_db(self, db_exists = False):
         if db_exists is False:
             directory = os.path.join(env.BASE_DIR, 'migrations')
             if os.path.exists(directory):
-                init(directory)    
-                self.removealembic()
+                if len(os.listdir(directory)) > 0:
+                    os.rmdir(directory)
+            init(directory)
+            self.removealembic()
+            
         self.migrations()
         for method in self._methods:
             getattr(self, method)()

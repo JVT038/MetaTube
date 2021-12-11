@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
 from metatube import create_app, socketio, logger
 from gevent import get_hub
 from gevent.pywsgi import WSGIServer
