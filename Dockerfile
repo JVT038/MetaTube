@@ -15,6 +15,9 @@ RUN \
         ffmpeg && \
     echo "**** Installing Python packages ****" && \
     git clone https://github.com/JVT038/MetaTube.git && \
-    pip3 install -r MetaTube/requirements.txt && \
+    mkdir -p /config && \
+    mv MetaTube/* /config && \
+    pip3 install -r /config/requirements.txt && \
     mkdir -p $DOWNLOADS
-CMD ["/usr/bin/python3", "MetaTube/metatube.py"]
+
+CMD ["/usr/bin/python3", "config/metatube.py"]

@@ -105,6 +105,7 @@ docker run \
   -p 5000:5000 \
   -e PORT=5000 \
   -e HOST=0.0.0.0 \
+  -v /volume1/Streaming/Muziek/YouTube:/downloads
   jvt038/metatube:latest
 ```
 ### :hammer_and_wrench: Manually build and start server ###
