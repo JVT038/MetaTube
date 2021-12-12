@@ -96,6 +96,18 @@ For a complete list, visit the [Dependencies overview](https://github.com/JVT038
 Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python](https://python.org) installed.
 
 ## :checkered_flag: Starting ##
+### Using Docker ###
+```docker
+docker run \
+  -d \
+  --name metatube \
+  --restart always \
+  -p 5000:5000 \
+  -e PORT=5000 \
+  -e HOST=0.0.0.0 \
+  jvt038/metatube:latest
+```
+
 ```bash
 # Clone this project
 $ git clone https://github.com/JVT038/metatube
@@ -135,6 +147,7 @@ HOST|Set the address on which the MetaTube server will run | 127.0.0.1
 DEBUG|Whether to enable debug mode or not | False
 DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
 FFMPEG | An absolute path to the folder containing ffmpeg. | Empty
+DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/MetaTube/downloads
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -155,7 +168,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 
 ## To-Do
 - [X] Add support for the use of proxies to download YouTube videos
-- [ ] Add Docker support
+- [X] Add Docker support
 - [ ] Add Github action / workflow thing, to automatically create Docker image upon a new commit
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
@@ -175,6 +188,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add button in settings to download the entire SQlite3 Database
 - [ ] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
+- [ ] Add support for HTTPS / SSL
+- [ ] Preview filenames when entering an output template
 - [X] Build a logger
 - [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [ ] Catch and show errors properly

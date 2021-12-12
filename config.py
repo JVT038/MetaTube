@@ -19,3 +19,4 @@ class Config(object):
     LOGGER = os.environ.get('LOG') or False
     PORT = os.environ.get('PORT') or 5000
     FFMPEG =  os.environ.get('FFMPEG') or ""
+    DOWNLOADS = os.environ.get('DOWNLOADS') or os.path.join(basedir, 'downloads')

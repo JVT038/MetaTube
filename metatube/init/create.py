@@ -4,15 +4,15 @@ from metatube import db, logger
 from metatube import Config as env
 from sqlalchemy.engine import create_engine
 from sqlalchemy import inspect
-import sqlite3
-import os
+import sqlite3, os, shutil
 class Default():
-    def __init__(self, app, url, ffmpeg):
+    def __init__(self, app, url):
         self._app = app
         app.app_context().push()
         self._url = url
         self._methods = ['config', 'templates']
-        self._ffmpeg = ffmpeg
+        self._ffmpeg = app.config["FFMPEG"]
+        self._downloads = app.config["DOWNLOADS"]
     def config(self):
         if Config.query.count() > 0:
             return True
@@ -37,7 +37,7 @@ class Default():
             name = 'Default',
             type = 'Audio',
             extension = 'mp3',
-            output_folder = 'downloads',
+            output_folder = self._downloads,
             output_name = f"%(title)s.%(ext)s",
             bitrate = 192,
             resolution = 'None',
@@ -52,12 +52,12 @@ class Default():
         logger.info('Created default rows for the Templates table')
         return True
         
-    def init_db(self, db_exists = False):
-        if db_exists is False:
+    def init_db(self, migrations = True):
+        if  migrations is False:
             directory = os.path.join(env.BASE_DIR, 'migrations')
             if os.path.exists(directory):
                 if len(os.listdir(directory)) > 0:
-                    os.rmdir(directory)
+                    shutil.rmtree(directory)
             init(directory)
             self.removealembic()
             

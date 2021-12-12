@@ -1,7 +1,10 @@
 FROM phusion/passenger-full:2.0.1
+LABEL Author JVT038
+LABEL Maintainer JVT038
 ENV PORT 5000
 ENV FFMPEG /usr/bin
-EXPOSE ${PORT}
+ENV DOWNLOADS /MetaTube/downloads
+EXPOSE $PORT
 VOLUME /MetaTube
 RUN \
     echo "**** Installing build packages ****" && \
@@ -12,6 +15,6 @@ RUN \
         ffmpeg && \
     echo "**** Installing Python packages ****" && \
     git clone https://github.com/JVT038/MetaTube.git && \
-    pip3 install -r MetaTube/requirements.txt
-# CMD ["/usr/bin/sh"]
+    pip3 install -r MetaTube/requirements.txt && \
+    mkdir -p $DOWNLOADS
 CMD ["/usr/bin/python3", "MetaTube/metatube.py"]

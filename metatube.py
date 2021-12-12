@@ -8,7 +8,7 @@ import os
 if __name__ == "__main__":
     app = create_app()
     port = os.environ.get('PORT') or 5000
-    host = os.environ.get('HOST') or '127.0.0.1'
+    host = os.environ.get('HOST') or '0.0.0.0'
     debug = os.environ.get('DEBUG') or False
     log_output = os.environ.get('LOG') or False
     get_hub().NOT_ERROR += (KeyboardInterrupt,)
