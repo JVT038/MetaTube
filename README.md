@@ -41,12 +41,12 @@
   - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX
   - Manually set height and width, if a video type has been selected
   - Store the information about downloaded releases in the database, to edit the downloaded content later after the download
+  - Docker is supported
 
   To-Do before the first release:
   - Support more extensions to merge metadata with.
   - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
   - Some decent mobile support
-  - Docker support
 </p>
 
 <hr>
@@ -96,7 +96,7 @@ For a complete list, visit the [Dependencies overview](https://github.com/JVT038
 Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python](https://python.org) installed.
 
 ## :checkered_flag: Starting ##
-### Using Docker ###
+### :whale: Using Docker ###
 ```docker
 docker run \
   -d \
@@ -107,7 +107,7 @@ docker run \
   -e HOST=0.0.0.0 \
   jvt038/metatube:latest
 ```
-
+### :hammer_and_wrench: Manually build and start server ###
 ```bash
 # Clone this project
 $ git clone https://github.com/JVT038/metatube
@@ -190,6 +190,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [ ] Add support for HTTPS / SSL
 - [ ] Preview filenames when entering an output template
+- [ ] Make the Docker file smaller, because it's huge
 - [X] Build a logger
 - [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [ ] Catch and show errors properly
