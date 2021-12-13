@@ -38,7 +38,7 @@ jobs:
       - name: Build image and push to Docker Hub
         uses: docker/build-push-action@v2
         with:
-          context: /
+          context: ./
           tags: jvt038/metatube:latest
           push: ${{ github.ref == 'refs/heads/master' }}
       - name: Image digest
