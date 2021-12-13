@@ -105,10 +105,12 @@ docker run \
   -p 5000:5000 \
   -e PORT=5000 \
   -e HOST=0.0.0.0 \
+  -e DATABASE_URL=sqlite:////database/app.db \
   -v /downloads:/downloads:rw \
-  -v /metatube:/config:rw \
+  -v /metatube:/database:rw \
   jvt038/metatube:latest
 ```
+You need to set the variable `DATABASE_URL` to a custom mount point (in this example `/database`), because otherwise your database file will reset everytime the Docker container updates.
 ### :hammer_and_wrench: Manually build and start server ###
 ```bash
 # Clone this project

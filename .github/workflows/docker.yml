@@ -6,6 +6,13 @@ name: Build and Publish- ç
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
+    paths-ignore: 
+      - '*.md'
+      - LICENSE
+      - 'example.flaskenv'
+      - '.gitattributes'
+      - '.github/workflows/docker.yml'
+      
     branches: [ master ]
   pull_request:
     branches: [ master ]
