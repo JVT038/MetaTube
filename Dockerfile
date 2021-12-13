@@ -16,7 +16,6 @@ RUN \
         ffmpeg && \
     echo "**** Installing Python packages ****" && \
     mkdir -p /config && \
-    mv MetaTube/* /config && \
     pip3 install -r /config/requirements.txt && \
     mkdir -p $DOWNLOADS
 
