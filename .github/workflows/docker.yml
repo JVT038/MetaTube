@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Build and Publish- ç 
+name: Build and Publish Docker image on Docker registry
 
 # Controls when the workflow will run
 on:
