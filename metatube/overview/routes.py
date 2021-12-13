@@ -3,12 +3,13 @@ from metatube.overview import bp
 from metatube.database import *
 from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
+from metatube.metadata import MetaData
 from metatube import socketio, sockets
+from metatube import Config as env
 from flask import render_template
+from multiprocessing import Pool
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
-from multiprocessing import Pool
-from metatube.metadata import MetaData
 import json
 import os
 
@@ -57,7 +58,8 @@ def download(url, ext='mp3', output_folder='downloads', type='Audio', output_for
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
-    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height)
+    verbose = bool(env.LOGGER)
+    ytdl_options = yt.get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
         yt_instance = yt()
         yt_instance.get_video(url, ytdl_options)

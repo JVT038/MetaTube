@@ -67,7 +67,7 @@ class YouTube:
         elif d['status'] == 'finished':
             sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'info_dict': json.dumps(d["info_dict"])})
             
-    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height):
+    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)
@@ -134,6 +134,7 @@ class YouTube:
             'logger': logger,
             'outtmpl': filepath,
             'noplaylist': True,
+            'verbose': verbose
         }
         
         # Add proxy if proxy is enabled

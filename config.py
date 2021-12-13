@@ -13,7 +13,7 @@ class Config(object):
         'sqlite:///' + os.path.join(basedir, 'metatube/app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD = True
-    FLASK_DEBUG= False
+    FLASK_DEBUG = False
     FLASK_ENV = 'production'
     BASE_DIR = basedir
     LOGGER = os.environ.get('LOG') or False
