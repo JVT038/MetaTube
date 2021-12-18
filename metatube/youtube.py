@@ -1,8 +1,6 @@
-import yt_dlp, json, os, sys
+import yt_dlp, json, os
 from threading import Thread
-from metatube import sockets, logger, sponsorblock
-from flask import render_template
-from metatube.database import Templates
+from metatube import sockets, logger
     
 class YouTube:
     def is_supported(url):
@@ -14,7 +12,7 @@ class YouTube:
 
     def fetch_url(url):
         if YouTube.is_supported(url):
-            ytdl_options = {}
+            ytdl_options = {'logger': logger}
             with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
                 try:
                     info = ytdl.extract_info(url, download=False)
@@ -74,10 +72,17 @@ class YouTube:
         postprocessors = []
         postprocessor_args = {}
         proxy_string = ""
-        format = 'ba' if type == 'Audio' else 'b/ba+bv'
+        ext = "m4a" if "m4a" in ext else ext
+        '''
+        Audio:
+        If an audio type has been selected, first try to look for a format with the selected extension
+        If no audio format with the selected extension has been found, just look for the best audio format
+        and automatically convert it to the selected extension anyway
+        Video:
+        Exactly the same for videos
+        '''
+        format = f'ba[ext={ext}]/ba' if type == 'Audio' else f'b[ext={ext}]/ba+bv[ext={ext}]/b/ba+bv'
         
-        if "m4a" in ext:
-            ext = "m4a"
         # choose whether to use the FFmpegExtractAudio post processor or the FFmpegVideoConverter one
         if type == 'Audio':
             postprocessors.append({
@@ -90,13 +95,16 @@ class YouTube:
                 "key": "FFmpegVideoConvertor",
                 "preferedformat": ext
             })
-            if len(height) < 1 or len(width) < 1:
-                width = 1920
-                height = 1080
-            postprocessor_args["videoconvertor"] = ['-vf', "scale=" + str(width) + ":" + str(height), '-b:a', str(bitrate) + "k"]
+            if bitrate != 'best':
+                postprocessor_args["videoconvertor"] = ['-b:a', str(bitrate) + "k"]
+                
+            if height != 'best' and width != 'best':
+                postprocessor_args["videoconvertor"][:0] = ['-vf', 'scale=' + str(width) + ':' + str(height)]
             
             # If hardware transcoding isn't None, add a hardware transcoding thingy to the FFmpeg arguments
             if hw_transcoding != 'None':
+                if "videoconvertor" not in postprocessor_args:
+                    postprocessor_args["videoconvertor"] = []
                 if hw_transcoding == 'nvenc':
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_nvenc'])
                 elif hw_transcoding == 'qsv':
@@ -138,8 +146,8 @@ class YouTube:
         }
         
         # Add proxy if proxy is enabled
-        if proxy['proxy_status'] != 'None':
-            proxy_string = proxy["proxy_status"].lower().strip() + "://"
+        if proxy['proxy_type'] != 'None':
+            proxy_string = proxy["proxy_type"].lower().strip() + "://"
             if len(proxy["proxy_username"]) > 0 and len(proxy["proxy_username"]) > 0:
                 proxy_string += proxy["proxy_username"] + ":" + proxy["proxy_password"] + "@" + proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
             else:

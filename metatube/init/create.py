@@ -1,9 +1,11 @@
 from flask_migrate import init, migrate, upgrade, stamp
 from metatube.database import *
 from metatube import db, logger
+from metatube.ffmpeg import ffmpeg
+from metatube import migrate as metatube_migrate
 from metatube import Config as env
-from sqlalchemy.engine import create_engine
-from sqlalchemy import inspect
+from alembic.config import Config as alembic_Config
+
 import sqlite3, os, shutil
 class Default():
     def __init__(self, app, url):
@@ -15,6 +17,8 @@ class Default():
         self._downloads = app.config["DOWNLOADS"]
     def config(self):
         if Config.query.count() > 0:
+            ffmpeg_instance = ffmpeg()
+            ffmpeg_instance.test()
             return True
         config = Config(
             ffmpeg_directory = self._ffmpeg,
@@ -27,6 +31,8 @@ class Default():
         db.session.add(config)
         db.session.commit()
         logger.info('Created default rows for the configuration table')
+        ffmpeg_instance = ffmpeg()
+        ffmpeg_instance.test()
         return True
 
     def templates(self):
@@ -39,7 +45,7 @@ class Default():
             extension = 'mp3',
             output_folder = self._downloads,
             output_name = f"%(title)s.%(ext)s",
-            bitrate = 192,
+            bitrate = 'best',
             resolution = 'None',
             proxy_status = False,
             proxy_username = "",
@@ -53,7 +59,7 @@ class Default():
         return True
         
     def init_db(self, migrations = True):
-        if  migrations is False:
+        if migrations is False:
             directory = os.path.join(env.BASE_DIR, 'migrations')
             if os.path.exists(directory):
                 if len(os.listdir(directory)) > 0:
@@ -79,3 +85,9 @@ class Default():
         conn.commit()
         conn.close()
         logger.info('Deleted alembic table')
+    
+    @metatube_migrate.configure
+    def configure_alembic(config):
+        config.set_section_option('logger_alembic', 'level', 'WARN')
+        config.set_section_option('logger_flask_migrate', 'level', 'WARN')
+        return config

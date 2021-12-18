@@ -22,22 +22,22 @@
             <label for="#extension">Extension</label>
             <select class="custom-select" id="extension">
                 <optgroup label="Audio">
-                    <option value="aac">AAC</option>
+                    <option value="aac">AAC (Metadata not supported)</option>
                     <option value="flac">FLAC</option>
                     <option value="mp3" selected>MP3</option>
                     <option value="m4a_audio">M4A</option>
                     <option value="opus">Opus</option>
-                    <option value="vorbis">Vorbis</option>
+                    <option value="vorbis">OGG (with Vorbis codec)</option>
                     <option value="wav">WAV</option>
                 </optgroup>
                 <optgroup label="Video">
                     <option value="mp4">MP4</option>
                     <option value="m4a_video">M4A</option>
-                    <option value="flv">Flash Video (FLV)</option>
-                    <option value="webm">WebM</option>
+                    <option value="flv">Flash Video (FLV & Metadata not supported)</option>
+                    <option value="webm">WebM (Metadata not supported)</option>
                     <option value="ogg">Ogg</option>
-                    <option value="mkv">Matroska (MKV)</option>
-                    <option value="avi">AVI</option>
+                    <option value="mkv">Matroska (MKV & Metadata not supported)</option>
+                    <option value="avi">AVI (Metadata not supported)</option>
                 </optgroup>
             </select>
         </div>
@@ -64,6 +64,7 @@
         <div class="col d-none d-lg-block">
             <label for="#resolution">Resolution****</label>
             <select class="custom-select" id="resolution">
+                <option value="best">Best</option>
                 <option value="7680;4320">8K UHD</option>
                 <option value="3840;2160">4K UHD</option>
                 <option value="1920;1080" selected>FHD</option>
@@ -77,7 +78,7 @@
             <p class="float-left">
                 * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
                 ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#output-template">here</a>) <br />
-                *** (More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>) <br />
+                *** (Leave empty to use best bitrate; More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>) <br />
                 **** (More info on resolutions <a target="_blank" href="https://levvvel.com/169-resolutions/">here</a>)
             </p>
         </div>

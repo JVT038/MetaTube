@@ -41,10 +41,9 @@
   - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX
   - Manually set height and width, if a video type has been selected
   - Store the information about downloaded releases in the database, to edit the downloaded content later after the download
-  - Docker is supported
+  - Docker is [supported](#whale-using-docker)
 
   To-Do before the first release:
-  - Support more extensions to merge metadata with.
   - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
   - Some decent mobile support
 </p>
@@ -97,6 +96,7 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 
 ## :checkered_flag: Starting ##
 ### :whale: Using Docker ###
+CLI docker:
 ```docker
 docker run \
   -d \
@@ -110,7 +110,25 @@ docker run \
   -v /metatube:/database:rw \
   jvt038/metatube:latest
 ```
-You need to set the variable `DATABASE_URL` to a custom mount point (in this example `/database`), because otherwise your database file will reset everytime the Docker container updates.
+Docker-compose:
+```
+version: '3.3'
+services:
+    metatube:
+        container_name: metatube
+        restart: always
+        image: jvt038/metatube:latest
+        ports:
+            - '5000:5000'
+        environment:
+            - PORT=5000
+            - HOST=0.0.0.0
+            - 'DATABASE_URL=sqlite:////database/app.db'
+        volumes:
+            - '/downloads:/downloads:rw'
+            - '/metatube:/database:rw'        
+```
+You need to set the variable `DATABASE_URL` to a custom mount point (in these examples `/database`), because otherwise your database file will reset everytime the Docker container updates.
 ### :hammer_and_wrench: Manually build and start server ###
 ```bash
 # Clone this project
@@ -137,13 +155,12 @@ $ cd ../
 # Install dependencies
 $ pip install -r requirements.txt
 
-# Run the project
-$ py metatube.py
+# Run the file
+$ python metatube.py
 
 # The server will initialize in the <http://localhost:5000>
 ```
-
-Additionally, you can set the following environment variables:
+You can set the following environment variables:
 Name | Description | Default value
 ---|---|---
 PORT|Set the port on which the MetaTube server will be available|5000
@@ -151,7 +168,11 @@ HOST|Set the address on which the MetaTube server will run | 127.0.0.1
 DEBUG|Whether to enable debug mode or not | False
 DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
 FFMPEG | An absolute path to the folder containing ffmpeg. | Empty
-DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/MetaTube/downloads
+DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/MetaTube/downloads; absolute path will be calculated automatically
+LOG | Whether to keep logs or not | False
+SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
+LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 30
+BUFFER_SIZE | The maximum size of the websockets **in bytes**; adjust if your covers are too large to be sent | 10000000 (10 million); equal to 10MB
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -206,7 +227,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip fragments
 - [X] Manually edit metadata of file, before the download
-- [ ] Manually edit metadata of file, after the download
+- [X] Manually edit metadata of file, after the download
 - [X] Select output type (coding, extension, etc.)
 - [X] Switch from AJAX to websockets
 - [X] Hardware transcoding with NVENC, Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF

@@ -1,6 +1,7 @@
 import subprocess, os
 from metatube.database import Config
 from metatube import Config as env
+from metatube import logger
 import ffmpeg as ffmpeg_python
 
 
@@ -16,10 +17,12 @@ class ffmpeg():
             self.ffmpeg_path = ""
     def test(self):
         try:
-            p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True, stdout=subprocess.DEVNULL)
+            p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             p.wait()
+            logger.info('FFmpeg has been found!')
             return True
         except Exception as e:
+            logger.warn('FFmpeg has not been found at %s', self.ffmpeg_path)
             return str(e)
 
     # So I wrote this function to exclude fragments from the download, and I spent countless hours trying to figure this out.

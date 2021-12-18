@@ -4,3 +4,7 @@ DEBUG=False
 DATABASE_URL=sqlite:///path/to/database.db
 FFMPEG=/usr/bin/ffmpeg
 DOWNLOADS=/downloads
+LOG=False
+SOCKET_LOG=False
+LOG_LEVEL=30
+BUFFER_SIZE=10000000

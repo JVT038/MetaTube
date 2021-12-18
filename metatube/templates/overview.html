@@ -1,96 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-{% macro metadataview() %}
-    <div class="form-row">
-        <div class="col">
-            <p>* All input fields with an *, are optional</p>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#mbp_releaseid">Musicbrainz release id*</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="mbp_releaseid" />
-                <div class="input_group_append">
-                    <button type="button" id="fetchmbpreleasebtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch release data"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_albumid">Musicbrainz album id*</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="md_albumid" />
-                <div class="input_group_append">
-                    <button type="button" id="fetchmbpalbumbtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_title">Title of the song</label>
-            <input type="text" class="form-control" id="md_title" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_artists">Artist(s) of the song. Use a semicolon (;) to separate multiple artists</label>
-            <input type="text" class="form-control" id="md_artists" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_album">Album of the song*</label>
-            <input type="text" class="form-control" id="md_album" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_album_artists">Artist(s) of the album. Use a semicolon (;) to separate multiple artists*</label>
-            <input type="text" class="form-control" id="md_album_artists" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_album_tracknr">Number of track in album*</label>
-            <input type="text" class="form-control" id="md_album_tracknr" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_album_releasedate">Release date of album*</label>
-            <input type="text" class="form-control" id="md_album_releasedate" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <label for="#md_cover">Cover image for the song*</label>
-            <input type="text" class="form-control" id="md_cover" />
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="col">
-            <p>Enter any people related to this song*</p>
-        </div>
-    </div>
-    <div class="form-row personrow" id="personrow0">
-        <div class="col">
-            <label for="#artist_relations_name0">Name</label>
-            <input type="text" class="form-control artist_relations" id="artist_relations_name0" />
-        </div>
-        <div class="col">
-            <label for="#artist_relations_type0">Type</label>
-            <div class="input-group">
-                <input type="text" class="form-control artist_relations" id="artist_relations_type0" />
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-success bg-success addperson"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endmacro %}
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='CSS/overview.css') }}" />
 <div class="container">
@@ -115,28 +24,36 @@
                 <th scope="col">Artist</th>
                 <th scope="col">Album</th>
                 <th scope="col">Date</th>
+                <th scope="col">Extension</th>
                 <th scope="col">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for record in records %}
                 <tr id="{{ record.id }}">
-                    <td>{{ record.name }}</td>
-                    <td>{{ record.artist.replace('/', ';') }}</td>
-                    <td>{{ record.album }}</td>
-                    <td>{{ record.date.strftime('%d-%m-%Y') }}</td>
-                    <td>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="{% if path_exists(record.filepath) %} Edit item {% else %}Item has been moved or deleted {% endif %}" {% if path_exists(record.filepath) == False %} style="cursor: not-allowed" {% endif %} class="btn btn-success edititembtn" {% if path_exists(record.filepath) == False %}disabled{% endif %}><i class="{% if path_exists(record.filepath) %} fi-xnsuxl-edit-solid {% else %} fi-xnpuxl-edit-solid {% endif %}"></i></button>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="{% if path_exists(record.filepath) %} Download item {% else %}Item has been moved or deleted {% endif %}" {% if path_exists(record.filepath) == False %} style="cursor: not-allowed" {% endif %} class="btn btn-primary downloaditembtn" {% if path_exists(record.filepath) == False %}disabled{% endif %}><i class="{% if path_exists(record.filepath) %} fi-xwsrxl-sign-in-solid {% else %} fi-xwprxl-sign-in-solid {% endif %}"></i></button>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="View YouTube video" class="btn btn-info" onclick="window.open('https:\/\/youtu.be/{{ record.youtube_id }}', '__blank')"><i style="color: red;" class="fi-xwsuxl-youtube"></i></button>
-                        <button type="button" data-toggle="tooltip" data-placement="top" title="Delete item" class="btn btn-danger deleteitembtn"><i class="fi-xnsuxl-trash-bin"></i></button>
+                    <td class="td_name"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" /> <span>{{ record.name }}</span></td>
+                    <td class="td_artist" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
+                    <td class="td_album" style="vertical-align: middle;">{{ record.album }}</td>
+                    <td class="td_date" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
+                    <td class="td_ext" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
+                    <td style="vertical-align: middle;">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
+                            <div class="dropdown-menu">
+                                <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
+                                <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Item has been moved or deleted or metadata is not supported {% endif %}</a>
+                                <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
+                                <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
+                                <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-<div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-labelledby="download content modal" aria-hidden="true">
+<div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-hidden="true">
     <div class="modal-dialog modal-lg mw-100 w-75">
         <div class="modal-content">
             <div class="modal-header">
@@ -164,9 +81,7 @@
                         <div class="col-md-6" id="ytcol"></div>
                         <div class="col-md-6" id="audiocol"></div>
                     </div>
-                    <div id="metadataview" class="d-none animate__animated">
-                        {{ metadataview() }}
-                    </div>
+                    <div id="metadataview" class="d-none animate__animated"></div>
                     <div id="progressview" class="d-none">
                         <div class="form-row">
                             <div class="col">
@@ -218,7 +133,7 @@
     </div>
 </div>
 <div class="modal fade" id="edititemmodal" tabindex="-1" role="dialog" aria-labelledby="Edit item modal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg mw-100 w-75" role="document">
         <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="edititemmodaltitle"></h5>
@@ -226,9 +141,12 @@
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-            <div class="modal-body"></div>
+            <div class="modal-body">
+                <div id="downloadsection"></div>
+                <div id="metadatasection"></div>
+            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="edititembtnmodal">Delete item</button>
+                <button type="button" class="btn btn-primary" id="edititembtnmodal">Save item</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>

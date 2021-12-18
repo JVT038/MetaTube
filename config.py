@@ -17,6 +17,9 @@ class Config(object):
     FLASK_ENV = 'production'
     BASE_DIR = basedir
     LOGGER = os.environ.get('LOG') or False
+    LOG_LEVEL = os.environ.get('LOG_LEVEL') or 30
+    SOCKET_LOG = os.environ.get('SOCKET_LOG') or False
     PORT = os.environ.get('PORT') or 5000
     FFMPEG =  os.environ.get('FFMPEG') or ""
     DOWNLOADS = os.environ.get('DOWNLOADS') or os.path.join(basedir, 'downloads')
+    BUFFER_SIZE = os.environ.get('BUFFER_SIZE') or 10000000

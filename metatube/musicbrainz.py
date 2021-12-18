@@ -7,9 +7,9 @@ def search(args):
     
     query = args['query']
     artist = args['artist']
-    max = args['max']
-    response = musicbrainzngs.search_releases(query, artistname=artist, limit=max, type='Album')
-    logger.info('Fetched info for %s', query)
+    max = int(args['max'])
+    response = musicbrainzngs.search_releases(query, artistname=artist, limit=max)
+    logger.info('Searching for %s, with artist %s', query, artist)
     return response
 
 def search_id_release(id):

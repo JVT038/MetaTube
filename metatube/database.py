@@ -1,4 +1,4 @@
-from metatube import db, logger
+from metatube import db, logger, sockets
 from dateutil import parser
 
 class Config(db.Model):
@@ -14,6 +14,7 @@ class Config(db.Model):
     def ffmpeg(self, ffmpeg_path):
         self.ffmpeg_directory = ffmpeg_path
         db.session.commit()
+        logger.info('Set FFmpeg path to %s', ffmpeg_path)
     
     def get_ffmpeg():
         return Config.query.get(1).ffmpeg_directory
@@ -24,10 +25,12 @@ class Config(db.Model):
     def set_amount(self, amount):
         self.amount = int(amount)
         db.session.commit()
+        logger.info('Changed amount to %s', str(amount))
     
     def set_hwtranscoding(self, hw_transcoding):
         self.hardware_transcoding = hw_transcoding
         db.session.commit()
+        logger.info('Set hardware transcoding to %s', hw_transcoding)
     
     def get_max():
         return Config.query.get(1).amount
@@ -39,7 +42,7 @@ class Templates(db.Model):
     extension = db.Column(db.String(16), nullable=True)
     output_folder = db.Column(db.String(128), nullable=True)
     output_name = db.Column(db.String(32), nullable=True)
-    bitrate = db.Column(db.Integer)
+    bitrate = db.Column(db.String(8))
     resolution = db.Column(db.String(16))
     proxy_status = db.Column(db.Boolean, default=False)
     proxy_type = db.Column(db.String(16))
@@ -68,6 +71,7 @@ class Templates(db.Model):
         )
         db.session.add(row)
         db.session.commit()
+        logger.info('Added template %s', data["name"])
     
     def fetchtemplate(input_id):
         return Templates.query.filter_by(id = input_id).first()
@@ -76,8 +80,10 @@ class Templates(db.Model):
         return Templates.query.all()
     
     def delete(self):
+        logger.info('Deleting template %s', self.name)
         db.session.delete(self)
         db.session.commit()
+        
     
     def edit(self, data):
         self.name = data["name"]
@@ -94,6 +100,7 @@ class Templates(db.Model):
         self.proxy_address = data["proxy"]["address"]
         self.proxy_port = data["proxy"]["port"]
         db.session.commit()
+        logger.info('Edited template %s', data["name"])
         
 class Database(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +126,9 @@ class Database(db.Model):
     def checkyt(youtube_id_input):
         return Database.query.filter_by(youtube_id = youtube_id_input).first()
     
+    def checkmusicbrainz(release_id_input):
+        return Database.query.filter_by(musicbrainz_id = release_id_input).first()
+    
     def insert(data):
         row = Database(
             filepath = data["filepath"],
@@ -134,6 +144,20 @@ class Database(db.Model):
         db.session.commit()
         logger.info('Inserted item %s into database', data["name"])
         return row.id
+    
+    def update(self, data):
+        self.filepath = data["filepath"]
+        self.name = data["name"]
+        self.artist = data["artist"]
+        self.album = data["album"]
+        self.date = parser.parse(data["date"])
+        self.length = data["length"]
+        self.cover = data["image"]
+        self.musicbrainz_id = data["musicbrainz_id"]
+        self.youtube_id = data["youtube_id"]
+        db.session.commit()
+        logger.info('Updated item %s', data["name"])
+        sockets.overview({'msg': 'changed_metadata_db', 'data': data})
     
     def delete(self):
         db.session.delete(self)

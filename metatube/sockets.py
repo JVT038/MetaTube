@@ -21,5 +21,14 @@ def overview(message):
 def musicbrainzresults(data):
     socketio.emit('mbp_response', data)
     
-def youtuberesults(data, form):
-    socketio.emit('ytdl_response', (data, form))
+def youtuberesults(data, downloadform, metadataform):
+    socketio.emit('ytdl_response', (data, downloadform, metadataform))
+    
+def editmetadata(data):
+    socketio.emit('edit_metadata', data)
+
+def editfile(data):
+    socketio.emit('edit_file', data)
+
+def metadatalog(msg):
+    socketio.emit('metadatalog', msg)

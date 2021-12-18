@@ -17,13 +17,13 @@ def settings():
     return render_template('settings.html', ffmpeg=ffmpeg_path, amount=amount, current_page='settings', templates=templates, hw_transcoding=hw_transcoding)
 
 @socketio.on('updatetemplate')
-def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 192, width = 1920, height = 1080, proxy_json = {'status': False,'type': '','address': '','port': '','username': '','password': ''}):
+def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 'best', width = 'best', height = 'best', proxy_json = {'status': False,'type': '','address': '','port': '','username': '','password': ''}):
     data = {
         'name': name,
         'output_folder': output_folder, 
         'ext': output_ext,
         'output_name': output_name,
-        'bitrate': bitrate,
+        'bitrate': str(bitrate),
         'width': width,
         'height': height,
         'resolution': str(width) + ";" + str(height)
@@ -49,7 +49,8 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 1
             if os.path.exists(data["output_folder"]) is False or os.path.isdir(data["output_folder"]) is False:
                 sockets.changetemplate('Output directory doesn\'t exist')
         else:
-            if os.path.exists(os.path.join(env.BASE_DIR, data["output_folder"])) is False or os.path.isdir(os.path.join(env.BASE_DIR, data["output_folder"])) is False:
+            data["output_folder"] = os.path.join(env.BASE_DIR, data["output_folder"])
+            if os.path.exists(data["output_folder"]) is False or os.path.isdir(data["output_folder"]) is False:
                 sockets.changetemplate('Output directory doesn\'t exist')
         
         if data["ext"] not in ["mp4", "flv", "webm", "ogg", "mkv", "avi", "aac", "flac", "mp3", "m4a_audio", "m4a_video", "opus", "vorbis", "wav"]:
@@ -70,6 +71,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 1
         if goal == 'add':
             if Templates.check_existing(data["name"]):
                 sockets.changetemplate('Name is already in use')
+                return False
             Templates.add(data)
             sockets.changetemplate('Template successfully added')
         
@@ -82,6 +84,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 1
 def deltemplate(id):
     if len(id) < 1 or int(id) == 0:
         sockets.templatesettings('Select a valid template')
+        return False
     template = Templates.fetchtemplate(input_id=id)
     template.delete()
     sockets.templatesettings('Template successfully removed')
