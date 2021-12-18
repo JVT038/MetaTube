@@ -1,4 +1,6 @@
 import yt_dlp, json, os
+from yt_dlp.postprocessor.ffmpeg import PostProcessingError
+from youtubesearchpython.__future__ import VideosSearch, VideoSortOrder
 from threading import Thread
 from metatube import sockets, logger
     
@@ -30,12 +32,22 @@ class YouTube:
             logger.error('Error in metatube/youtube.py: ' + str(e))
             return False
         
+    async def search(query):
+        logger.info('Searching YouTube for \'%s\'', query)
+        search = VideosSearch(query)
+        result = await search.next()
+        sockets.youtubesearch(result)
+        
     def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
                 ytdl.download(url)
+            except PostProcessingError as e:
+                logger.error(str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'Converting video has failed. Check logs for more info'})
             except Exception as e:
-                return e
+                logger.error(e)
+                sockets.downloadprogress({'status': 'error', 'message': 'Something has gone wrong. Check logs for more info'})
     
     def download_hook(d):
         if d['status'] == 'finished':
@@ -95,6 +107,7 @@ class YouTube:
                 "key": "FFmpegVideoConvertor",
                 "preferedformat": ext
             })
+            postprocessor_args['videoconvertor'] = []
             if bitrate != 'best':
                 postprocessor_args["videoconvertor"] = ['-b:a', str(bitrate) + "k"]
                 

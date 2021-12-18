@@ -1,4 +1,3 @@
-import engineio
 from flask import Flask, json
 from flask.logging import default_handler
 from flask_sqlalchemy import SQLAlchemy

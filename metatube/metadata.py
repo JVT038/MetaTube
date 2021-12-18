@@ -37,7 +37,10 @@ class MetaData:
             except Exception:
                 pass
         artist_list = artist_list.strip()[0:len(artist_list.strip()) - 1] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
-        language = metadata_mbp["release"]["text-representation"]["language"]
+        try:
+            language = metadata_mbp["release"]["text-representation"]["language"]
+        except Exception:
+            language = ""
         mbp_releaseid = metadata_mbp["release"]["id"] if len(metadata_user["mbp_releaseid"]) < 1 else metadata_user["mbp_releaseid"]
         mbp_albumid = metadata_mbp["release"]["release-group"]["id"] if len(metadata_user["mbp_albumid"]) < 1 else metadata_user["mbp_albumid"]
         barcode = metadata_mbp["release"]["barcode"] if "barcode" in metadata_mbp["release"] else ""
@@ -82,7 +85,7 @@ class MetaData:
                 genres += tag['name'] + "; "
         genres = genres.strip()[0:len(genres.strip()) - 1]# if len(metadata_user["genres"]) < 1 else metadata_user["genres"].replace(';', '/')
         
-        if metadata_mbp["release"]["release-group"]["type"] == 'Album':
+        if "first-release-date" in metadata_mbp["release"]["release-group"]:
             release_date = metadata_mbp["release"]["release-group"]["first-release-date"] if len(metadata_user['album_releasedate']) < 1 else metadata_user["album_releasedate"]
         else:
             release_date = metadata_mbp["release"]["date"]
@@ -263,7 +266,7 @@ class MetaData:
         video["\xa9alb"] = data["album"]
         video["\xa9ART"] = data["artists"]
         video["\xa9gen"] = data["genres"]
-        video["\xa9day"] = year
+        video["\xa9day"] = str(year)
         try:
             video["trkn"] = [(int(data["tracknr"]), int(data["total_tracks"]))]
         except Exception:
@@ -310,13 +313,17 @@ class MetaData:
             tracknr = audio["tracknumber"][0]
         except Exception:
             tracknr = 1
+        try:
+            language = audio["language"][0]
+        except Exception:
+            language = ""
         
         response = {
             'title': audio["title"][0],
             'artist': audio["artist"][0],
             'album': audio["album"][0],
             'genres': genres,
-            'language': audio["language"][0],
+            'language': language,
             'mbp_releaseid': audio["musicbrainz_releasetrackid"][0],
             'mbp_releasegroupid': audio["musicbrainz_releasegroupid"][0],
             'isrc': isrc,

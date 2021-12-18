@@ -6,12 +6,12 @@ from metatube.metadata import MetaData
 from metatube import socketio, sockets
 from metatube import Config as env
 from flask import render_template
-from multiprocessing import Pool
 from datetime import datetime
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import json
 import os
+import asyncio
 
 @bp.route('/')
 @bp.route('/index')
@@ -35,14 +35,13 @@ def search(query):
                     'type': 'webui'
                 }
 
-                pool = Pool()
-                segments_results = pool.map_async(sb.segments, (video["id"], ))
-                mbp_results = pool.map_async(musicbrainz.search, (mbp_args, ))
-
-                segments = segments_results.get()[0] if type(segments_results.get()[0]) == list else 'error'
-                mbp = mbp_results.get()[0]
+                segments_search = asyncio.run(sb.segments(video["id"]))
+                mbp = asyncio.run(musicbrainz.search(mbp_args))
+                segments = segments_search if type(segments_search) == list else 'error'
+                
                 downloadform = render_template('downloadform.html', templates=templates, segments=segments)
                 metadataform = render_template('metadataform.html')
+                
                 sockets.youtuberesults(video, downloadform, metadataform)
                 if len(mbp["release-list"]) > 0:
                     for release in mbp["release-list"]:
@@ -54,8 +53,7 @@ def search(query):
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
-            sockets.searchvideo('Enter a valid URL!')
-
+            asyncio.run(yt.search(query))
     else:
         sockets.searchvideo('Enter an URL!')
 
@@ -76,6 +74,7 @@ def download(data):
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = bool(env.LOGGER)
+    logger.info('Request to download %s', data["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
         yt_instance = yt()

@@ -154,7 +154,7 @@ $(document).ready(function() {
         td_ext.innerText = itemdata["filepath"].split('.')[itemdata["filepath"].split('.').length - 1].toUpperCase();
         dropdownbtn.innerText = 'Select action';
         editfileanchor.innerText = 'Change file data';
-        editmetadataanchor.innerText = td_ext.innerText ? ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV'].indexOf(td_ext.innerText) > -1 : 'Item has been moved or deleted or metadata is not supported';
+        editmetadataanchor.innerText = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV'].indexOf(td_ext.innerText) > -1 ? 'Change metadata' : 'Item has been moved or deleted or metadata is not supported';
         downloadanchor.innerText = 'Download item';
         viewanchor.innerText = 'View YouTube video';
         deleteanchor.innerText = 'Delete item';
@@ -165,6 +165,12 @@ $(document).ready(function() {
         td_date.setAttribute('style', 'vertical-align: middle;');
         td_ext.setAttribute('style', 'vertical-align: middle;');
         td_actions.setAttribute('style', 'vertical-align: middle;');
+
+        td_name.classList.add('td_name')
+        td_artist.classList.add('td_artist')
+        td_album.classList.add('td_album')
+        td_date.classList.add('td_date')
+        td_ext.classList.add('td_ext')
         
         dropdown.classList.add('dropdown');
         dropdownbtn.classList.add('btn', 'btn-primary', 'dropdown-toggle');
@@ -217,11 +223,49 @@ $(document).ready(function() {
         delete link;
     }
 
-    $(document).on('mouseenter', '.mbp-item', function() {
+    function searchresult(data) {
+        let ul = document.createElement('ul');
+        let li = document.createElement('li');
+        let img = document.createElement('img');
+        let body = document.createElement('div');
+        let header = document.createElement('a');
+        let channel = document.createElement('a');
+        let desc = document.createElement('p');
+
+        ul.classList.add('list-unstyled', 'youtuberesult');
+        li.classList.add('media');
+        img.classList.add('img-fluid');
+        body.classList.add('media-body');
+        header.classList.add('youtubelink');
+
+        header.href = data.link;
+        header.innerText = data.title;
+        header.target = '_blank';
+
+        img.src = data.thumbnails[0].url;
+        channel.href = data.channel.link;
+        channel.innerText = data.channel.name;
+        channel.target = '_blank';
+
+        ul.setAttribute('style', 'cursor: pointer');
+
+        desc.innerHTML = 'Channel: ' + channel.outerHTML + '<br />Description: ';
+        try {
+            for(let i = 0; i < data.descriptionSnippet.length; i++) {
+                desc.innerHTML += data.descriptionSnippet[i].text;
+            }
+        } catch {}
+        body.append(header, desc);
+        li.append(img, body);
+        ul.append(li);
+        $("#defaultview").append(ul);
+    }
+
+    $(document).on('mouseenter', '.mbp-item, .youtuberesult', function() {
         $(this).css('filter', 'brightness(50%)');
         $(this).css('background-colour', '#009999');
     });
-    $(document).on('mouseleave', '.mbp-item', function() {
+    $(document).on('mouseleave', '.mbp-item, .youtuberesult', function() {
         $(this).css('filter', '');
         $(this).css('background-colour', 'white');
     });
@@ -284,14 +328,13 @@ $(document).ready(function() {
         $(".timestamp_row:last").after(row);
         friconix_update();
     });
+
     $(document).on('click', '#segments_check', function() {
         
         $(".timestamp_row").toggleClass('d-none');
         $(".timestamp_caption").parents('.form-row').toggleClass('d-none');
     });
     $(document).on('click', 'label[for=\'#segments_check\']', function() {
-        $(".timestamp_row").toggleClass('d-none');
-        $(".timestamp_caption").parents('.form-row').toggleClass('d-none');
         $(this).siblings('input').click();
     });
     
@@ -303,17 +346,22 @@ $(document).ready(function() {
             $("#videorow").addClass('d-none');
             $("#type").val('Audio');
         }
+        if(['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV'].indexOf($("#extension").val().toUpperCase()) < 0)  {
+            $("#editmetadata").addClass('d-none');
+        } else {
+            $("#editmetadata").removeClass('d-none');
+        }
     });
 
     $(document).on('change', '#resolution', function() {
-        if($(this).val() == 'best') {
+        if($(this).val() != 'best') {
             $("#width").val($(this).val().split(';')[0]);
             $("#height").val($(this).val().split(';')[1]);
-            $("#width, #height").removeClass('d-none');
+            $(this).parent().siblings().removeClass('d-none');
         } else {
             $("#width").val('best');
             $("#height").val('best');
-            $("#width, #height").addClass('d-none');
+            $(this).parent().siblings().addClass('d-none');
         }
     });
     
@@ -419,6 +467,21 @@ $(document).ready(function() {
         $("#edititemmodal").modal('hide');
     });
 
+    $(document).on('click', '.youtuberesult', function() {
+        let link = $(this).find('.youtubelink').attr('href');
+        socket.emit('ytdl_search', link);
+        $("#defaultview").children('ul').remove();
+        let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
+        $("#searchlog, #progresstext").empty();
+        $("#defaultview").removeClass('d-none');
+        $("#ytcol, #audiocol").empty().removeClass('d-none').append(spinner);
+        // Reset the modal
+        $("#progress").attr('aria-valuenow', "0").css('width', '0');
+        $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn").addClass('d-none');
+        $(".removeperson").parents('.personrow').remove();
+        $("#metadataview").find('input').val('');
+    });
+
     $("#delitembtnmodal").on('click', function() {
         let id = $(this).attr('id');
         $("tr#"+id).remove();
@@ -470,6 +533,10 @@ $(document).ready(function() {
                         skipfragments[id].end = value.value;
                     }
                 });
+            } else {
+                if($(".timestamp_input").val() == '') {
+                    $("#searchlog").text('Enter all segment fields or disable the segments');
+                }
             }
             skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
             let proxy_data = JSON.stringify({
@@ -596,6 +663,11 @@ $(document).ready(function() {
             $("#downloadfilebtn").removeClass('d-none');
             $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
             socket.emit('insertitem', msg.data);
+        } else if(msg.status == 'error') {
+            progress_text.text(msg.message);
+            $("#progress").attr('aria-valuenow', 100);
+            $("#progress").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
+            $("#progress").css('width', '100%');
         }
     });
 
@@ -643,7 +715,7 @@ $(document).ready(function() {
             if(response.width == 'best' || response.height == 'best') {
                 $("#width").val('best');
                 $("#height").val('best');
-                $("#width, #height").addClass('d-none');
+                $("#resolution").parent().siblings().addClass('d-none');
             } else {
                 $("#width").val(response.resolution.split(';')[0]);
                 $("#height").val(response.resolution.split(';')[1]);
@@ -722,6 +794,8 @@ $(document).ready(function() {
     socket.on('searchvideo', (data) => {
         $("#defaultview").find(".spinner-border").parent('.d-flex').remove();
         $("#searchlog").text(data);
+        $("#defaultview, #downloadbtn, #editmetadata").removeClass('d-none');
+        $("#progressview").addClass('d-none');
         $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
     });
 
@@ -779,5 +853,12 @@ $(document).ready(function() {
     socket.on('edit_file', (data) => {
         $("#downloadsection, #ytcol").empty();
 
+    });
+
+    socket.on('youtubesearch', (data) => {
+        $("#defaultview").children().addClass('d-none');
+        for(let i = 0; i < Object.keys(data.result).length; i++) {
+            searchresult(data.result[i]);
+        };
     });
 })

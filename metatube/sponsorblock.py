@@ -1,7 +1,7 @@
 import sponsorblock
 from sponsorblock.errors import *
 from metatube import logger
-def segments(url):
+async def segments(url):
     client = sponsorblock.Client()
     logger.info('Fetching sponsorblock segments for %s', url)
     try:

@@ -32,3 +32,6 @@ def editfile(data):
 
 def metadatalog(msg):
     socketio.emit('metadatalog', msg)
+    
+def youtubesearch(data):
+    socketio.emit('youtubesearch', data)

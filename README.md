@@ -219,7 +219,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Build a logger
 - [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [ ] Catch and show errors properly
-- [ ] Support looking for YouTube videos and downloading them
+- [X] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
 - [ ] Support MySQL
 - [ ] Make a CLI to download and match music

@@ -3,7 +3,7 @@ import musicbrainzngs
 from musicbrainzngs.musicbrainz import ResponseError
 from metatube import logger
 musicbrainzngs.set_useragent("metatube", "0.1")
-def search(args):
+async def search(args):
     
     query = args['query']
     artist = args['artist']
