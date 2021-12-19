@@ -236,7 +236,6 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [ ] Make sure the search for downloaded song field works
-- [ ] Increase search speed
 &#xa0;
 
 ## Disclaimer

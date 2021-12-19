@@ -39,8 +39,6 @@ $(document).ready(function() {
     }
 
     function insertAudioCol(mbp_data) {
-        let ul = document.createElement('ul');
-        ul.classList.add('list-unstyled');
         let release_id = mbp_data.id;
         let title = mbp_data.title;
         let artists = mbp_data['artist-credit'].length > 1 ? "Artists: <br />" : "Artist: ";
@@ -69,15 +67,56 @@ $(document).ready(function() {
         } else {
             mbp_image = Flask.url_for('static', {"filename": "images/empty_cover.png"});
         }
-        html = {
-            'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
-            'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
-            'checkbox': '<div class="input-group-text"><input class="audiocol-checkbox" type="radio" aria-label="Radio button for selecting an item"></div>',
-        }
-        let list = '<li class="media mbp-item" style="cursor: pointer" id="'+release_id+'">'+html['img']+html['desc']+html['checkbox']+'</li>';
-        ul.insertAdjacentHTML('beforeend', list);
+        
+        // html = {
+        //     'img': '<img src="'+mbp_image+'" class="align-self-center mr-3" alt="Thumbnail for '+release_id+'"/>',
+        //     'desc': '<div class="media-body"><h5 class="mt-0 mb-1"><a href="'+mbp_url+'" target="_blank">'+title+'</a></h5><p>'+artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language+'</p></div>',
+        //     'checkbox': '<div class="input-group-text"><input class="audiocol-checkbox" type="radio" aria-label="Radio button for selecting an item"></div>',
+        // }
+
+        let ul = document.createElement('ul');
+        let img = document.createElement('img');
+        let desc = document.createElement('div');
+        let header = document.createElement('h5');
+        let headeranchor = document.createElement('a');
+        let paragraph = document.createElement('p');
+        let inputgroup = document.createElement('div');
+        let checkbox = document.createElement('input');
+        let list = document.createElement('li');
+
+        ul.classList.add('list-unstyled');
+        img.classList.add('align-self-center', 'mr-3', 'img-fluid');
+        desc.classList.add('media-body');
+        header.classList.add('mt-0', 'mb-1');
+
+        headeranchor.href = mbp_url;
+        headeranchor.target = '_blank';
+        headeranchor.innerText = title;
+
+        img.src = mbp_image;
+        img.target = '_blank';
+
+        paragraph.innerHTML = artists+'Type: '+release_type+'<br/>Date: '+date+'<br/>Language: '+language;
+        
+        inputgroup.classList.add("input-group-text");
+        
+        checkbox.classList.add('audiocol-checkbox');
+        checkbox.type = 'radio';
+        checkbox.ariaLabel = 'Radio button for selecting an item';
+
+        list.classList.add('media', 'mbp-item');
+        list.setAttribute('style', 'cursor: pointer');
+        list.id = release_id;
+
+        header.append(headeranchor);
+        desc.append(header, paragraph);
+
+        inputgroup.appendChild(checkbox);
+        list.append(img, desc, inputgroup);
+        ul.appendChild(list);
+
         $(".spinner-border").parent().remove();
-        return ul;
+        $("#audiocol").append(ul);
     }
 
     function addperson() {
@@ -254,7 +293,9 @@ $(document).ready(function() {
             for(let i = 0; i < data.descriptionSnippet.length; i++) {
                 desc.innerHTML += data.descriptionSnippet[i].text;
             }
-        } catch {}
+        } catch {
+            desc.innerHTML += 'No description available';
+        }
         body.append(header, desc);
         li.append(img, body);
         ul.append(li);
@@ -683,10 +724,10 @@ $(document).ready(function() {
 
     socket.on('mbp_response', (mbp) => {
         console.info('Got musicbrainz info');
-        let audiocol = insertAudioCol(mbp);
-        audiodata = mbp;
-        $("#audiocol").append(audiocol);
-        $(".modal-footer").removeClass('d-none')
+        for(let i = 0; i < Object.keys(mbp).length; i++) {
+            let list = insertAudioCol(mbp[i]);
+        }
+        $(".modal-footer").removeClass('d-none');
     });
 
     socket.on('template', (response) => {
@@ -861,4 +902,4 @@ $(document).ready(function() {
             searchresult(data.result[i]);
         };
     });
-})
+});

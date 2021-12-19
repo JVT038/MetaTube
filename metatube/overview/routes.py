@@ -46,8 +46,8 @@ def search(query):
                 if len(mbp["release-list"]) > 0:
                     for release in mbp["release-list"]:
                         release["cover"] = musicbrainz.get_cover(release["id"])
-                        socketio.start_background_task(sockets.musicbrainzresults, release)
-                        logger.info('Sent musicbrainz release')
+                    socketio.start_background_task(sockets.musicbrainzresults, mbp["release-list"])
+                    logger.info('Sent musicbrainz release')
                 else:
                     sockets.searchvideo('No releases from Musicbrainz have been found!')
             else:

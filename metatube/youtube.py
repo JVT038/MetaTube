@@ -1,6 +1,6 @@
 import yt_dlp, json, os
 from yt_dlp.postprocessor.ffmpeg import PostProcessingError
-from youtubesearchpython.__future__ import VideosSearch, VideoSortOrder
+from youtubesearchpython.__future__ import VideosSearch
 from threading import Thread
 from metatube import sockets, logger
     
