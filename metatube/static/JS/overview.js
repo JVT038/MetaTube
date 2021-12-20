@@ -523,6 +523,7 @@ $(document).ready(function() {
         $("#metadataview").find('input').val('');
     });
 
+
     $("#delitembtnmodal").on('click', function() {
         let id = $(this).attr('id');
         $("tr#"+id).remove();
@@ -541,7 +542,8 @@ $(document).ready(function() {
         socket.emit('ytdl_search', query);
         let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div></div>';
         $("#searchlog, #progresstext").empty();
-        $("#defaultview").removeClass('d-none');
+        $("#defaultview, #ytcol, #audiocol").removeClass('d-none');
+        $("#defaultview").children('.youtuberesult').remove();
         $("#ytcol, #audiocol").empty().append(spinner);
         // Reset the modal
         $("#progress").attr('aria-valuenow', "0").css('width', '0');
@@ -552,8 +554,11 @@ $(document).ready(function() {
 
     $("#downloadbtn").on('click', function(e) {
         if($(".audiocol-checkbox:checked").length < 1) {
-            e.preventDefault();
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#searchlog").text('Select a release on the right side before downloading a video');
+        }  else if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+            $("#searchlog").text('Enter all segment fields or disable the segments');
         } else {
             let url = $("#thumbnail_yt").attr('url');
             let ext = $("#extension").val();
@@ -574,10 +579,6 @@ $(document).ready(function() {
                         skipfragments[id].end = value.value;
                     }
                 });
-            } else {
-                if($(".timestamp_input").val() == '') {
-                    $("#searchlog").text('Enter all segment fields or disable the segments');
-                }
             }
             skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
             let proxy_data = JSON.stringify({
@@ -636,7 +637,7 @@ $(document).ready(function() {
         var progress_text = $("#progresstext");
         if(msg.status == 'downloading') {
             progress_text.text("Downloading...");
-            let percentage = Math.round((msg.downloaded_bytes / msg.total_bytes) * 100) / 3;
+            let percentage = Math.round(((msg.downloaded_bytes / msg.total_bytes) * 100) / 3);
             $("#progress").attr('aria-valuenow', percentage+"%");
             $("#progress").text(percentage + "%");
             $("#progress").css('width', parseInt(percentage)+'%');
@@ -871,7 +872,7 @@ $(document).ready(function() {
     });
 
     socket.on('edit_metadata', (data) => {
-        $("#metadatasection, #metadataview").empty();
+        $("#downloadsection, #metadatasection, #metadataview").empty();
         $("#metadatasection").append(data.metadataview);
         $("#metadatasection").find('#mbp_releaseid').val(data.metadata.musicbrainz_id);
         $("#metadatasection").find('#mbp_albumid').val(data.metadata.mbp_releasegroupid);
@@ -892,8 +893,10 @@ $(document).ready(function() {
     });
 
     socket.on('edit_file', (data) => {
-        $("#downloadsection, #ytcol").empty();
-
+        $("#downloadsection, #ytcol, #metadatasection").empty();
+        $("#downloadsection").append(data.downloadview);
+        friconix_update();
+        $("#edititemmodal").modal('show');
     });
 
     socket.on('youtubesearch', (data) => {

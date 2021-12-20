@@ -40,7 +40,7 @@ def create_app(config_class=Config):
     buffer_size = int(app.config["BUFFER_SIZE"])
     db.init_app(app)
 
-    migrate.init_app(app, db, compare_type=True, render_as_batch=is_sqlite)
+    migrate.init_app(app, db, compare_type=True, render_as_batch=is_sqlite, ping_interval=60)
     jsglue.init_app(app)
     socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log, max_http_buffer_size=buffer_size) # Allow maximum 10MB to be sent through web sockets
     app.register_blueprint(bp_overview)

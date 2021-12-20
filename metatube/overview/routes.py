@@ -219,7 +219,7 @@ def editfile(id):
         'youtube_id': item.youtube_id
     }
     templates = Templates.fetchalltemplates()
-    segment_results = sb.segments(itemdata["youtube_id"])
+    segment_results = asyncio.run(sb.segments(itemdata["youtube_id"]))
     segments = segment_results if type(segment_results) == list else 'error'
     downloadform = render_template('downloadform.html', templates=templates, segments=segments)
     sockets.editfile({'filedata': itemdata, 'downloadview': downloadform})

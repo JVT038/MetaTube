@@ -4,7 +4,6 @@ from metatube import db, logger
 from metatube.ffmpeg import ffmpeg
 from metatube import migrate as metatube_migrate
 from metatube import Config as env
-from alembic.config import Config as alembic_Config
 
 import sqlite3, os, shutil
 class Default():
@@ -88,6 +87,14 @@ class Default():
     
     @metatube_migrate.configure
     def configure_alembic(config):
-        config.set_section_option('logger_alembic', 'level', 'WARN')
-        config.set_section_option('logger_flask_migrate', 'level', 'WARN')
+        parser = config.file_config
+        try:
+            parser["logger_alembic"]["LEVEL"] = 'WARN'
+            parser["logger_flask_migrate"]["LEVEL"] = 'WARN'
+            parser["formatter_generic"]["format"] = str(logger.handlers[0].formatter._fmt).replace('%', '%%')
+            parser["formatter_generic"]["datefmt"] = str(logger.handlers[0].formatter.datefmt).replace('%', '%%')
+            with open(config.config_file_name, 'w') as file:
+                parser.write(file)
+        except Exception as e:
+            logger.error(str(e))
         return config

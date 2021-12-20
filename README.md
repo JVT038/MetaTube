@@ -213,6 +213,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add button in settings to download the entire SQlite3 Database
 - [ ] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
+- [ ] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
 - [ ] Add support for HTTPS / SSL
 - [ ] Preview filenames when entering an output template
 - [ ] Make the Docker file smaller, because it's huge
@@ -236,6 +237,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [ ] Make sure the search for downloaded song field works
+- [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 &#xa0;
 
 ## Disclaimer
