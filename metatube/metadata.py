@@ -1,4 +1,5 @@
 from mimetypes import guess_type
+from re import M
 from mutagen.id3 import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
     ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1
@@ -24,80 +25,79 @@ class MetaData:
             'album': data["album"],
             'date': data["release_date"],
             'length': data["length"],
-            'image': data["image"],
-            'musicbrainz_id': data["mbp_releaseid"]
+            'image': data["cover_path"],
+            'track_id': data["track_id"]
         }
     
-    def getdata(filename, metadata_user, metadata_mbp, cover_mbp):
-        album = metadata_mbp["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
+    def getmusicbrainzdata(filename, metadata_user, metadata_source, cover_source):
+        logger.info('Getting Musicbrainz metadata')
+        album = metadata_source["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         artist_list = ""
-        for artist in metadata_mbp["release"]["artist-credit"]:
+        for artist in metadata_source["release"]["artist-credit"]:
             try:
                 artist_list += artist["artist"]["name"] + "/ "
             except Exception:
                 pass
         artist_list = artist_list.strip()[0:len(artist_list.strip()) - 1] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
         try:
-            language = metadata_mbp["release"]["text-representation"]["language"]
+            language = metadata_source["release"]["text-representation"]["language"]
         except Exception:
             language = ""
-        mbp_releaseid = metadata_mbp["release"]["id"] if len(metadata_user["mbp_releaseid"]) < 1 else metadata_user["mbp_releaseid"]
-        mbp_albumid = metadata_mbp["release"]["release-group"]["id"] if len(metadata_user["mbp_albumid"]) < 1 else metadata_user["mbp_albumid"]
-        barcode = metadata_mbp["release"]["barcode"] if "barcode" in metadata_mbp["release"] else ""
+        mbp_releaseid = metadata_source["release"]["id"] if len(metadata_user["mbp_releaseid"]) < 1 else metadata_user["mbp_releaseid"]
+        mbp_albumid = metadata_source["release"]["release-group"]["id"] if len(metadata_user["mbp_albumid"]) < 1 else metadata_user["mbp_albumid"]
+        barcode = metadata_source["release"]["barcode"] if "barcode" in metadata_source["release"] else ""
         release_date = ""
         mbp_trackid = ""
         tracknr = ""
         isrc = ""
         length = ""
         genres = ""
-        if len(metadata_user["cover"]) > 0:
-            cover_path = metadata_user["cover"]
-        elif cover_mbp != 'None':
-            cover_path = cover_mbp["images"][0]["image"]
-        else:
-            cover_path = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
+        cover_path = cover_source if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
         cover_mime_type = guess_type(cover_path)[0]
         if cover_path != os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png'):
             try:
                 response = requests.get(cover_path)
                 image = response.content
             except Exception:               
-                sockets.searchvideo('Cover URL is invalid')
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False
         else:
             file = open(cover_path, 'rb')
             image = file.read()
         
-        total_tracks = len(metadata_mbp["release"]["medium-list"][0]["track-list"])
+        total_tracks = len(metadata_source["release"]["medium-list"][0]["track-list"])
         
-        for track in metadata_mbp["release"]["medium-list"][0]["track-list"]:
-            if metadata_mbp["release"]["title"] in track["recording"]["title"]:
+        for track in metadata_source["release"]["medium-list"][0]["track-list"]:
+            if metadata_source["release"]["title"] in track["recording"]["title"]:
                 tracknr += track["number"] if "number" in track and len(track["number"]) > 0 else 1
                 mbp_trackid += track["id"]
                 isrc += track["recording"]["isrc-list"][0] if "isrc-list" in track["recording"] else ''
                 length += track["recording"]["length"] if "length" in track["recording"] else ''
         genres = ""
-        if "tag-list" in metadata_mbp["release"]["release-group"]:
-            for tag in metadata_mbp["release"]["release-group"]["tag-list"]:
-                genres += tag['name'] + "; "
-        elif 'tag-list' in metadata_mbp["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]:
-            for tag in metadata_mbp["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]["tag-list"]:
-                genres += tag['name'] + "; "
+        try:
+            if "tag-list" in metadata_source["release"]["release-group"]:
+                for tag in metadata_source["release"]["release-group"]["tag-list"]:
+                    genres += tag['name'] + "; "
+            elif 'tag-list' in metadata_source["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]:
+                for tag in metadata_source["release"]["medium-list"][0]["track-list"][int(tracknr) - 1]["recording"]["tag-list"]:
+                    genres += tag['name'] + "; "
+        except Exception:
+            pass
         genres = genres.strip()[0:len(genres.strip()) - 1]# if len(metadata_user["genres"]) < 1 else metadata_user["genres"].replace(';', '/')
         
-        if "first-release-date" in metadata_mbp["release"]["release-group"]:
-            release_date = metadata_mbp["release"]["release-group"]["first-release-date"] if len(metadata_user['album_releasedate']) < 1 else metadata_user["album_releasedate"]
+        if "first-release-date" in metadata_source["release"]["release-group"]:
+            release_date = metadata_source["release"]["release-group"]["first-release-date"] if len(metadata_user['album_releasedate']) < 1 else metadata_user["album_releasedate"]
         else:
-            release_date = metadata_mbp["release"]["date"]
+            release_date = metadata_source["release"]["date"]
         
-        title = metadata_mbp["release"]["title"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
+        title = metadata_source["release"]["title"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
         data = {
             'filename': filename,
             'album': album,
             'artists': artist_list,
             'language': language,
-            'mbp_releaseid': mbp_releaseid,
-            'mbp_albumid': mbp_albumid,
+            'track_id': mbp_releaseid,
+            'album_id': mbp_albumid,
             'mbp_trackid': mbp_trackid,
             'barcode': barcode,
             'release_date': release_date,
@@ -110,6 +110,89 @@ class MetaData:
             'image': image,
             'title': title,
             'genres': genres
+        }
+        return data
+    
+    def getspotifydata(filename, metadata_user, metadata_source, cover_source):
+        logger.info('Getting Spotify metadata')
+        album = metadata_source["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
+        trackid = metadata_source["id"] if len(metadata_user["trackid"]) < 1 else metadata_user["trackid"]
+        albumid = metadata_source["album"]["id"] if len(metadata_user["albumid"]) < 1 else metadata_user["albumid"]
+        isrc = metadata_source["external_ids"]["isrc"] if "isrc" in metadata_source else ''
+        release_date = metadata_source["album"]["release_date"] if len(metadata_user["album_releasedate"]) < 1 else metadata_user["album_releasedate"]
+        length = str(int(int(metadata_source["duration_ms"]) / 1000))
+        tracknr = metadata_source["track_number"] if len(metadata_user["album_tracknr"]) < 1 else metadata_user["album_tracknr"]
+        total_tracks = metadata_source["total_tracks"] if 'total_tracks' in metadata_source else '1'
+        cover_path = cover_source if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
+        title = metadata_source["name"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
+        genres = "" # Spotify API doesn't provide genres with tracks
+        spotify_artists = ""
+        for artist in metadata_source["artists"]:
+            spotify_artists += artist["name"] + "; "
+        artists = spotify_artists[0:len(spotify_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+        cover_mime_type = guess_type(cover_path)
+        if cover_path != os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png'):
+            try:
+                response = requests.get(cover_path)
+                image = response.content
+            except Exception:               
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                return False
+        else:
+            file = open(cover_path, 'rb')
+            image = file.read()
+        data = {
+            'filename': filename,
+            'album': album,
+            'artists': artists,
+            'barcode':  "",
+            'language': "Unknown",
+            'track_id': trackid,
+            'album_id': albumid,
+            'release_date': release_date,
+            'tracknr': tracknr,
+            'total_tracks': total_tracks,
+            'isrc': isrc,
+            'length': length,
+            'cover_path': cover_path,
+            'cover_mime_type': cover_mime_type,
+            'image': image,
+            'title': title,
+            'genres': genres
+        }
+        return data
+    
+    def onlyuserdata(filename, metadata_user):
+        if metadata_user["cover"] != '':
+            try:
+                cover_path = metadata_user["cover"]
+                response = requests.get(metadata_user["cover"])
+                image = response.content
+            except Exception:
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                return False
+        else:
+            cover_path = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
+            file = open(cover_path, 'rb')
+            image = file.read()
+        data = {
+            'filename': filename,
+            'album': metadata_user.get('album', ''),
+            'artists': metadata_user.get('artists', ''),
+            'barcode': "",
+            'language': "Unknown",
+            'track_id': metadata_user.get('trackid', ''),
+            'album_id': metadata_user.get('albumid', ''),
+            'release_date': metadata_user.get('album_releasedate', ''),
+            'tracknr': metadata_user.get('album_tracknr', '1'),
+            'total_tracks': metadata_user.get('album_tracknr', '1'),
+            'isrc': "",
+            'length': "",
+            'cover_path': cover_path,
+            'cover_mime_type': guess_type(cover_path),
+            'image': image,
+            'title': metadata_user.get('title', ''),
+            'genres': ""
         }
         return data
         
@@ -183,18 +266,18 @@ class MetaData:
         elif data["extension"] == 'OGG':
             audio = OggVorbis(data["filename"])
             
-        
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
         audio["barcode"] = data["barcode"]
         audio["language"] = data["language"]
-        audio["tracknumber"] = data["tracknr"]
+        audio["tracknumber"] = str(data["tracknr"])
         audio["title"] = data["title"]
-        audio["musicbrainz_releasetrackid"] = data["mbp_releaseid"]
-        audio["musicbrainz_releasegroupid"] = data["mbp_albumid"]
-        audio["musicbrainz_albumid"] = data["mbp_albumid"]
         audio["date"] = data["release_date"]
         audio["genre"] = data["genres"]
+        if data.get('source', '') == 'Musicbrainz':
+            audio["musicbrainz_releasetrackid"] = data["track_id"]
+            audio["musicbrainz_releasegroupid"] = data["album_id"]
+            audio["musicbrainz_albumid"] = data["album_id"]
         
         audio.save()
         
@@ -259,7 +342,8 @@ class MetaData:
     def mergevideodata(data):
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
-        dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d')
+        print(data["extension"])
+        dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d') if len(data["release_date"]) > 0 else datetime.now().date()
         year = dateobj.year
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
         video["\xa9nam"] = data["title"]
@@ -286,53 +370,44 @@ class MetaData:
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
     def readaudiometadata(filename):
+        logger.info('Reading metadata of %s', filename)
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
         if extension == 'MP3':
             audio = EasyID3(filename)
             data = MP3(filename)
-            bitrate = data.info.bitrate
-            length = data.info.length
         elif extension == 'FLAC':
             audio = FLAC(filename)
+            data = FLAC(filename)
         elif extension == 'AAC':
             audio = AAC(filename)
+            data = FLAC(filename)
         elif extension == 'OPUS':
             audio = OggOpus(filename)
+            data = OggOpus(filename)
         elif extension == 'OGG':
             audio = OggVorbis(filename)
-            
-        try:
-            genres = audio["genre"][0]
-        except Exception:
-            genres = ""
-        try:
-            isrc = audio["isrc"][0]
-        except Exception:
-            isrc = ""
-        try:
-            tracknr = audio["tracknumber"][0]
-        except Exception:
-            tracknr = 1
-        try:
-            language = audio["language"][0]
-        except Exception:
-            language = ""
+            data = OggVorbis(filename)
         
         response = {
-            'title': audio["title"][0],
-            'artist': audio["artist"][0],
-            'album': audio["album"][0],
-            'genres': genres,
-            'language': language,
-            'mbp_releaseid': audio["musicbrainz_releasetrackid"][0],
-            'mbp_releasegroupid': audio["musicbrainz_releasegroupid"][0],
-            'isrc': isrc,
-            'tracknr': tracknr,
-            'date': audio["date"][0],
-            'length': length,
-            'bitrate': bitrate,
+            'title': audio.get('title', [''])[0],
+            'artists': audio.get('artist', [''])[0],
+            'album': audio.get('album', [''])[0],
+            'barcode': audio.get('barcode', [''])[0],
+            'genres': audio.get('genre', [''])[0],
+            'language': audio.get('language', [''])[0],
+            'release_date': audio.get('date', [''])[0],
+            'album_id': "",
+            'total_tracks': "",
+            'mbp_releaseid': audio.get('musicbrainz_releasetrackid', [''])[0],
+            'mbp_releasegroupid': audio.get('musicbrainz_releasegroupid', [''])[0],
+            'isrc': audio.get('isrc', [''])[0],
+            'tracknr': audio.get('tracknumber', [''])[0],
+            'date': audio.get('date', [''])[0],
+            'length': data.info.length,
+            'bitrate': data.info.bitrate,
             'output_folder': os.path.dirname(filename),
-            'filepath': filename
+            'filename': filename,
+            "goal": "edit",
         }
         
         return response
@@ -341,17 +416,21 @@ class MetaData:
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
         if extension in ['M4A', 'MP4']:
             video = MP4(filename)
+            
         # Bitrate calculation: https://www.reddit.com/r/headphones/comments/3xju4s/comment/cy5dn8h/?utm_source=share&utm_medium=web2x&context=3
         # Mutagen MP4 stream info: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Info
         bitrate = int(video.info.bits_per_sample * video.info.sample_rate * video.info.channels)
         response = {
-            'title': video["\xa9nam"][0],
-            'album': video["\xa9alb"][0],
-            'artist': video["\xa9ART"][0],
-            'genres': video["\xa9gen"][0],
+            'title': video.get('\xa9nam', [''])[0],
+            'album': video.get("\xa9alb", [''])[0],
+            'artists': video.get("\xa9ART", [''])[0],
+            'genres': video.get("\xa9gen", [''])[0],
+            'release_date': video.get("\xa9day", [''])[0],
             'bitrate': bitrate,
             'output_folder': os.path.dirname(filename),
-            'filepath': filename
+            'filename': filename,
+            'length': video.info.length,
+            'tracknr': video.get('trkn', [[1]])[0][0]
         }
         return response
     

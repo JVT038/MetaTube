@@ -35,3 +35,9 @@ def metadatalog(msg):
     
 def youtubesearch(data):
     socketio.emit('youtubesearch', data)
+    
+def spotifysearch(data):
+    socketio.emit('spotify_response', data)
+    
+def foundspotifytrack(data):
+    socketio.emit('spotify_track', data)

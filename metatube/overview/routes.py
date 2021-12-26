@@ -3,22 +3,28 @@ from metatube.database import *
 from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
 from metatube.metadata import MetaData
+from metatube.spotify import spotify_metadata as Spotify
 from metatube import socketio, sockets
 from metatube import Config as env
 from flask import render_template
 from datetime import datetime
+from threading import Thread
+from dateutil import parser
+from distutils.util import strtobool
+from shutil import move
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import json
 import os
 import asyncio
+import requests
 
 @bp.route('/')
-@bp.route('/index')
 def index():
     ffmpeg_path = True if len(Config.query.get(1).ffmpeg_directory) > 0 else False
     records = Database.getrecords()
-    metadataform = render_template('metadataform.html')
+    metadata_sources = Config.get_metadata_sources()
+    metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform)
 
 @socketio.on('ytdl_search')
@@ -28,34 +34,26 @@ def search(query):
             video = yt.fetch_url(query)
             if Database.checkyt(video["id"]) is None:
                 templates = Templates.fetchalltemplates()
-                mbp_args = {
-                    'query': video["track"] if "track" in video else (video["alt_title"] if "alt_title" in video else video["title"]),
-                    'artist': video["artist"] if "artist" in video else (video["creator"] if "creator" in video else video["channel"]),
-                    'max': Config.get_max(),
-                    'type': 'webui'
-                }
-
-                segments_search = asyncio.run(sb.segments(video["id"]))
-                mbp = asyncio.run(musicbrainz.search(mbp_args))
-                segments = segments_search if type(segments_search) == list else 'error'
-                
-                downloadform = render_template('downloadform.html', templates=templates, segments=segments)
-                metadataform = render_template('metadataform.html')
-                
-                sockets.youtuberesults(video, downloadform, metadataform)
-                if len(mbp["release-list"]) > 0:
-                    for release in mbp["release-list"]:
-                        release["cover"] = musicbrainz.get_cover(release["id"])
-                    socketio.start_background_task(sockets.musicbrainzresults, mbp["release-list"])
-                    logger.info('Sent musicbrainz release')
-                else:
-                    sockets.searchvideo('No releases from Musicbrainz have been found!')
+                metadata_sources = Config.get_metadata_sources()
+                socketio.start_background_task(yt.fetch_video, video, templates, metadata_sources)
+                                     
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
             asyncio.run(yt.search(query))
     else:
         sockets.searchvideo('Enter an URL!')
+
+@socketio.on('searchmetadata')
+def searchmetadata(data):
+    sources = Config.get_metadata_sources()
+    data["max"] = Config.get_max()
+    if 'musicbrainz' in sources:
+        Thread(target = musicbrainz.webui, args=(data, )).start()
+    if 'spotify' in sources:
+        cred = Config.get_spotify().split(';')
+        spotify = Spotify(cred[1], cred[0])
+        spotify.get_item(data)
 
 @socketio.on('ytdl_download')
 def download(data):
@@ -73,7 +71,7 @@ def download(data):
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
-    verbose = bool(env.LOGGER)
+    verbose = strtobool(env.LOGGER)
     logger.info('Request to download %s', data["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
@@ -95,18 +93,39 @@ def fetchmbpalbum(album_id):
         socketio.emit('foundmbpalbum', json.dumps(mbp))
     else:
         sockets.metadatalog('Release group not found!')
+        
+@socketio.on('fetchspotifyalbum')
+def fetchspotifyalbum(input_id):
+    logger.info('Request for Spotify album with id %s', input_id)
+        
+@socketio.on('fetchspotifytrack')
+def fetchspotifytrack(input_id):
+    logger.info('Request for Spotify track with id %s', input_id)
+    cred = Config.get_spotify().split(';')
+    spotify = Spotify(cred[1], cred[0])
+    spotify.sockets_track(input_id)
 
 @socketio.on('mergedata')
-def mergedata(filepath, release_id, metadata):
-    if Database.checkmusicbrainz(release_id) is None:
+def mergedata(filepath, release_id, metadata, cover, source):
+    if Database.checktrackid(release_id) is None and Database.fetchitem(release_id) is None and Database.checktrackid(metadata.get('trackid', '')) is None:
         metadata_user = metadata
-        metadata_mbp = musicbrainz.search_id_release(release_id)
-        cover_mbp = musicbrainz.get_cover(release_id)
+        cover_source = cover if cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', cover)
         extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-        data = MetaData.getdata(filepath, metadata_user, metadata_mbp, cover_mbp)
-        data["goal"] = 'add'
+        if source == 'Spotify':
+            cred = Config.get_spotify().split(';')
+            spotify = Spotify(cred[1], cred[0])
+            metadata_source = spotify.fetch_track(release_id)
+            data = MetaData.getspotifydata(filepath, metadata_user, metadata_source, cover_source)
+            
+        elif source == 'Musicbrainz':
+            metadata_source = musicbrainz.search_id_release(release_id)
+            data = MetaData.getmusicbrainzdata(filepath, metadata_user, metadata_source, cover_source)
+        elif source == 'Unavailable':
+            data = MetaData.onlyuserdata(filepath, metadata_user)
         if data is not False:
+            data["goal"] = 'add'
             data["extension"] = extension
+            data["source"] = source
             if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
                 MetaData.mergeaudiodata(data)
             elif extension in ['MP4', 'M4A']:
@@ -131,7 +150,7 @@ def mergedata(filepath, release_id, metadata):
                 sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
                 logger.debug('Metadata unavailable for file %s', data["filepath"])
     else:
-        sockets.searchvideo('Musicbrainz release has already been downloaded!')
+        sockets.searchvideo(f'{source} item has already been downloaded!')
         try:
             os.unlink(filepath)
         except Exception:
@@ -148,6 +167,15 @@ def insertitem(data):
 def updateitem(data):
     logger.info('Got request to update item')
     id = data["itemid"]
+    head, tail = os.path.split(data["filepath"])
+    if tail.startswith('tmp_'):
+        print('starts with tmp')
+        data["filepath"] = os.path.join(head, tail[4:len(tail)])
+    print(data["filepath"])
+    try:
+        data["date"] = parser.parse(data["date"])
+    except Exception:
+        data["date"] = datetime.now().date()
     item = Database.fetchitem(id)
     data["youtube_id"] = item.youtube_id
     item.update(data)
@@ -200,10 +228,10 @@ def editmetadata(id):
         metadata = MetaData.readvideometadata(item.filepath)
     else:
         return False
-    metadata["musicbrainz_id"] = item.musicbrainz_id
+    metadata["audio_id"] = item.audio_id
     metadata["itemid"] = item.id
-    
-    metadataform = render_template('metadataform.html')
+    metadata_sources = Config.get_metadata_sources()
+    metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
     sockets.editmetadata({'metadata': metadata, 'metadataview': metadataform})
 
 @socketio.on('editfile')
@@ -215,25 +243,76 @@ def editfile(id):
         'album': item.album,
         'date': item.date,
         'length': item.length,
-        'musicbrainz_id': item.musicbrainz_id,
-        'youtube_id': item.youtube_id
+        'audio_id': item.audio_id,
+        'youtube_id': item.youtube_id,
+        'itemid': item.id
     }
     templates = Templates.fetchalltemplates()
-    segment_results = asyncio.run(sb.segments(itemdata["youtube_id"]))
+    segment_results = sb.segments(itemdata["youtube_id"])
     segments = segment_results if type(segment_results) == list else 'error'
     downloadform = render_template('downloadform.html', templates=templates, segments=segments)
     sockets.editfile({'filedata': itemdata, 'downloadview': downloadform})
     
+@socketio.on('editfilerequest')
+def editfilerequest(filepath, id):
+    logger.info('Got request to edit file')
+    item = Database.fetchitem(id)
+    if item is not None:
+        extension = item.filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
+        new_extension = filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
+        if item.cover != os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png'):
+            try:
+                response = requests.get(item.cover)
+                image = response.content
+                mime_type = guess_type(item.cover)
+            except Exception:               
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                return False
+        else:
+            file = open(item.cover, 'rb')
+            image = file.read()
+            mime_type = 'image/png'
+        if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
+            metadata_item = MetaData.readaudiometadata(item.filepath)
+                        
+        elif extension in ['MP4', 'M4A']:
+            metadata_item = MetaData.readvideometadata(item.filepath)
+            metadata_item["barcode"] = ""
+            metadata_item["language"] = ""
+            
+        metadata_item["track_id"] = item.audio_id
+        metadata_item["cover_path"] = item.cover
+        metadata_item["cover_mime_type"]  = mime_type
+        metadata_item["image"] = image
+        metadata_item["itemid"] = item.id
+        metadata_item["goal"] = 'edit'
+        metadata_item["extension"] = new_extension
+        metadata_item["filename"] = filepath
+            
+        if new_extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
+            MetaData.mergeaudiodata(metadata_item)
+        elif new_extension in ['MP4', 'M4A']:
+            MetaData.mergevideodata(metadata_item)
+        head, tail = os.path.split(filepath)
+        move(filepath, os.path.join(head, tail[4:len(tail)]))
+        try:
+            os.unlink(item.filepath)
+        except Exception:
+            pass
+        
+    else:
+        logger.info('File not in database')
+        logger.info(item)
+    
 @socketio.on('editmetadatarequest')
-def editmetadatarequest(metadata_user, release_id, filepath, id):
-    metadata_mbp = musicbrainz.search_id_release(release_id)
-    cover_mbp = musicbrainz.get_cover(release_id)
+def editmetadatarequest(metadata_user, filepath, id):
     extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-    data = MetaData.getdata(filepath, metadata_user, metadata_mbp, cover_mbp)
-    data["goal"] = 'edit'
-    data["itemid"] = id
+    data = MetaData.onlyuserdata(filepath, metadata_user)
     if data is not False:
+        data["goal"] = 'edit'
+        data["itemid"] = id
         data["extension"] = extension
+        data["source"] = metadata_user["source"]
         if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
             MetaData.mergeaudiodata(data)
         elif extension in ['MP4', 'M4A']:
@@ -250,5 +329,5 @@ def utility_processor():
     def get_ext(filepath):
         return filepath.split('.')[len(filepath.split('.')) - 1].upper()
     def check_metadata(filepath):
-        return filepath.split('.')[len(filepath.split('.')) - 1].upper() in ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV']
+        return filepath.split('.')[len(filepath.split('.')) - 1].upper() in ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A']
     return dict(path_exists=path_exists, get_ext=get_ext, check_metadata=check_metadata)

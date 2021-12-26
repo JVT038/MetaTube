@@ -1,13 +1,16 @@
 import sponsorblock
 from sponsorblock.errors import *
 from metatube import logger
-async def segments(url):
+def segments(url):
     client = sponsorblock.Client()
     logger.info('Fetching sponsorblock segments for %s', url)
     try:
-        segments = client.get_skip_segments(url)    
+        segments = client.get_skip_segments(url)
+    except NotFoundException:
+        logger.warn('No segments found for %s', str(url))
+        return "404"
     except Exception as e:
-        logger.error("Error in metatube/sponsorblock.py: " + str(e))
+        logger.error("Error in metatube/sponsorblock.py: %s", str(e))
         return str(e)
     
     response = []

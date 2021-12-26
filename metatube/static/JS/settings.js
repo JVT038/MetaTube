@@ -14,6 +14,10 @@ $(document).ready(function() {
     } else {
         $("#hardware_acceleration").children('option[value='+$("#current_hw").val()+']').prop('selected', true);
     }
+
+    if($("#spotifycheck").hasAttr('checked')) {
+        $("#spotifyrow").removeClass('d-none');
+    }
     
     $(document).on('click', ".templatebtn", function() {
         let goal = $(this).attr('goal');
@@ -91,6 +95,7 @@ $(document).ready(function() {
             $(".videocol").addClass('d-none');
         }
     });
+
     $("#advancedtoggle").on('click', function() {
         if($("#advancedrow").hasClass('d-none')) {
             $(this).text('Hide advanced');
@@ -99,23 +104,53 @@ $(document).ready(function() {
         }
         $("#advancedrow").toggleClass('d-none');
     });
+
     $("#proxy_status").on('change', function() {
         $("#proxyrow").children('div.col:not(:first)').toggleClass('d-none');
     });
+
     $(".expandtemplatebtn").on('click', function() {
         let id = $(this).parents('tr').attr('id');
         $(this).parents('tr').siblings('#proxy_'+id).toggleClass('d-none');
         
     });
 
+    $(".custom-control-label").on('click', function() {
+        $(this).siblings('.metadatainput').trigger('click');
+    });
+
+    $(".metadatainput").on('change', function() {
+        if($(this).val() == 'spotify') {
+            if($(this).is(':checked')) {
+                $("#spotifyrow").removeClass('d-none');
+            } else {
+                $("#spotifyrow").addClass('d-none');
+            }
+        }
+    });
+
     $("#submitdownloadform").on('click', function() {
         let amount = $("#max_amount").val();
         let ffmpeg_path = $("#ffmpeg_path").val();
         let hardware_transcoding = $("#hardware_acceleration").val();
+        let extradata = {};
         if(hardware_transcoding == 'vaapi') {
             hardware_transcoding += ';'+$("#vaapi_device").val();
+        };
+        let metadata_sources = $('.metadatainput:checked').map(function() {
+            return this.value;
+        }).get();
+        if(metadata_sources.indexOf('spotify') > -1)  {
+            if($("#spotifyclientSecret").val() == '' || $("#spotifyclientID").val() == '') {
+                $("#downloadsettingslog").find('p').text('Enter the Spotify API credentials!');
+            } else {
+                extradata["spotifyapi"] = {
+                    'id': $("#spotifyclientID").val(),
+                    'secret': $("#spotifyclientSecret").val()
+                };
+            }
         }
-        socket.emit('updatesettings', ffmpeg_path, amount, hardware_transcoding);
+        socket.emit('updatesettings', ffmpeg_path, amount, hardware_transcoding, metadata_sources, extradata);
     });
 
     $("#hardware_acceleration").on('change', function() {
@@ -135,6 +170,14 @@ $(document).ready(function() {
             $(".videocol").not($(this).parent()).removeClass('d-none');
         } else {
             $(".videocol").not($(this).parent()).addClass('d-none');
+        }
+    });
+
+    $("#togglesecret").on('click', function() {
+        if($("#spotifyclientSecret").attr('type') == 'password') {
+            $("#spotifyclientSecret").attr('type', 'text');
+        } else {
+            $("#spotifyclientSecret").attr('type', 'password');
         }
     });
 

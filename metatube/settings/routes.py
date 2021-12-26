@@ -12,10 +12,18 @@ def settings():
     ffmpeg_path = db_config.ffmpeg_directory
     amount = db_config.amount
     hw_transcoding = db_config.hardware_transcoding
+    metadata_sources = db_config.metadata_sources.split(';')
+    spotify = db_config.spotify_api.split(';') if len(db_config.spotify_api) > 0 else ['', '']
     templates = Templates.query.all()
 
-    return render_template('settings.html', ffmpeg=ffmpeg_path, amount=amount, current_page='settings', templates=templates, hw_transcoding=hw_transcoding)
-
+    return render_template('settings.html', 
+                           ffmpeg=ffmpeg_path, 
+                           amount=amount, 
+                           current_page='settings', 
+                           templates=templates, 
+                           hw_transcoding=hw_transcoding,
+                           metadata_sources=metadata_sources,
+                           spotify=spotify)
 @socketio.on('updatetemplate')
 def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 'best', width = 'best', height = 'best', proxy_json = {'status': False,'type': '','address': '','port': '','username': '','password': ''}):
     data = {
@@ -90,7 +98,7 @@ def deltemplate(id):
     sockets.templatesettings('Template successfully removed')
 
 @socketio.on('updatesettings')
-def updatesettings(ffmpeg_path, amount, hardware_transcoding):
+def updatesettings(ffmpeg_path, amount, hardware_transcoding, metadata_sources, extradata):
     db_config = Config.query.get(1)
     response = ""
     
@@ -120,5 +128,17 @@ def updatesettings(ffmpeg_path, amount, hardware_transcoding):
                 exit()
         db_config.set_hwtranscoding(hardware_transcoding)
         response += 'Hardware Transcoding setting has succesfully been updated! <br />'
-        
+    if ';'.join(sorted(metadata_sources)) != ';'.join(sorted(db_config.metadata_sources.split(';'))):
+        if len(metadata_sources) > 0:
+            db_config.set_metadata(';'.join(sorted(metadata_sources)))
+            response += 'Metadata setting has succesfully been updated! <br />'
+        else:
+            response += 'At least one metadata source must be selected! <br />'
+    
+    if 'spotify' in metadata_sources and 'spotifyapi' in extradata:
+        spotifydata =  extradata["spotifyapi"]["secret"] + ";" +  extradata["spotifyapi"]["id"]
+        if str(db_config.spotify_api) != spotifydata:
+            db_config.set_spotify(spotifydata)
+            response += 'Spotify API settings have succesfully been updated! <br />'
+            
     sockets.downloadsettings(response)

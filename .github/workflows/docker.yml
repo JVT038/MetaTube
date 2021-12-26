@@ -12,6 +12,7 @@ on:
       - 'example.flaskenv'
       - '.gitattributes'
       - '.github/workflows/docker.yml'
+      - '.dockerignore'
       
     branches: [ master ]
   pull_request:

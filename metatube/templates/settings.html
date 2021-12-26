@@ -17,7 +17,7 @@
     </nav>
     <div class="tab-content">
         <div class="tab-pane active" id="downloadtab">
-            <h4>Download settings</h4>
+            <h4 class="text-center">Download settings</h4>
             <div class="form-row" id="downloadsettingslog">
                 <div class="col">
                     <p class="text-center"></p>
@@ -56,13 +56,44 @@
                     <input type="text" class="form-control" id="hw_render_node" />
                 </div>
             </div>
+            <div class="form-row">
+                <label class="col-form-label">Select sources to get metadata from</label>
+                <div class="col">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input metadatainput" value="musicbrainz" id="musicbrainzcheck" {% if 'musicbrainz' in metadata_sources %} checked {% endif %}/>
+                        <label class="custom-control-label" for="#musicbrainzcheck">Musicbrainz</label>
+                    </div>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input metadatainput" value="spotify" id="spotifycheck" {% if 'spotify' in metadata_sources %} checked {% endif %}/>
+                        <label class="custom-control-label" for="#spotifycheck">Spotify</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row d-none" id="spotifyrow">
+                <p class="mt-3">You can register get Spotify API credentials for <i>free</i> <a href="https://developer.spotify.com/dashboard/applications" target="_blank">here</a></p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Spotify client ID</span>
+                    </div>
+                    <input type="text" class="form-control" value="{{ spotify[1] }}" id="spotifyclientID" />
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Spotify client Secret</span>
+                    </div>
+                    <input type="password" class="form-control" value="{{ spotify[0] }}" id="spotifyclientSecret" />
+                    <div class="input-group-append">
+                        <span class="input-group-text" style="cursor: pointer" id="togglesecret"><i class="fi-xnpuxl-eye"></i></span>
+                    </div>
+                </div>
+            </div>
             <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
                 ** The root directory is the same directory where <code>metatube.py</code> is located
             </p>
             <button type="button" class="btn btn-success" id="submitdownloadform">Update settings</button>
         </div>
         <div class="tab-pane" id="templatestab">
-            <h4>Template settings</h4>
+            <h4 class="text-center">Template settings</h4>
             <p class="text-center" id="templateslog"></p>
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -81,7 +112,7 @@
                             <tr id="{{ template.id }}">
                                 <td class="td_name">{{ template.name }}</td>
                                 <td class="td_type">{{ template.type }}</td>
-                                <td class="td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') }}</td>
+                                <td class="td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') | upper }}</td>
                                 <td class="td_output_name">{{ template.output_name }}</td>
                                 <td class="td_output_folder">{{ template.output_folder }}</td>
                                 <td>

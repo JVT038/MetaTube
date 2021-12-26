@@ -7,6 +7,8 @@ class Config(db.Model):
     ffmpeg_directory = db.Column(db.String(128))
     amount = db.Column(db.Integer)
     hardware_transcoding = db.Column(db.String(16), default="None")
+    metadata_sources = db.Column(db.String(128), default='musicbrainz')
+    spotify_api = db.Column(db.String(128))
     auth = db.Column(db.Boolean)
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
@@ -26,11 +28,27 @@ class Config(db.Model):
         self.amount = int(amount)
         db.session.commit()
         logger.info('Changed amount to %s', str(amount))
+
+    def set_spotify(self, spotify):
+        self.spotify_api = spotify
+        db.session.commit()
+        logger.info('Changed the Spotify API settings')
+        
+    def set_metadata(self, metadata_sources):
+        self.metadata_sources = metadata_sources
+        db.session.commit()
+        logger.info('Changed the metadata settings')
     
     def set_hwtranscoding(self, hw_transcoding):
         self.hardware_transcoding = hw_transcoding
         db.session.commit()
         logger.info('Set hardware transcoding to %s', hw_transcoding)
+    
+    def get_metadata_sources():
+        return Config.query.get(1).metadata_sources
+    
+    def get_spotify():
+        return Config.query.get(1).spotify_api
     
     def get_max():
         return Config.query.get(1).amount
@@ -110,9 +128,9 @@ class Database(db.Model):
     album = db.Column(db.String(64))
     date = db.Column(db.DateTime)
     length = db.Column(db.Integer)
-    cover = db.Column(db.LargeBinary)
-    musicbrainz_id = db.Column(db.String(128), unique=True)
-    youtube_id = db.Column(db.String(16), unique=True)
+    cover = db.Column(db.String(256))
+    audio_id = db.Column(db.String(128))
+    youtube_id = db.Column(db.String(16))
     
     def getrecords():
         return Database.query.all()
@@ -126,8 +144,8 @@ class Database(db.Model):
     def checkyt(youtube_id_input):
         return Database.query.filter_by(youtube_id = youtube_id_input).first()
     
-    def checkmusicbrainz(release_id_input):
-        return Database.query.filter_by(musicbrainz_id = release_id_input).first()
+    def checktrackid(release_id_input):
+        return Database.query.filter_by(audio_id = release_id_input).first()
     
     def insert(data):
         row = Database(
@@ -137,7 +155,7 @@ class Database(db.Model):
             album = data["album"],
             date = parser.parse(data["date"]),
             cover = data["image"],
-            musicbrainz_id = data["musicbrainz_id"],
+            audio_id = data["track_id"],
             youtube_id = data["ytid"]
         )
         db.session.add(row)
@@ -150,13 +168,14 @@ class Database(db.Model):
         self.name = data["name"]
         self.artist = data["artist"]
         self.album = data["album"]
-        self.date = parser.parse(data["date"])
+        self.date = data["date"]
         self.length = data["length"]
         self.cover = data["image"]
-        self.musicbrainz_id = data["musicbrainz_id"]
+        self.audio_id = data["track_id"]
         self.youtube_id = data["youtube_id"]
         db.session.commit()
         logger.info('Updated item %s', data["name"])
+        data["date"] = data["date"].strftime('%d-%m-%Y')
         sockets.overview({'msg': 'changed_metadata_db', 'data': data})
     
     def delete(self):

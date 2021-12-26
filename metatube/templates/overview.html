@@ -31,7 +31,7 @@
         <tbody>
             {% for record in records %}
                 <tr id="{{ record.id }}">
-                    <td class="td_name"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" /> <span>{{ record.name }}</span></td>
+                    <td class="td_name"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
                     <td class="td_artist" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
                     <td class="td_album" style="vertical-align: middle;">{{ record.album }}</td>
                     <td class="td_date" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
@@ -77,11 +77,19 @@
                             <p class="text-center" id="searchlog"></p>
                         </form>
                     </div>
-                    <div class="row animate__animated" id="defaultview">
-                        <div class="col-md-6" id="ytcol"></div>
-                        <div class="col-md-6" id="audiocol"></div>
+                    <div class="row d-flex" id="defaultview"></div>
+                    <div id="metadataview" class="d-none"></div>
+                    <div id="searchmetadataview" class="d-none">
+                        <p>No matching items from Spotify found :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
+                        <form id="metadataqueryform">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="metadataquery" />
+                                <div class="input-group-append">
+                                    <button type="button" id="searchmetadatabtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div id="metadataview" class="d-none animate__animated"></div>
                     <div id="progressview" class="d-none">
                         <div class="form-row">
                             <div class="col">
@@ -104,9 +112,11 @@
                 </div>
             </div>
             <div class="modal-footer d-none" id="searchvideomodalfooter">
-                <button type="button" class="btn btn-primary" id="editmetadata">Edit metadata manually</button>
-                <button type="button" class="btn btn-success" id="downloadbtn">Download</button>
+                <button type="button" class="btn btn-success d-none" id="nextbtn">Next</button>
+                <button type="button" class="btn btn-warning d-none" id="resetviewbtn">Return to video overview</button>
+                <button type="button" class="btn btn-primary d-none" id="editmetadata">Edit metadata manually</button>
                 <button type="button" class="btn btn-primary d-none" id="downloadfilebtn">Download file</button>
+                <button type="button" class="btn btn-success d-none" id="downloadbtn">Download</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -144,10 +154,23 @@
             <div class="modal-body">
                 <div id="downloadsection"></div>
                 <div id="metadatasection"></div>
-                <div id="progresssection"></div>
+                <div id="progressection" class="d-none">
+                    <div class="form-row">
+                        <div class="col">
+                            <p id="progresstextedit" class="text-center"></p>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressedit" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="edititembtnmodal">Save item</button>
+                <button type="button" class="btn btn-primary" id="editfilebtnmodal">Save item</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>

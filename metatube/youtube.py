@@ -1,8 +1,12 @@
 import yt_dlp, json, os
-from yt_dlp.postprocessor.ffmpeg import PostProcessingError
+from yt_dlp.postprocessor.ffmpeg import PostProcessingError as ffmpegerror
 from youtubesearchpython.__future__ import VideosSearch
 from threading import Thread
+from urllib.error import URLError
+from yt_dlp.utils import ExtractorError, DownloadError, PostProcessingError
 from metatube import sockets, logger
+from metatube.sponsorblock import segments as findsegments
+from jinja2 import Environment, PackageLoader, select_autoescape
     
 class YouTube:
     def is_supported(url):
@@ -42,11 +46,26 @@ class YouTube:
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
                 ytdl.download(url)
+            except KeyError as e:
+                logger.error('%s key did not exist', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'The output template was incorrect. Check logs for more info.'})
+            except ExtractorError as e:
+                logger.error('Extractor error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'An extractor error has occured. Check logs for more info.'})
+            except ffmpegerror as e:
+                logger.error('FFmpeg error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'A converting error has occured. Check logs for more info.'})
             except PostProcessingError as e:
-                logger.error(str(e))
-                sockets.downloadprogress({'status': 'error', 'message': 'Converting video has failed. Check logs for more info'})
+                logger.error('Postprocessor error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'A processing error has occured. Check logs for more info.'})
+            except DownloadError as e:
+                logger.error('Downloading error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'A downloading error has occured. Check logs for more info.'})
+            except URLError as e:
+                logger.error('Network connection error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'A network error occured. Check logs for more info.'})
             except Exception as e:
-                logger.error(e)
+                logger.exception('Error during downloading video: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'Something has gone wrong. Check logs for more info'})
     
     def download_hook(d):
@@ -72,10 +91,8 @@ class YouTube:
                 })
                 
     def postprocessor_hook(d):
-        if d['status'] == 'processing' or d['status'] == 'started':
-            sockets.downloadprogress({'status': 'processing'})
-        elif d['status'] == 'finished':
-            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'info_dict': json.dumps(d["info_dict"])})
+        if d['status'] == 'finished':
+            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
             
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
@@ -147,6 +164,7 @@ class YouTube:
 
         ytdl_options = {
             'format': format,
+            'merge_output_format': ext,
             'postprocessors': postprocessors,
             'postprocessor_args': postprocessor_args,
             'ffmpeg_location': ffmpeg,
@@ -170,3 +188,16 @@ class YouTube:
 
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        
+    def fetch_video(video, templates, metadata_sources):
+        sb = findsegments(video["webpage_url"])
+        segments = sb if type(sb) == list else 'error'
+        env = Environment(
+            loader=PackageLoader('metatube'),
+            autoescape=select_autoescape()
+        )
+        downloadtemplate = env.get_template('downloadform.html')
+        metadatatemplate = env.get_template('metadataform.html')
+        downloadform = downloadtemplate.render(templates=templates, segments=segments)
+        metadataform = metadatatemplate.render(metadata_sources=metadata_sources)
+        sockets.youtuberesults(video, downloadform, metadataform)

@@ -3,7 +3,7 @@
 
 from metatube import create_app, socketio, logger
 from gevent import get_hub
-from gevent.pywsgi import WSGIServer
+from distutils.util import strtobool
 import os
 if __name__ == "__main__":
     app = create_app()
@@ -14,6 +14,6 @@ if __name__ == "__main__":
     get_hub().NOT_ERROR += (KeyboardInterrupt,)
     try:
         logger.info(u'Starting the webserver on http://%s:%s...'%(host, port))
-        socketio.run(app, str(host), int(port), log_output=bool(log_output))
+        socketio.run(app, str(host), int(port), log_output=bool(strtobool(log_output)))
     except KeyboardInterrupt:
         logger.info('Stopped server because of KeyboardInterrupt')

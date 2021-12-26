@@ -28,25 +28,6 @@
 <h4 align="center"> 
 	🚧  MetaTube 🚀 Under construction...  🚧 <br/>
 </h4>
-<p>
-  It's definitely not finished yet and these features are currently supported:
-
-  - Fetch information from a YouTube video based on an URL
-  - Query and fetch results from the Musicbrainz API
-  - Set up templates and options for the YouTube download
-  - Download YouTube videos based on a selected template
-  - Exclude fragments (such as intros, outros, etc.) from the download
-  - Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files
-  - Hardware encoding using NVENC, Intel Quick Sync
-  - Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX
-  - Manually set height and width, if a video type has been selected
-  - Store the information about downloaded releases in the database, to edit the downloaded content later after the download
-  - Docker is [supported](#whale-using-docker)
-
-  To-Do before the first release:
-  - For some reason, Musicbrainz prefers to show singles over Albums, while I want the opposite.
-  - Some decent mobile support
-</p>
 
 <hr>
 
@@ -65,13 +46,23 @@
 
 ## :dart: About ##
 
-I made this project to download videos from YouTube easier, by automatically fetching music metadata from MusicBrainz Picard. 
+MetaTube downloads video from YouTube and can add metadata from Spotify and/or Musicbrainz on the downloaded file. 
 
 ## :sparkles: Features ##
 
-:heavy_check_mark: Automatically download YouTube videos <br/>
-:heavy_check_mark: Add metadata from the Musicbrainz Picard database <br/>
-:heavy_check_mark: Set start and end point to cut off any outros  and/or intros
+It's almost finished and these features are currently supported:
+
+:heavy_check_mark: Fetch information from a YouTube video based on an URL <br />
+:heavy_check_mark: Query and fetch results from the Musicbrainz API and the Spotify Web API <br />
+:heavy_check_mark: Set up templates and options for the YouTube download <br />
+:heavy_check_mark: Download YouTube videos based on a selected template <br />
+:heavy_check_mark: Exclude fragments (such as intros, outros, etc.) from the download <br />
+:heavy_check_mark: Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files <br />
+:heavy_check_mark: Hardware encoding using NVENC, Intel Quick Sync <br />
+:heavy_check_mark: Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX <br />
+:heavy_check_mark: Manually set height and width, if a video type has been selected <br />
+:heavy_check_mark: Store the information about downloaded releases in the database, to edit the downloaded metadata or the file itself later after the download <br />
+:heavy_check_mark: Docker is [supported](#whale-using-docker)
 
 ## :rocket: Technologies ##
 
@@ -92,7 +83,7 @@ For a complete list, visit the [Dependencies overview](https://github.com/JVT038
 
 ## :white_check_mark: Requirements ##
 
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python](https://python.org) installed.
+Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python 3.8 or higher](https://python.org/downloads) installed.
 
 ## :checkered_flag: Starting ##
 ### :whale: Using Docker ###
@@ -204,6 +195,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
+- [X] Add support for Spotify
+- [ ] Add support for Deezer
 - [ ] Add translations
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
@@ -213,13 +206,13 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add button in settings to download the entire SQlite3 Database
 - [ ] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
-- [ ] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
+- [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
 - [ ] Add support for HTTPS / SSL
 - [ ] Preview filenames when entering an output template
 - [ ] Make the Docker file smaller, because it's huge
 - [X] Build a logger
 - [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
-- [ ] Catch and show errors properly
+- [X] Catch and show errors properly
 - [X] Support looking for YouTube videos and downloading them
 - [ ] Support querying the Musicbrainz database and matching YouTube videos with them
 - [ ] Support MySQL
@@ -238,6 +231,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [ ] Make sure the search for downloaded song field works
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
+- [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 &#xa0;
 
 ## Disclaimer

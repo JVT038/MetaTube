@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jsglue import JSGlue
 from flask_migrate import Migrate
 from flask_socketio import SocketIO
+from distutils.util import strtobool
 from config import Config
 
 import logging
@@ -36,7 +37,7 @@ def create_app(config_class=Config):
     app.logger.addHandler(logger)
     console.setLevel(int(app.config["LOG_LEVEL"]))
     is_sqlite = app.config["SQLALCHEMY_DATABASE_URI"].startswith('sqlite:///')
-    socket_log = logger if bool(app.config["SOCKET_LOG"]) is True else False
+    socket_log = logger if bool(strtobool(app.config["SOCKET_LOG"])) is True else False
     buffer_size = int(app.config["BUFFER_SIZE"])
     db.init_app(app)
 

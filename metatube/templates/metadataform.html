@@ -4,6 +4,7 @@
         <p>* All input fields with an *, are optional</p>
     </div>
 </div>
+{% if 'musicbrainz' in metadata_sources %}
 <div class="form-row">
     <div class="col">
         <label for="#mbp_releaseid">Musicbrainz release id*</label>
@@ -26,16 +27,38 @@
         </div>
     </div>
 </div>
+{% endif %}
+{% if 'spotify' in metadata_sources %}
+<div class="form-row">
+    <div class="col">
+        <label for="#spotify_trackid">Spotify Track ID*</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="spotify_trackid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchspotifytrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#spotify_albumid">Spotify Album ID*</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="spotify_albumid" />
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="form-row">
     <div class="col">
         <label for="#md_title">Title of the song</label>
-        <input type="text" class="form-control" id="md_title" />
+        <input type="text" class="form-control" id="md_title" required aria-required/>
     </div>
 </div>
 <div class="form-row">
     <div class="col">
         <label for="#md_artists">Artist(s) of the song. Use a semicolon (;) to separate multiple artists</label>
-        <input type="text" class="form-control" id="md_artists" />
+        <input type="text" class="form-control" id="md_artists" required aria-required/>
     </div>
 </div>
 <div class="form-row">

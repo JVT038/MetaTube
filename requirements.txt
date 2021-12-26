@@ -13,3 +13,4 @@ python-dateutil==2.8.2
 python-dotenv==0.19.1
 ffmpeg-python==0.2.0
 youtube-search-python==1.5.3
+spotipy==2.19.0
