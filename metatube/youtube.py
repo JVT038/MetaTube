@@ -151,8 +151,7 @@ class YouTube:
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_amf'])
                 elif hw_transcoding == 'omx':
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_omx'])
-            print(postprocessor_args)
-                    
+                                        
         # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
         if len(segments) > 0:
             ranges = []
@@ -189,7 +188,6 @@ class YouTube:
             else:
                 proxy_string += proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
             ytdl_options["proxy"] = proxy_string
-        print(ytdl_options)
         return ytdl_options
 
     def get_video(self, url, ytdl_options):

@@ -43,8 +43,8 @@ class MetaData:
             language = metadata_source["release"]["text-representation"]["language"]
         except Exception:
             language = ""
-        mbp_releaseid = metadata_source["release"]["id"] if len(metadata_user["mbp_releaseid"]) < 1 else metadata_user["mbp_releaseid"]
-        mbp_albumid = metadata_source["release"]["release-group"]["id"] if len(metadata_user["mbp_albumid"]) < 1 else metadata_user["mbp_albumid"]
+        mbp_releaseid = metadata_source["release"]["id"] if len(metadata_user["trackid"]) < 1 else metadata_user["trackid"]
+        mbp_albumid = metadata_source["release"]["release-group"]["id"] if len(metadata_user["albumid"]) < 1 else metadata_user["albumid"]
         barcode = metadata_source["release"]["barcode"] if "barcode" in metadata_source["release"] else ""
         release_date = ""
         mbp_trackid = ""

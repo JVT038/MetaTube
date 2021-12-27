@@ -15,3 +15,4 @@ ffmpeg-python==0.2.0
 youtube-search-python==1.5.3
 spotipy==2.19.0
 gevent-websocket==0.10.1
+urllib3==1.26.7

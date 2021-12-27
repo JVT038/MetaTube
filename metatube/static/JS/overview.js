@@ -136,11 +136,10 @@ $(document).ready(function() {
         }
         $.each(mbp_data["artist-credit"], function(key_artist, value_artist) {
             if(typeof(value_artist) == 'object') {
-                let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a><br/>';
+                let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a> <br/>';
                 artists+=a;
             }
         });
-        artists.slice(0, artists.length - 5);
         let release_type = mbp_data["release-group"].type;
         let mbp_url = 'https://musicbrainz.org/release/'+release_id;
         let mbp_image = "";
@@ -152,7 +151,7 @@ $(document).ready(function() {
         let data = {
             'url': mbp_url,
             'title': title,
-            'artists': artists,
+            'artists': artists.slice(0, artists.length - 5),
             'type': release_type,
             'date': date,
             'language': language,

@@ -1,5 +1,4 @@
 from metatube import socketio
-from flask_socketio import emit
 
 def downloadprogress(message):
     socketio.emit('downloadprogress', message)

@@ -10,7 +10,7 @@ class spotify_metadata():
             logger.error('Spotify authentication has failed. Error: %s', str(e))
             
     def get_item(self, data):
-        searchresults =  self.spotify.search(f"track:{data['title']}", data["max"])
+        searchresults = self.spotify.search(f"track:{data['title']}", data["max"])
         sockets.spotifysearch(searchresults)
         logger.info('Searched Spotify for track %s with artist %s', data["title"], data["artist"])
         
