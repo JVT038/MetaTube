@@ -23,7 +23,7 @@ def musicbrainzresults(data):
     socketio.emit('mbp_response', data)
     
 def youtuberesults(data, downloadform, metadataform):
-    emit('ytdl_response', (data, downloadform, metadataform))
+    socketio.emit('ytdl_response', (data, downloadform, metadataform))
     
 def editmetadata(data):
     socketio.emit('edit_metadata', data)
@@ -42,3 +42,6 @@ def spotifysearch(data):
     
 def foundspotifytrack(data):
     socketio.emit('spotify_track', data)
+
+def deezersearch(data):
+    socketio.emit('deezer_response', data)

@@ -197,6 +197,11 @@ $(document).ready(function() {
         createaudiocol(data);
     }
 
+    function insertdeezerdata(data) {
+        let title = data["title"];
+        
+    }
+
     function addperson() {
         let addbutton = $(".addperson");
         let id = addbutton.parents('.personrow').siblings('.personrow').length > 0 ? parseInt(addbutton.parents('.personrow').siblings('.personrow:last').attr('id').slice(addbutton.parents('.personrow').attr('id').length - 1)) + 1 : parseInt(addbutton.parents('.personrow').attr('id').slice(addbutton.parents('.personrow').attr('id').length - 1)) + 1;
@@ -993,6 +998,22 @@ $(document).ready(function() {
             }
             $("#searchmetadataview").addClass('d-none');
             $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
+        } else {
+            $("#defaultview").children('.spinner-border').remove();
+            $("#nextbtn").addClass('d-none');
+            $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+        }
+    });
+
+    socket.on('deezer_response', (deezer) => {
+        console.info('Deezer info');
+        deezerdata = deezer;
+        if(deezer.length > 0) {
+            for(let i = 0; i < deezer.length; i++) {
+                insertdeezerdata(deezer[i]);
+                $("#searchmetadataview").addClass('d-none');
+                $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
+            }
         } else {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
