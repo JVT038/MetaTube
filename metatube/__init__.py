@@ -36,12 +36,10 @@ def create_app(config_class=Config):
     app.logger.removeHandler(default_handler)
     app.logger.addHandler(logger)
     console.setLevel(int(app.config["LOG_LEVEL"]))
-    is_sqlite = app.config["SQLALCHEMY_DATABASE_URI"].startswith('sqlite:///')
-    socket_log = logger if bool(strtobool(app.config["SOCKET_LOG"])) is True else False
+    socket_log = logger if strtobool(str(app.config["SOCKET_LOG"])) == 1 else False
     buffer_size = int(app.config["BUFFER_SIZE"])
     db.init_app(app)
-
-    migrate.init_app(app, db, compare_type=True, render_as_batch=is_sqlite, ping_interval=60)
+    migrate.init_app(app, db, compare_type=True, ping_interval=60)
     jsglue.init_app(app)
     socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log, max_http_buffer_size=buffer_size) # Allow maximum 10MB to be sent through web sockets
     app.register_blueprint(bp_overview)

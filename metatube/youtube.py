@@ -1,5 +1,6 @@
 import yt_dlp, json, os
-from yt_dlp.postprocessor.ffmpeg import PostProcessingError as ffmpegerror
+from yt_dlp.postprocessor.ffmpeg import PostProcessingError as FFmpegError
+from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
 from youtubesearchpython.__future__ import VideosSearch
 from threading import Thread
 from urllib.error import URLError
@@ -52,9 +53,12 @@ class YouTube:
             except ExtractorError as e:
                 logger.error('Extractor error: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'An extractor error has occured. Check logs for more info.'})
-            except ffmpegerror as e:
+            except FFmpegError as e:
                 logger.error('FFmpeg error: %s', str(e))
-                sockets.downloadprogress({'status': 'error', 'message': 'A converting error has occured. Check logs for more info.'})
+                sockets.downloadprogress({'status': 'error', 'message': 'An error involving FFmpeg has occured. Check logs for more info.'})
+            except FFmpegPostProcessorError as e:
+                logger.error('FFmpegPostProcessor error: %s', str(e))
+                sockets.downloadprogress({'status': 'error', 'message': 'An processing error involving FFmpeg has occured. Check logs for more info.'})
             except PostProcessingError as e:
                 logger.error('Postprocessor error: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'A processing error has occured. Check logs for more info.'})
@@ -147,6 +151,7 @@ class YouTube:
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_amf'])
                 elif hw_transcoding == 'omx':
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_omx'])
+            print(postprocessor_args)
                     
         # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
         if len(segments) > 0:
@@ -184,6 +189,7 @@ class YouTube:
             else:
                 proxy_string += proxy["proxy_address"].strip() + ":" + proxy["proxy_port"].strip()
             ytdl_options["proxy"] = proxy_string
+        print(ytdl_options)
         return ytdl_options
 
     def get_video(self, url, ytdl_options):

@@ -36,7 +36,6 @@ def search(query):
                 templates = Templates.fetchalltemplates()
                 metadata_sources = Config.get_metadata_sources()
                 socketio.start_background_task(yt.fetch_video, video, templates, metadata_sources)
-                                     
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
@@ -71,7 +70,7 @@ def download(data):
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
-    verbose = strtobool(env.LOGGER)
+    verbose = strtobool(str(env.LOGGER))
     logger.info('Request to download %s', data["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
@@ -107,7 +106,7 @@ def fetchspotifytrack(input_id):
 
 @socketio.on('mergedata')
 def mergedata(filepath, release_id, metadata, cover, source):
-    if Database.checktrackid(release_id) is None and Database.fetchitem(release_id) is None and Database.checktrackid(metadata.get('trackid', '')) is None:
+    if Database.checktrackid(release_id) is None and Database.checktrackid(metadata.get('trackid', '')) is None:
         metadata_user = metadata
         cover_source = cover if cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', cover)
         extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
@@ -116,7 +115,6 @@ def mergedata(filepath, release_id, metadata, cover, source):
             spotify = Spotify(cred[1], cred[0])
             metadata_source = spotify.fetch_track(release_id)
             data = MetaData.getspotifydata(filepath, metadata_user, metadata_source, cover_source)
-            
         elif source == 'Musicbrainz':
             metadata_source = musicbrainz.search_id_release(release_id)
             data = MetaData.getmusicbrainzdata(filepath, metadata_user, metadata_source, cover_source)
@@ -133,19 +131,19 @@ def mergedata(filepath, release_id, metadata, cover, source):
             elif extension in ['WAV']:
                 MetaData.mergeid3data(data)
             else:
-                file = open(os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png'), 'rb')
-                image = file.read()
+                image = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png'), 'rb'
                 # The name will be the filename of the downloaded file without the extension
-                name = filepath[0:len(filepath) - len(filepath.split('.')[len(filepath.split('.')) - 1]) - 1]
+                filename = os.path.split(filepath)[1]
+                name = filename[0:len(filename) - len(filename.split('.')[len(filename.split('.')) - 1]) - 1]
                 data = {
                     'filepath': os.path.join(env.BASE_DIR, data["filename"]),
                     'name': name,
-                    'artist': 'Unknown',
+                    'artist': metadata_user.get('artists', 'Unknown'),
                     'album': 'Unknown',
-                    'date': datetime.now(),
+                    'date': datetime.now().strftime('%d-%m-%Y'),
                     'length': 'Unknown',
                     'image': image,
-                    'musicbrainz_id': 'Unknown'
+                    'track_id': release_id
                 }
                 sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
                 logger.debug('Metadata unavailable for file %s', data["filepath"])
@@ -169,9 +167,7 @@ def updateitem(data):
     id = data["itemid"]
     head, tail = os.path.split(data["filepath"])
     if tail.startswith('tmp_'):
-        print('starts with tmp')
         data["filepath"] = os.path.join(head, tail[4:len(tail)])
-    print(data["filepath"])
     try:
         data["date"] = parser.parse(data["date"])
     except Exception:

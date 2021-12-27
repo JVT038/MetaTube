@@ -162,7 +162,7 @@ FFMPEG | An absolute path to the folder containing ffmpeg. | Empty
 DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/MetaTube/downloads; absolute path will be calculated automatically
 LOG | Whether to keep logs or not | False
 SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
-LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 30
+LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 10
 BUFFER_SIZE | The maximum size of the websockets **in bytes**; adjust if your covers are too large to be sent | 10000000 (10 million); equal to 10MB
 ```bash
 # On Windows 10, you can set an environment variable like this: 
@@ -232,6 +232,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Make sure the search for downloaded song field works
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
+- [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
 &#xa0;
 
 ## Disclaimer

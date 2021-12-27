@@ -464,6 +464,13 @@ $(document).ready(function() {
             $("#videorow").addClass('d-none');
             $("#type").val('Audio');
         }
+        if($("#extension option:selected").hasAttr('nosupport')) {
+            $("#nextbtn").addClass('d-none');
+            $("#downloadbtn").removeClass('d-none');
+        } else {
+            $("#nextbtn").removeClass('d-none');
+            $("#downloadbtn").addClass('d-none');
+        }
     });
 
     $(document).on('change', '#resolution', function() {
@@ -686,7 +693,7 @@ $(document).ready(function() {
             $("#searchlog").text('Enter all segment fields or disable the segments');
         } else if($("#audiocol").length > 0){
             $("#audiocol, #editmetadata, #downloadbtn, #resetviewbtn").removeClass('d-none');
-            $("#nextbtn, #ytcol,m ").addClass('d-none');
+            $("#nextbtn, #ytcol").addClass('d-none');
         } else if($("#outputname").val().startsWith('tmp_')) {
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#searchlog").text('Your output name can not begin with tmp_!');
@@ -741,13 +748,13 @@ $(document).ready(function() {
     });
 
     $("#downloadbtn").on('click', function(e) {
-        if($(".audiocol-checkbox:checked").length < 1 && $("#audiocol").length > 0) {
+        if($(".audiocol-checkbox:checked").length < 1 && $("#audiocol").length > 0 && !$("#extension option:selected").hasAttr('nosupport')) {
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#searchlog").text('Select a release on the right side before downloading a video');
         }  else if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#searchlog").text('Enter all segment fields or disable the segments');
-        } else if($("#audiocol").length < 1 && $("#metadataview").find('input[required]').val() == '') {
+        } else if($("#audiocol").length < 1 && $("#metadataview").find('input[required]').val() == '' && !$("#extension option:selected").hasAttr('nosupport')) {
             $("#metadatalog").text('Enter all required fields!');
         } else {
             let url = $("#thumbnail_yt").attr('url');
@@ -848,7 +855,7 @@ $(document).ready(function() {
             }).text(percentage + "%");
         }
 
-        $("#editmetadata, #nextbtn, #defaultview").addClass('d-none');
+        $("#editmetadata, #nextbtn, #defaultview, #ytcol").addClass('d-none');
         $("#progressview").removeClass('d-none');
         $("#searchlog").empty();
         var progress_text = $("#edititemmodal").css('display').toLowerCase() == 'block' ? $("#progresstextedit") : $("#progresstext");

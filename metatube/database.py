@@ -130,7 +130,7 @@ class Database(db.Model):
     length = db.Column(db.Integer)
     cover = db.Column(db.String(256))
     audio_id = db.Column(db.String(128))
-    youtube_id = db.Column(db.String(16))
+    youtube_id = db.Column(db.String(16), unique=True)
     
     def getrecords():
         return Database.query.all()
@@ -160,7 +160,7 @@ class Database(db.Model):
         )
         db.session.add(row)
         db.session.commit()
-        logger.info('Inserted item %s into database', data["name"])
+        logger.info('Inserted item %s into database', data["name"], exc_info=1)
         return row.id
     
     def update(self, data):

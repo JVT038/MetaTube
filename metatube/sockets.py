@@ -1,4 +1,5 @@
 from metatube import socketio
+from flask_socketio import emit
 
 def downloadprogress(message):
     socketio.emit('downloadprogress', message)
@@ -22,7 +23,7 @@ def musicbrainzresults(data):
     socketio.emit('mbp_response', data)
     
 def youtuberesults(data, downloadform, metadataform):
-    socketio.emit('ytdl_response', (data, downloadform, metadataform))
+    emit('ytdl_response', (data, downloadform, metadataform))
     
 def editmetadata(data):
     socketio.emit('edit_metadata', data)
