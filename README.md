@@ -53,11 +53,11 @@ MetaTube downloads video from YouTube and can add metadata from Spotify and/or M
 It's almost finished and these features are currently supported:
 
 :heavy_check_mark: Fetch information from a YouTube video based on an URL <br />
-:heavy_check_mark: Query and fetch results from the Musicbrainz API and the Spotify Web API <br />
+:heavy_check_mark: Query and fetch results from the Musicbrainz API, the Spotify Web API, and the Deezer API <br />
 :heavy_check_mark: Set up templates and options for the YouTube download <br />
 :heavy_check_mark: Download YouTube videos based on a selected template <br />
 :heavy_check_mark: Exclude fragments (such as intros, outros, etc.) from the download <br />
-:heavy_check_mark: Metadata from either the user or Musicbrainz can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files <br />
+:heavy_check_mark: Metadata from either the user or the chosen metadata provider can be merged with MP3, Opus, FLAC, WAV, OGG, M4A & MP4 files <br />
 :heavy_check_mark: Hardware encoding using NVENC, Intel Quick Sync <br />
 :heavy_check_mark: Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX <br />
 :heavy_check_mark: Manually set height and width, if a video type has been selected <br />
@@ -197,7 +197,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
 - [X] Add support for Spotify
-- [ ] Add support for Deezer
+- [X] Add support for Deezer
 - [ ] Add translations
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
