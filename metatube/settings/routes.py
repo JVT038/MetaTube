@@ -130,6 +130,7 @@ def updatesettings(ffmpeg_path, amount, hardware_transcoding, metadata_sources, 
                 exit()
         db_config.set_hwtranscoding(hardware_transcoding)
         response += 'Hardware Transcoding setting has succesfully been updated! <br />'
+        
     if ';'.join(sorted(metadata_sources)) != ';'.join(sorted(db_config.metadata_sources.split(';'))):
         if len(metadata_sources) > 0:
             db_config.set_metadata(';'.join(sorted(metadata_sources)))

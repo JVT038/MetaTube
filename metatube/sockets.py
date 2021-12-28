@@ -44,3 +44,6 @@ def foundspotifytrack(data):
 
 def deezersearch(data):
     socketio.emit('deezer_response', data)
+    
+def deezertrack(data):
+    socketio.emit('deezer_track', data)

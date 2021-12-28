@@ -185,6 +185,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 ## To-Do
 - [X] Add support for the use of proxies to download YouTube videos
 - [X] Add Docker support
+- [ ] Add Docker support for ARM devices (such as Raspberry Pi)
 - [X] Add Github action / workflow thing, to automatically create Docker image upon a new commit
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube

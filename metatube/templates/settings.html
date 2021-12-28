@@ -67,6 +67,10 @@
                         <input type="checkbox" class="custom-control-input metadatainput" value="spotify" id="spotifycheck" {% if 'spotify' in metadata_sources %} checked {% endif %}/>
                         <label class="custom-control-label" for="#spotifycheck">Spotify</label>
                     </div>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input metadatainput" value="deezer" id="deezercheck" {% if 'deezer' in metadata_sources %} checked {% endif %}/>
+                        <label class="custom-control-label" for="#deezercheck">Deezer</label>
+                    </div>
                 </div>
             </div>
             <div class="form-row d-none" id="spotifyrow">

@@ -1,7 +1,7 @@
 Flask==2.0.2
 mutagen==1.45.1
 requests==2.26.0
-yt-dlp==2021.12.1
+yt-dlp==2021.12.27
 gevent==21.8.0
 Flask-SocketIO==5.1.1
 Flask-Migrate==3.1.0

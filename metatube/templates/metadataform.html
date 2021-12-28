@@ -18,9 +18,9 @@
 </div>
 <div class="form-row">
     <div class="col">
-        <label for="#md_albumid">Musicbrainz album id*</label>
+        <label for="#mbp_albumid">Musicbrainz album id*</label>
         <div class="input-group">
-            <input type="text" class="form-control" id="md_albumid" />
+            <input type="text" class="form-control" id="mbp_albumid" />
             <div class="input_group_append">
                 <button type="button" id="fetchmbpalbumbtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
             </div>
@@ -45,6 +45,27 @@
         <label for="#spotify_albumid">Spotify Album ID*</label>
         <div class="input-group">
             <input type="text" class="form-control" id="spotify_albumid" />
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if 'deezer' in metadata_sources %}
+<div class="form-row">
+    <div class="col">
+        <label for="#deezer_trackid">Deezer Track ID*</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="deezer_trackid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchdeezertrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="fi-xwsrxl-sign-in-solid" style="color: white;"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#deezer_albumid">Deezer Album ID*</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="deezer_albumid" />
         </div>
     </div>
 </div>

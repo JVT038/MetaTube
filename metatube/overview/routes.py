@@ -3,6 +3,7 @@ from metatube.database import *
 from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
 from metatube.metadata import MetaData
+from metatube.deezer import Deezer
 from metatube.spotify import spotify_metadata as Spotify
 from metatube import socketio, sockets
 from metatube import Config as env
@@ -51,8 +52,9 @@ def searchmetadata(data):
         Thread(target = musicbrainz.webui, args=(data, )).start()
     if 'spotify' in sources:
         cred = Config.get_spotify().split(';')
-        spotify = Spotify(cred[1], cred[0])
-        spotify.get_item(data)
+        Thread(target = Spotify.searchspotify, args=(data, cred, )).start()
+    if 'deezer' in sources:
+        Thread(target = Deezer.socketsearch, args=(data, )).start()
 
 @socketio.on('ytdl_download')
 def download(data):
@@ -103,6 +105,11 @@ def fetchspotifytrack(input_id):
     cred = Config.get_spotify().split(';')
     spotify = Spotify(cred[1], cred[0])
     spotify.sockets_track(input_id)
+    
+@socketio.on('fetchdeezertrack')
+def fetchdeezertrack(input_id):
+    logger.info('Request for Deezer track with id %s', input_id)
+    Deezer.sockets_track(input_id)
 
 @socketio.on('mergedata')
 def mergedata(filepath, release_id, metadata, cover, source):
@@ -114,10 +121,13 @@ def mergedata(filepath, release_id, metadata, cover, source):
             cred = Config.get_spotify().split(';')
             spotify = Spotify(cred[1], cred[0])
             metadata_source = spotify.fetch_track(release_id)
-            data = MetaData.getspotifydata(filepath, metadata_user, metadata_source, cover_source)
+            data = MetaData.getspotifydata(filepath, metadata_user, metadata_source)
         elif source == 'Musicbrainz':
             metadata_source = musicbrainz.search_id_release(release_id)
             data = MetaData.getmusicbrainzdata(filepath, metadata_user, metadata_source, cover_source)
+        elif source == 'Deezer':
+            metadata_source = Deezer.searchid(release_id)
+            data = MetaData.getdeezerdata(filepath, metadata_user, metadata_source)
         elif source == 'Unavailable':
             data = MetaData.onlyuserdata(filepath, metadata_user)
         if data is not False:
@@ -131,7 +141,6 @@ def mergedata(filepath, release_id, metadata, cover, source):
             elif extension in ['WAV']:
                 MetaData.mergeid3data(data)
             else:
-                image = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png'), 'rb'
                 # The name will be the filename of the downloaded file without the extension
                 filename = os.path.split(filepath)[1]
                 name = filename[0:len(filename) - len(filename.split('.')[len(filename.split('.')) - 1]) - 1]
@@ -142,7 +151,7 @@ def mergedata(filepath, release_id, metadata, cover, source):
                     'album': 'Unknown',
                     'date': datetime.now().strftime('%d-%m-%Y'),
                     'length': 'Unknown',
-                    'image': image,
+                    'image': cover_source,
                     'track_id': release_id
                 }
                 sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
@@ -156,14 +165,12 @@ def mergedata(filepath, release_id, metadata, cover, source):
         
 @socketio.on('insertitem')
 def insertitem(data):
-    logger.info('Got request to insert data')
     id = Database.insert(data)
     data["id"] = id
     sockets.overview({'msg': 'inserted_song', 'data': data})
     
 @socketio.on('updateitem')
 def updateitem(data):
-    logger.info('Got request to update item')
     id = data["itemid"]
     head, tail = os.path.split(data["filepath"])
     if tail.startswith('tmp_'):
@@ -226,6 +233,7 @@ def editmetadata(id):
         return False
     metadata["audio_id"] = item.audio_id
     metadata["itemid"] = item.id
+    metadata["cover"] = item.cover
     metadata_sources = Config.get_metadata_sources()
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
     sockets.editmetadata({'metadata': metadata, 'metadataview': metadataform})
@@ -251,7 +259,6 @@ def editfile(id):
     
 @socketio.on('editfilerequest')
 def editfilerequest(filepath, id):
-    logger.info('Got request to edit file')
     item = Database.fetchitem(id)
     if item is not None:
         extension = item.filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
@@ -295,10 +302,9 @@ def editfilerequest(filepath, id):
             os.unlink(item.filepath)
         except Exception:
             pass
-        
+        logger.info('Edited file %s', tail)
     else:
         logger.info('File not in database')
-        logger.info(item)
     
 @socketio.on('editmetadatarequest')
 def editmetadatarequest(metadata_user, filepath, id):

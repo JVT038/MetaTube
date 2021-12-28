@@ -196,9 +196,27 @@ $(document).ready(function() {
         createaudiocol(data);
     }
 
-    function insertdeezerdata(data) {
-        let title = data["title"];
-        
+    function insertdeezerdata(deezerdata) {
+        let title = deezerdata["title"];
+        let artists = "Artist: <br /> <a href='"+deezerdata["link"]+"' target='_blank'>"+deezerdata["artist"]["name"]+"</a>";
+        let type = deezerdata["album"]["type"];
+        let url = deezerdata["link"];
+        let date = "Unknown";
+        let language = "Unknown";
+        let cover = deezerdata["album"]["cover_medium"];
+        let id = deezerdata["id"];
+        let data = {
+            'url': url,
+            'title': title,
+            'artists': artists,
+            'type': type,
+            'date': date,
+            'language': language,
+            'source': 'Deezer',
+            'cover': cover,
+            'id': id
+        }
+        createaudiocol(data);
     }
 
     function addperson() {
@@ -567,6 +585,15 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on('click', '#fetchdeezertrack', function() {
+        let track_id = $(this).parent().siblings('input').val();
+        if(track_id.length > 0) {
+            socket.emit('fetchdeezertrack', track_id)
+        } else {
+            $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Spotify track ID!</p>')
+        }
+    });
+
     $(document).on('click', '#editmetadatabtnmodal', function() {
         if($("#metadatasection").find('input[required]').val() == '') {
             $("#metadatalog").text('Fill all required fields!');
@@ -578,7 +605,7 @@ $(document).ready(function() {
             let filepath = $("#item_filepath").val();
             let id = $("#edititemmodal").attr('itemid');
             let trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : $("#mbp_releaseid").val();
-            let albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : $("#md_albumid").val();
+            let albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : $("#mbp_albumid").val();
             let source = $("#spotify_trackid").length > 0 ? 'Spotify' : 'Musicbrainz';
             $.each($('.artist_relations'), function() {
                 if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
@@ -896,15 +923,22 @@ $(document).ready(function() {
                     
                     let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
                     let people = {};
-                    let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
                     let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
+                    let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
     
-                    if(cover == 'Unavailable') {
-                        var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : $("#mbp_releaseid").val();
-                        var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : $("#md_albumid").val();
-                    } else {
-                        var trackid = metadata_source == 'Spotify' ? $("#spotify_trackid").val() : $("#mbp_releaseid").val();
-                        var albumid = metadata_source == 'Spotify' ? $("#spotify_albumid").val() : $("#md_albumid").val();
+                    if(metadata_source == 'Unavailable') {
+                        // The priority order is: Spotify -> Deezer -> Musibrainz
+                        var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
+                        var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
+                    } else if(metadata_source == 'Spotify') {
+                        var trackid = $("#spotify_trackid").val();
+                        var albumid = $("#spotify_albumid").val();   
+                    } else if(metadata_source == 'Musicbrainz') {
+                        var trackid = $("#mbp_releaseid").val();
+                        var albumid = $("#mbp_albumid").val();
+                    } else if(metadata_source == 'Deezer') {
+                        var trackid = $("#deezer_trackid").val();
+                        var albumid = $("#deezer_albumid").val();
                     }
         
                     $.each($('.artist_relations'), function() {
@@ -1080,7 +1114,7 @@ $(document).ready(function() {
         $("#md_artists").val(artists);
         $("#md_album").val(album);
         $("#md_album_releasedate").val(album_releasedate);
-        $("#md_albumid").val(album_id);
+        $("#mbp_albumid").val(album_id);
     
         if("artist-relation-list" in mbp["release"] && mbp["release"]["artist-relation-list"].length > 0) {
             $.each(mbp["release"]["artist-relation-list"], function(key, value) {
@@ -1149,6 +1183,22 @@ $(document).ready(function() {
         $("#md_cover").val(cover);
     });
 
+    socket.on('deezer_track', (data) => {
+        let contributors = "";
+
+        for(let i = 0; i < Object.keys(data["contributors"]).length; i++) {
+            contributors += data["contributors"][i]["name"] + "; ";
+        }
+        $("#md_title").val(data["title"]);
+        $("#md_artists").val(contributors);
+        $("#md_album").val(data["album"]["title"]);
+        $("#md_album_artists").val(data["artist"]["name"])
+        $("#md_album_tracknr").val(data["track_position"]);
+        $("#md_album_releasedate").val(data["release_date"]);
+        $("#spotify_albumid").val(data["album"]["id"]);
+        $("#md_cover").val(data["album"]["cover_medium"]);
+    });
+
     socket.on('searchvideo', (data) => {
         $("#defaultview").find(".spinner-border").remove();
         $("#searchlog").text(data);
@@ -1159,6 +1209,7 @@ $(document).ready(function() {
 
     socket.on('overview', (data) => {
         if(data.msg == 'inserted_song') {
+            $("#overviewlog").empty();
             additem(data)
         } else if(data.msg == 'download_file') {
             filedata = data.data;
@@ -1192,11 +1243,12 @@ $(document).ready(function() {
         $("#metadatasection").find('#mbp_releaseid').val(data.metadata.musicbrainz_id);
         $("#metadatasection").find('#mbp_albumid').val(data.metadata.mbp_releasegroupid);
         $("#metadatasection").find('#md_title').val(data.metadata.title);
-        $("#metadatasection").find('#md_artists').val(data.metadata.artist);
+        $("#metadatasection").find('#md_artists').val(data.metadata.artists);
         $("#metadatasection").find('#md_album').val(data.metadata.album);
-        $("#metadatasection").find('#md_album_artists').val(data.metadata.artist);
+        $("#metadatasection").find('#md_album_artists').val(data.metadata.artists);
         $("#metadatasection").find('#md_album_tracknr').val(data.metadata.tracknr);
         $("#metadatasection").find('#md_album_releasedate').val(data.metadata.date);
+        $("#metadatasection").find('#md_cover').val(data.metadata.cover);
         $("#metadatasection").prepend('<div class="form-row"><div class="col"><label for="#itemfilepath">Filepath of item:</label><input type="text" value="'+data.metadata.filename+'" class="form-control" id="item_filepath" style="cursor: not-allowed" disabled /></div></div>');
         $("#edititemmodal").attr('itemid', data.metadata.itemid)
         $("#editfilebtnmodal").attr('id','editmetadatabtnmodal');

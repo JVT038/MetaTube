@@ -113,17 +113,18 @@ class MetaData:
         }
         return data
     
-    def getspotifydata(filename, metadata_user, metadata_source, cover_source):
+    def getspotifydata(filename, metadata_user, metadata_source):
         logger.info('Getting Spotify metadata')
         album = metadata_source["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = metadata_source["id"] if len(metadata_user["trackid"]) < 1 else metadata_user["trackid"]
         albumid = metadata_source["album"]["id"] if len(metadata_user["albumid"]) < 1 else metadata_user["albumid"]
-        isrc = metadata_source["external_ids"]["isrc"] if "isrc" in metadata_source else ''
+        isrc = metadata_source["external_ids"].get('isrc', '')
         release_date = metadata_source["album"]["release_date"] if len(metadata_user["album_releasedate"]) < 1 else metadata_user["album_releasedate"]
         length = str(int(int(metadata_source["duration_ms"]) / 1000))
         tracknr = metadata_source["track_number"] if len(metadata_user["album_tracknr"]) < 1 else metadata_user["album_tracknr"]
         total_tracks = metadata_source["total_tracks"] if 'total_tracks' in metadata_source else '1'
-        cover_path = cover_source if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
+        default_cover = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
+        cover_path = metadata_source["album"]["images"][0]["url"] if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
         title = metadata_source["name"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
         genres = "" # Spotify API doesn't provide genres with tracks
         spotify_artists = ""
@@ -131,7 +132,7 @@ class MetaData:
             spotify_artists += artist["name"] + "; "
         artists = spotify_artists[0:len(spotify_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
         cover_mime_type = guess_type(cover_path)
-        if cover_path != os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png'):
+        if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
                 image = response.content
@@ -159,6 +160,55 @@ class MetaData:
             'image': image,
             'title': title,
             'genres': genres
+        }
+        return data
+    
+    def getdeezerdata(filename, metadata_user, metadata_source):
+        album = metadata_source["album"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
+        trackid = str(metadata_source["id"]) if len(metadata_user["trackid"]) < 1 else str(metadata_user["trackid"])
+        albumid = str(metadata_source["album"]["id"]) if len(metadata_user["albumid"]) < 1 else str(metadata_user["albumid"])
+        isrc = metadata_source.get('isrc', '')
+        release_date = metadata_source["release_date"] if len(metadata_user["album_releasedate"]) < 1 else metadata_user["album_releasedate"]
+        length = str(metadata_source.get('duration', '0'))
+        tracknr = str(metadata_source.get('track_position', 1)) if len(metadata_user["album_tracknr"]) < 1 else metadata_user["album_tracknr"]
+        total_tracks = 1
+        default_cover = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
+        cover_path = metadata_source["album"].get('cover_xl', default_cover) if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
+        title = metadata_source["title"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
+        deezer_artists = ""
+        for contributor in metadata_source["contributors"]:
+            if contributor["type"].lower() == 'artist':
+                deezer_artists += contributor["name"] + "; "
+        artists = deezer_artists[0:len(deezer_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+        cover_mime_type = guess_type(cover_path)
+        if cover_path != default_cover:
+            try:
+                response = requests.get(cover_path)
+                image = response.content
+            except Exception:               
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                return False
+        else:
+            file = open(cover_path, 'rb')
+            image = file.read()
+        data = {
+            'filename': filename,
+            'album': album,
+            'artists': artists,
+            'barcode':  "",
+            'language': "Unknown",
+            'track_id': trackid,
+            'album_id': albumid,
+            'release_date': release_date,
+            'tracknr': tracknr,
+            'total_tracks': total_tracks,
+            'isrc': isrc,
+            'length': length,
+            'cover_path': cover_path,
+            'cover_mime_type': cover_mime_type,
+            'image': image,
+            'title': title,
+            'genres': ""
         }
         return data
     
@@ -260,6 +310,9 @@ class MetaData:
             if data.get('source', '') == 'Spotify':
                 audio.RegisterTXXXKey('spotify_trackid', data["track_id"])
                 audio.RegisterTXXXKey('spotify_albumid', data["album_id"])
+            elif data.get('source', '') == 'Deezer':
+                audio.RegisterTXXXKey('deezer_trackid', data["track_id"])
+                audio.RegisterTXXXKey('deezer_albumid', data["album_id"])
         elif data["extension"] == 'FLAC':
             audio = FLAC(data["filename"])
         elif data["extension"] == 'AAC':

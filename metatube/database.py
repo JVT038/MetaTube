@@ -160,7 +160,7 @@ class Database(db.Model):
         )
         db.session.add(row)
         db.session.commit()
-        logger.info('Inserted item %s into database', data["name"], exc_info=1)
+        logger.info('Inserted item %s into database', data["name"])
         return row.id
     
     def update(self, data):
