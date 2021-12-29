@@ -1,5 +1,4 @@
-# FROM phusion/passenger-full:2.0.1
-FROM alpine:3.15
+FROM python:3.9-alpine
 LABEL Author=JVT038 \
     Maintainer=JVT038 \
     Name=MetaTube
@@ -9,17 +8,11 @@ ENV PORT=5000 \
 EXPOSE $PORT
 COPY . /config/
 RUN \
-    apk add --no-cache \
-        python3 \
-        py3-pip \
-        py-gevent \
-        ffmpeg \
-        gcc \
-        musl-dev \
-        libffi-dev \
-        openssl-dev && \
+    apk update && \
+    apk add --no-cache python3-dev libffi-dev gcc musl-dev make ffmpeg && \
     mkdir -p /config && \
     pip3 install -r /config/requirements.txt && \
+    apk del --purge python3-dev libffi-dev gcc musl-dev make && \
     mkdir -p $DOWNLOADS
 
-ENTRYPOINT ["/usr/bin/python3", "config/metatube.py"]
+ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]
