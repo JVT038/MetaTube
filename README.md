@@ -234,6 +234,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
+- [ ] Make sure the progress bar works properly in a Docker contianer, because it doesn't work properly rn.
 &#xa0;
 
 ## Disclaimer
