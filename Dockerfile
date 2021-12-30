@@ -1,4 +1,3 @@
-# FROM phusion/passenger-full:2.0.1
 FROM alpine:3.15
 LABEL Author=JVT038 \
     Maintainer=JVT038 \

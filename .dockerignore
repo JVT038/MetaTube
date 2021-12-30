@@ -4,3 +4,6 @@ readme.md
 example.flaskenv
 LICENSE
 .github
+downloads
+.vscode
+.cache
