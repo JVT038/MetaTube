@@ -105,6 +105,7 @@ $(document).ready(function() {
         if($(window).width() >= 600) {
             list.classList.add('media');
             list.append(img, desc, inputgroup);
+            img.classList.add('mw-100', 'w-75');
         } else {
             list.append(img, inputgroup, desc);
             inputgroup.classList.add('float-right');
@@ -431,6 +432,7 @@ $(document).ready(function() {
             }
             input_group.addClass('float-right');
             $(".mbp-item").removeClass('media');
+            $(".mbp-item").children('img').addClass(['mw-100', 'w-75']);
         } else {
             let input_group = $(".mbp-item").children('.input-group-text');
             for(let i = 0; i < input_group.length; i++) {
@@ -439,6 +441,7 @@ $(document).ready(function() {
             }
             input_group.removeClass('float-right');
             $('.mbp-item').addClass('media');
+            $(".mbp-item").children('img').removeClass(['mw-100', 'w-75']);
         }
     }).resize();
 
