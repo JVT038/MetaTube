@@ -46,7 +46,7 @@
 
 ## :dart: About ##
 
-MetaTube downloads video from YouTube and can add metadata from Spotify and/or Musicbrainz on the downloaded file. 
+MetaTube downloads video from YouTube and can add metadata from a specified metadata provider on the downloaded file. 
 
 ## :sparkles: Features ##
 
@@ -219,7 +219,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Support MySQL
 - [ ] Make a CLI to download and match music
 - [X] Store the information of downloaded songs in a SQL database
-- [ ] Make it mobile-friendly
+- [X] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip fragments
 - [X] Manually edit metadata of file, before the download
 - [X] Manually edit metadata of file, after the download

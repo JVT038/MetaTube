@@ -35,7 +35,7 @@ $(document).ready(function() {
         let mediaheader = document.createElement('h5');
         let hr = document.createElement('hr');
 
-        img.classList.add('img-fluid', 'd-none', 'd-md-block');
+        img.classList.add('img-fluid');
         img.id = "thumbnail_yt";
         img.setAttribute('ytid', data.id);
         img.src = thumbnail;
@@ -45,7 +45,9 @@ $(document).ready(function() {
         img.setAttribute('style', 'cursor: pointer');
         img.setAttribute('url', data.webpage_url);
 
-        media.classList.add('media');
+        if($(window).width() >= 650) {
+            media.classList.add('media');
+        }
         body.classList.add('media-body');
         mediaheader.classList.add('mt-0');
         mediaheader.innerText = data.title;
@@ -98,15 +100,21 @@ $(document).ready(function() {
         checkbox.type = 'radio';
         checkbox.ariaLabel = 'Radio button for selecting an item';
 
-        list.classList.add('media', 'mbp-item');
         list.setAttribute('style', 'cursor: pointer');
         list.id = data["id"];
+        if($(window).width() >= 600) {
+            list.classList.add('media');
+            list.append(img, desc, inputgroup);
+        } else {
+            list.append(img, inputgroup, desc);
+            inputgroup.classList.add('float-right');
+        }
+        list.classList.add('mbp-item');
 
         header.append(headeranchor);
         desc.append(header, paragraph);
 
         inputgroup.appendChild(checkbox);
-        list.append(img, desc, inputgroup);
         ul.appendChild(list);
 
         audiocol.id = 'audiocol';
@@ -164,7 +172,7 @@ $(document).ready(function() {
 
     function insertspotifydata(spotifydata) {
         let title = spotifydata["name"];
-        let artists = spotifydata["artists"].length > 1 ? "Artists: <br />" : "Artist: ";
+        let artists = spotifydata["artists"].length > 1 ? "Artists: " : "Artist: ";
         let date = spotifydata["album"]["release_date"];
         let language = "Unknown";
         let type = spotifydata["album"]["type"];
@@ -198,7 +206,7 @@ $(document).ready(function() {
 
     function insertdeezerdata(deezerdata) {
         let title = deezerdata["title"];
-        let artists = "Artist: <br /> <a href='"+deezerdata["link"]+"' target='_blank'>"+deezerdata["artist"]["name"]+"</a>";
+        let artists = "Artist: <a href='"+deezerdata["link"]+"' target='_blank'>"+deezerdata["artist"]["name"]+"</a>";
         let type = deezerdata["album"]["type"];
         let url = deezerdata["link"];
         let date = "Unknown";
@@ -369,7 +377,6 @@ $(document).ready(function() {
         let desc = document.createElement('p');
 
         ul.classList.add('list-unstyled', 'youtuberesult');
-        li.classList.add('media');
         img.classList.add('img-fluid');
         body.classList.add('media-body');
         header.classList.add('youtubelink');
@@ -393,6 +400,9 @@ $(document).ready(function() {
         } catch {
             desc.innerHTML += 'No description available';
         }
+        if($(window).width() >= 700) {
+            li.classList.add('media');
+        }
         body.append(header, desc);
         li.append(img, body);
         ul.append(li);
@@ -400,6 +410,37 @@ $(document).ready(function() {
         $("#defaultview").removeClass(['d-flex', 'justify-content-center']);
         $("#defaultview").append(ul);
     }
+
+    $(window).resize(function() {
+        if ($(window).width() < 700) {
+            $(".youtuberesult").children('li').removeClass('media');
+        } else {
+            $(".youtuberesult").children('li').addClass('media');
+        }
+        if($(window).width() < 650) {
+            $("#ytcol").children('div').removeClass('media');
+        } else {
+            $("#ytcol").children('div').addClass('media');
+        }
+        if($(window).width() < 600) {
+            $('.mbp-item').removeClass('media');
+            let input_group = $(".mbp-item").children('.input-group-text');
+            for(let i = 0; i < input_group.length; i++) {
+                let li = $('.mbp-item')[i];
+                $(li).children('.media-body').before(input_group[i]);
+            }
+            input_group.addClass('float-right');
+            $(".mbp-item").removeClass('media');
+        } else {
+            let input_group = $(".mbp-item").children('.input-group-text');
+            for(let i = 0; i < input_group.length; i++) {
+                let li = $('.mbp-item')[i];
+                $(li).children('.media-body').after(input_group[i]);
+            }
+            input_group.removeClass('float-right');
+            $('.mbp-item').addClass('media');
+        }
+    }).resize();
 
     $(document).on('mouseenter', '.mbp-item, .youtuberesult', function() {
         $(this).css('filter', 'brightness(50%)');
@@ -539,6 +580,7 @@ $(document).ready(function() {
     $(document).on('click', ".deleteitembtn", function() {
         $("#removeitemmodal").find('.btn-danger').attr('id', $(this).parents('tr').attr('id'));
         $("#removeitemmodaltitle").text('Delete ' + $(this).parents('tr').children(':first').text())
+        $("#removeitemmodal").addClass(['d-flex', 'justify-content-center']);
         $("#removeitemmodal").modal('show');
     });
 
@@ -728,6 +770,9 @@ $(document).ready(function() {
         } else if($("#outputname").val().startsWith('tmp_')) {
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#searchlog").text('Your output name can not begin with tmp_!');
+        } else if($("#proxy_type").val() != 'None' && $("#proxy_row").find('input[required]').val() == '') {
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+            $("#searchlog").text('Enter a proxy port and address!');
         } else {
             let args = {
                 'title': $("#trackspan").text() != 'Unknown' ? $("#trackspan").text() : $(".media-body").children('h5').text().replace('(Official Video)', '').trim(),
@@ -851,7 +896,12 @@ $(document).ready(function() {
             });
         }
         $("#progressview").addClass('d-none');
+        $("#downloadmodal").addClass(['d-flex', 'justify-content-center']);
         $("#downloadmodal").modal('toggle');
+    });
+
+    $("#downloadmodal, #removeitemmodal, #edititemmodal").on('hidden.bs.modal', function() {
+        $(this).removeClass(['d-flex', 'justify-content-center']);
     });
 
     $("#downloadfilebtn").on('click', function() {
@@ -1263,6 +1313,7 @@ $(document).ready(function() {
             $("#spotify_trackid").val(data.metadata.audio_id);
         }
         friconix_update();
+        $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);
         $("#edititemmodal").modal('show');
     });
 
@@ -1285,6 +1336,7 @@ $(document).ready(function() {
         $("#edititemmodal").attr({'itemid': data.filedata.itemid, 'ytid': data.filedata.youtube_id});
         $("hr").addClass('d-none');
         friconix_update();
+        $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);
         $("#edititemmodal").modal('show');
     });
 

@@ -47,15 +47,21 @@ $(document).ready(function() {
         socket.emit('updatetemplate', name, output_folder, output_ext, output_name, id, goal, bitrate, width, height, proxy_json);
     });
 
+    $("#removetemplatemodal, #templatesmodal").on('hidden.bs.modal', function() {
+        $(this).removeClass(['d-flex', 'justify-content-center']);
+    });
+
     $(".deltemplatebtn").on('click', function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
         } else {
             $("#removetemplatemodaltitle").text('Remove modal \''+ $(this).parent().siblings(':first').text() + '\'');
             $("#removetemplatemodal").find('.btn-danger').attr('id', $(this).parent().parent().attr('id'));
+            $("#removetemplatemodal").addClass(['d-flex', 'justify-content-center']);
             $("#removetemplatemodal").modal('show');
         }
     });
+
     $("#deltemplatebtnmodal").on('click', function(){
         let id = $(this).attr('id');
         socket.emit('deletetemplate', id);
@@ -68,6 +74,7 @@ $(document).ready(function() {
         } else {
             let id = $(this).parent().parent().attr('id');
             socket.emit('fetchtemplate', id);
+            $("#templatesmodal").addClass(['d-flex', 'justify-content-center']);
             $("#templatesmodal").modal("show");
         }
     });
@@ -80,6 +87,7 @@ $(document).ready(function() {
         $("#changetemplatebtn").attr('id', 'addtemplatebtn');
         $("#addtemplatebtn").text('Add template');
         $("#addtemplatebtn").attr('goal', 'add');
+        $("#templatesmodal").addClass(['d-flex', 'justify-content-center']);
         $("#templatesmodal").modal("show");
         $("#advancedtoggle").text('Show advanced');
         $("#advancedrow, .videocol").addClass('d-none');
@@ -239,6 +247,7 @@ $(document).ready(function() {
             $("#proxy_username").val(proxy_username);
             $("#proxy_password").val(proxy_password);
         }
+        $("#templatesmodal").addClass(['d-flex', 'justify-content-center']);
         $("#templatesmodal").modal("show");
     });
 });
