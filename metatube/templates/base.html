@@ -20,17 +20,25 @@
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
-                    <a class="nav-link" href="{{ url_for('overview.index') }}">Overview</a>
+                    <a class="nav-link text-dark" href="{{ url_for('overview.index') }}">Overview</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
+                <li class="nav-item {{ 'active' if theme == 'dark' else '' }} ">
+                    <span class="custom-control nav-link custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="darkSwitch" />
+                        <label class="custom-control-label" id="switchlabel" for="darkSwitch">Dark Mode</label>
+                    </span>
+                </li>
                 <li class="nav-item {{ 'active' if current_page == 'settings' else '' }} ">
-                    <a class="nav-link" href="{{ url_for('settings.settings') }}">Settings <i class="fi-xnsuxl-setting-solid"></i></a>
+                    <a class="nav-link text-dark" href="{{ url_for('settings.settings') }}">Settings <i class="fi-xnsuxl-setting-solid"></i></a>
                 </li>
             </ul>
         </div>
     </nav>
     
     {% block content %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/dark.css') }}" />
+    <script src="{{ url_for('static', filename='JS/libraries/dark.min.js') }}"></script>
 </body>
 </html>

@@ -26,13 +26,14 @@ def index():
     records = Database.getrecords()
     metadata_sources = Config.get_metadata_sources()
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
-    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform)
+    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform, theme='dark')
 
 @socketio.on('ytdl_search')
 def search(query):
     if query is not None and len(query) > 1:
         if yt.is_supported(query):
-            video = yt.fetch_url(query)
+            verbose = strtobool(str(env.LOGGER))
+            video = yt.fetch_url(query, verbose)
             if Database.checkyt(video["id"]) is None:
                 templates = Templates.fetchalltemplates()
                 metadata_sources = Config.get_metadata_sources()
@@ -43,6 +44,13 @@ def search(query):
             asyncio.run(yt.search(query))
     else:
         sockets.searchvideo('Enter an URL!')
+        
+        
+@socketio.on('ytdl_template')
+def filename(data):
+    info_dict = json.loads(data["info_dict"])
+    filename = yt.verifytemplate(data["template"], info_dict, False)
+    sockets.filenametemplate(filename)
 
 @socketio.on('searchmetadata')
 def searchmetadata(data):

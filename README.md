@@ -62,6 +62,7 @@ It's almost finished and these features are currently supported:
 :heavy_check_mark: Hardware encoding is supported, but not yet tested for Video Toolbox, Video Acceleration API (VAAPI), AMD AMF & OpenMax OMX <br />
 :heavy_check_mark: Manually set height and width, if a video type has been selected <br />
 :heavy_check_mark: Store the information about downloaded releases in the database, to edit the downloaded metadata or the file itself later after the download <br />
+:heavy_check_mark: Dark mode is available <br />
 :heavy_check_mark: Docker is [supported](#whale-using-docker)
 
 ## :rocket: Technologies ##
@@ -71,11 +72,15 @@ The following tools were used in this project:
 - [Python](https://python.org/)
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 - [JavaScript](https://www.javascript.com/)
-- [Python Musicbrainz](https://github.com/alastair/python-musicbrainzngs)
 - [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
+- [Dark Mode Switch](https://github.com/coliff/dark-mode-switch)
 - [jQuery 3.6.0](https://jquery.com/)
 - [Friconix](https://friconix.com/)
 - [Youtube-DLP](https://github.com/yt-dlp/yt-dlp)
+- [youtube-search-python](https://github.com/alexmercerind/youtube-search-python)
+- [Spotipy](https://github.com/plamere/spotipy)
+- [Deezer-python](https://github.com/browniebroke/deezer-python)
+- [Python Musicbrainz](https://github.com/alastair/python-musicbrainzngs)
 - [Sponsorblock.py](https://github.com/wasi-master/sponsorblock.py)
 - [FFmpeg 4.4.1](https://ffmpeg.org/)
 
@@ -209,8 +214,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
 - [ ] Add support for HTTPS / SSL
-- [ ] Preview filenames when entering an output template
-- [ ] Make the Docker file smaller, because it's huge
+- [X] Preview filenames when entering an output template
+- [X] Make the Docker file smaller, because it's huge
 - [X] Build a logger
 - [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [X] Catch and show errors properly
@@ -228,13 +233,13 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Hardware transcoding with NVENC, Intel Quick Sync, Video Acceleration API (VAAPI) & AMD AMF
 - [X] Improve the automatic creation of the database, the tables and the default rows, because it's horrible right now.
 - [X] Use multiprocessing and websockets to make the overview page faster
-- [ ] Dark mode support
+- [X] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [ ] Make sure the search for downloaded song field works
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
-- [ ] Make sure the progress bar works properly in a Docker contianer, because it doesn't work properly rn.
+- [ ] Make sure the progress bar works properly in a Docker container, because it doesn't work properly rn.
 &#xa0;
 
 ## Disclaimer

@@ -1,0 +1,53 @@
+[data-theme="dark"] {
+  background-color: #111 !important;
+  color: #eee;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: #333 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #000 !important;
+}
+
+[data-theme="dark"] .bg-black {
+  background-color: #eee !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: #eee !important;
+}
+
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu {
+  background-color: #333;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: white;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background-color: black;
+}
+
+[data-theme="dark"] .table-hover > tbody > tr:hover {
+  background-color: #281f1f;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] input.disabled,
+[data-theme="dark"] select,
+[data-theme="dark"] .input-group-text,
+[data-theme="dark"] #switchlabel,
+[data-theme="dark"] #item_filepath {
+  background-color: #333;
+  color: white;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-footer {
+  border-color: #222;
+}

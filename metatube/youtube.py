@@ -17,9 +17,9 @@ class YouTube:
                 return True
         return False
 
-    def fetch_url(url):
+    def fetch_url(url, verbose):
         if YouTube.is_supported(url):
-            ytdl_options = {'logger': logger}
+            ytdl_options = {'logger': logger, 'verbose': verbose}
             with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
                 try:
                     info = ytdl.extract_info(url, download=False)
@@ -29,13 +29,14 @@ class YouTube:
         else:
             raise ValueError("Invalid URL!")
         
-    def verifytemplate(template):
-        try:
-            yt_dlp.YoutubeDL.validate_outtmpl(template)
-            return True
-        except ValueError as e:
-            logger.error('Error in metatube/youtube.py: ' + str(e))
-            return False
+    def verifytemplate(template, info_dict, verbose):
+        ytdl_options = {'logger': logger, 'verbose': verbose}
+        with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
+            try:
+                filename = ytdl.evaluate_outtmpl(template, info_dict)
+                return filename
+            except Exception as e:
+                return str(e)
         
     async def search(query):
         logger.info('Searching YouTube for \'%s\'', query)
@@ -96,6 +97,7 @@ class YouTube:
                 
     def postprocessor_hook(d):
         if d['status'] == 'finished':
+            print(d["postprocessor"])
             sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
             
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):

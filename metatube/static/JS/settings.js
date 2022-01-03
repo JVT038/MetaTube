@@ -151,6 +151,7 @@ $(document).ready(function() {
         if(metadata_sources.indexOf('spotify') > -1)  {
             if($("#spotifyclientSecret").val() == '' || $("#spotifyclientID").val() == '') {
                 $("#downloadsettingslog").find('p').text('Enter the Spotify API credentials!');
+                return false;
             } else {
                 extradata["spotifyapi"] = {
                     'id': $("#spotifyclientID").val(),

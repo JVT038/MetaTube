@@ -33,7 +33,6 @@ $(document).ready(function() {
         let media = document.createElement('div');
         let body = document.createElement('div');
         let mediaheader = document.createElement('h5');
-        let hr = document.createElement('hr');
 
         img.classList.add('img-fluid');
         img.id = "thumbnail_yt";
@@ -44,6 +43,7 @@ $(document).ready(function() {
         img.setAttribute('onClick', "window.open('https://youtu.be/"+data.id+"', '_blank')");
         img.setAttribute('style', 'cursor: pointer');
         img.setAttribute('url', data.webpage_url);
+        img.setAttribute('info_dict', JSON.stringify(data));
 
         if($(window).width() >= 650) {
             media.classList.add('media');
@@ -105,10 +105,10 @@ $(document).ready(function() {
         if($(window).width() >= 600) {
             list.classList.add('media');
             list.append(img, desc, inputgroup);
-            img.classList.add('mw-100', 'w-75');
         } else {
             list.append(img, inputgroup, desc);
             inputgroup.classList.add('float-right');
+            img.classList.add('mw-100', 'w-75');
         }
         list.classList.add('mbp-item');
 
@@ -314,11 +314,11 @@ $(document).ready(function() {
         td_ext.setAttribute('style', 'vertical-align: middle;');
         td_actions.setAttribute('style', 'vertical-align: middle;');
 
-        td_name.classList.add('td_name')
-        td_artist.classList.add('td_artist')
-        td_album.classList.add('td_album')
-        td_date.classList.add('td_date')
-        td_ext.classList.add('td_ext')
+        td_name.classList.add('td_name', 'text-dark')
+        td_artist.classList.add('td_artist', 'text-dark')
+        td_album.classList.add('td_album', 'text-dark')
+        td_date.classList.add('td_date', 'text-dark')
+        td_ext.classList.add('td_ext', 'text-dark')
         
         dropdown.classList.add('dropdown');
         dropdownbtn.classList.add('btn', 'btn-primary', 'dropdown-toggle');
@@ -462,6 +462,14 @@ $(document).ready(function() {
         let id = $(this).val();
         socket.emit('fetchtemplate', id)
     });
+
+    $(document).on('keydown', '#outputname', function() {
+        let val = $(this).val();
+        let url = $("#thumbnail_yt").attr('ytid');
+        let info_dict = $("#thumbnail_yt").attr('info_dict');
+        socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
+    });
+
     $(document).on('click', ".removesegment", function() {
         $(this).parents('.form-row').remove();
     });
@@ -518,6 +526,7 @@ $(document).ready(function() {
         $(".timestamp_row").toggleClass('d-none');
         $(".timestamp_caption").parents('.form-row').toggleClass('d-none');
     });
+    
     $(document).on('click', 'label[for=\'#segments_check\']', function() {
         $(this).siblings('input').click();
     });
@@ -552,7 +561,7 @@ $(document).ready(function() {
     });
     
     $(document).on('click', "#editmetadata", function() {
-        $("#audiocol, #metadataview, #queryform, #downloadbtn, #resetviewbtn, #searchmetadataview").toggleClass('d-none');
+        $("#audiocol, #metadataview, #queryform, #downloadbtn, #resetviewbtn").toggleClass('d-none');
         $(this).attr('id', 'savemetadata');
         $(this).text('Save metadata')
     });
@@ -932,7 +941,7 @@ $(document).ready(function() {
 
     socket.on('downloadprogress', function(msg) {
         function setprogress(percentage) {
-            let progress = $("#edititemmodal").css('display').toLowerCase() == 'block' ? $("#progressedit") : $("#progress");
+            let progress = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progressedit") : $("#progress");
             progress.attr({
                 'aria-valuenow': percentage + "%",
                 'style': 'width: ' + parseInt(percentage) + '%'
@@ -942,7 +951,7 @@ $(document).ready(function() {
         $("#editmetadata, #nextbtn, #defaultview, #ytcol").addClass('d-none');
         $("#progressview").removeClass('d-none');
         $("#searchlog").empty();
-        var progress_text = $("#edititemmodal").css('display').toLowerCase() == 'block' ? $("#progresstextedit") : $("#progresstext");
+        var progress_text = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progresstextedit") : $("#progresstext");
         let phases = $("#segments_check").is(':checked') ? 4 : 5;
 
         if(msg.status == 'downloading') {
@@ -1069,8 +1078,14 @@ $(document).ready(function() {
 
     socket.on('mbp_response', (mbp) => {
         console.info('Got musicbrainz info');
-        for(let i = 0; i < Object.keys(mbp).length; i++) {
-            insertmusicbrainzdata(mbp[i]);
+        if(Object.keys(mbp).length > 0) {
+            for(let i = 0; i < Object.keys(mbp).length; i++) {
+                insertmusicbrainzdata(mbp[i]);
+            }
+        } else if(!$("#searchmetadataview").hasClass('d-none')) {
+            $("#defaultview").children('.spinner-border').remove();
+            $("#nextbtn").addClass('d-none');
+            $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
         }
         $("#searchvideomodalfooter").removeClass('d-none');
     });
@@ -1084,7 +1099,7 @@ $(document).ready(function() {
             }
             $("#searchmetadataview").addClass('d-none');
             $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
-        } else {
+        } else if(!$("#searchmetadataview").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
             $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
@@ -1100,7 +1115,7 @@ $(document).ready(function() {
                 $("#searchmetadataview").addClass('d-none');
                 $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
             }
-        } else {
+        } else if(!$("#searchmetadataview").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
             $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
@@ -1350,4 +1365,12 @@ $(document).ready(function() {
             searchresult(data.result[i]);
         };
     });
+
+    socket.on('ytdl_template', (data) => {
+        if($("#filenamespan").length > 0) {
+            $("#filenamespan").text("Filename: " + data);
+        } else {
+            $("#albumspan").after('<br/><span id="filenamespan">Filename: '+data+'</span>');
+        }
+    })
 });

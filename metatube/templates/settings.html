@@ -100,25 +100,25 @@
             <h4 class="text-center">Template settings</h4>
             <p class="text-center" id="templateslog"></p>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th scope="col">Template name</th>
-                            <th scope="col">Template type</th>
-                            <th scope="col">Template extension</th>
-                            <th scope="col">Template name format</th>
-                            <th scope="col">Template output folder</th>
-                            <th scope="col">Edit template</th>
+                            <th class="text-dark" scope="col">Template name</th>
+                            <th class="text-dark" scope="col">Template type</th>
+                            <th class="text-dark" scope="col">Template extension</th>
+                            <th class="text-dark" scope="col">Template name format</th>
+                            <th class="text-dark" scope="col">Template output folder</th>
+                            <th class="text-dark" scope="col">Edit template</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for template in templates %}
                             <tr id="{{ template.id }}">
-                                <td class="td_name">{{ template.name }}</td>
-                                <td class="td_type">{{ template.type }}</td>
-                                <td class="td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') | upper }}</td>
-                                <td class="td_output_name">{{ template.output_name }}</td>
-                                <td class="td_output_folder">{{ template.output_folder }}</td>
+                                <td class="text-dark td_name">{{ template.name }}</td>
+                                <td class="text-dark td_type">{{ template.type }}</td>
+                                <td class="text-dark td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') | upper }}</td>
+                                <td class="text-dark td_output_name">{{ template.output_name }}</td>
+                                <td class="text-dark td_output_folder">{{ template.output_folder }}</td>
                                 <td>
                                     <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
                                     <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-trash-bin"></i></button>
@@ -126,7 +126,7 @@
                                 </td>
                             </tr>
                             <tr id="proxy_{{ template.id }}" class="d-none">
-                                <td class="td_proxy" colspan="7">
+                                <td class="td_proxy text-dark" colspan="7">
                                     <p>
                                     Bitrate: {{ template.bitrate }} <br />
                                     {% if template.type == 'Video' %}

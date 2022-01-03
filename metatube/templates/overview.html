@@ -18,31 +18,31 @@
         </div>
     </div>
     <div class="table-responsive-sm">
-        <table class="table table-hover" id="recordstable">
+        <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Artist</th>
-                    <th scope="col">Album</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Extension</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-dark">Name</th>
+                    <th scope="col" class="text-dark">Artist</th>
+                    <th scope="col" class="text-dark">Album</th>
+                    <th scope="col" class="text-dark">Date</th>
+                    <th scope="col" class="text-dark">Extension</th>
+                    <th scope="col" class="text-dark">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for record in records %}
                     <tr id="{{ record.id }}">
-                        <td class="td_name"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
-                        <td class="td_artist" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
-                        <td class="td_album" style="vertical-align: middle;">{{ record.album }}</td>
-                        <td class="td_date" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
-                        <td class="td_ext" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
+                        <td class="td_name text-dark"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
+                        <td class="td_artist text-dark" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
+                        <td class="td_album text-dark" style="vertical-align: middle;">{{ record.album }}</td>
+                        <td class="td_date text-dark" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
+                        <td class="td_ext text-dark" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
                         <td style="vertical-align: middle;">
                             <div class="dropdown">
                                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
                                 <div class="dropdown-menu">
                                     <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
-                                    <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Item has been moved or deleted or metadata is not supported {% endif %}</a>
+                                    <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
                                     <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
                                     <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
                                     <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
@@ -82,7 +82,7 @@
                     <div class="row d-flex" id="defaultview"></div>
                     <div id="metadataview" class="d-none"></div>
                     <div id="searchmetadataview" class="d-none">
-                        <p>No matching items from Spotify found :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
+                        <p>No matching items found from selected metadata providers :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
                         <form id="metadataqueryform">
                             <div class="input-group">
                                 <input type="text" class="form-control" id="metadataquery" />

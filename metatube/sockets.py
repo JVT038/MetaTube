@@ -24,6 +24,9 @@ def musicbrainzresults(data):
 def youtuberesults(data, downloadform, metadataform):
     socketio.emit('ytdl_response', (data, downloadform, metadataform))
     
+def filenametemplate(data):
+    socketio.emit('ytdl_template', data)
+    
 def editmetadata(data):
     socketio.emit('edit_metadata', data)
 
