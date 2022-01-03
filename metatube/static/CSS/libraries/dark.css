@@ -24,7 +24,8 @@
   background-color: #333;
 }
 
-[data-theme="dark"] .dropdown-item {
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .navbar-toggler {
   color: white;
 }
 
@@ -41,7 +42,8 @@
 [data-theme="dark"] select,
 [data-theme="dark"] .input-group-text,
 [data-theme="dark"] #switchlabel,
-[data-theme="dark"] #item_filepath {
+[data-theme="dark"] #item_filepath,
+[data-theme="dark"] [data-toggle="tab"] {
   background-color: #333;
   color: white;
 }

@@ -30,27 +30,40 @@
                 </tr>
             </thead>
             <tbody>
-                {% for record in records %}
-                    <tr id="{{ record.id }}">
-                        <td class="td_name text-dark"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
-                        <td class="td_artist text-dark" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
-                        <td class="td_album text-dark" style="vertical-align: middle;">{{ record.album }}</td>
-                        <td class="td_date text-dark" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
-                        <td class="td_ext text-dark" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
-                        <td style="vertical-align: middle;">
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
-                                <div class="dropdown-menu">
-                                    <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
-                                    <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
-                                    <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
-                                    <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
-                                    <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
-                                </div>
-                            </div>
+                <noscript>
+                    <tr>
+                        <td colspan="6" class="text-dark text-center">
+                            <h5>MetaTube will NOT work if you disable JavaScript</h5>
                         </td>
                     </tr>
-                {% endfor %}
+                </noscript>
+                {% if record|length > 0 %}
+                    {% for record in records %}
+                        <tr id="{{ record.id }}">
+                            <td class="td_name text-dark"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
+                            <td class="td_artist text-dark" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
+                            <td class="td_album text-dark" style="vertical-align: middle;">{{ record.album }}</td>
+                            <td class="td_date text-dark" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
+                            <td class="td_ext text-dark" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
+                            <td style="vertical-align: middle;">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
+                                    <div class="dropdown-menu">
+                                        <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
+                                        <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
+                                        <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
+                                        <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
+                                        <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr id="emptyrow">
+                        <td colspan="6" class="text-dark text-center" style="border: 0px;"><h5>No items have been downloaded yet! Click on the plus next to the search field to add an item!</h5></td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

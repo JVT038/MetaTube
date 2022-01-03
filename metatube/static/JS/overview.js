@@ -354,6 +354,7 @@ $(document).ready(function() {
         td_name.prepend(cover);
 
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
+        $("#emptyrow").remove();
         $("#recordstable").children("tbody").append(tr);
         friconix_update();
     }
@@ -1082,7 +1083,7 @@ $(document).ready(function() {
             for(let i = 0; i < Object.keys(mbp).length; i++) {
                 insertmusicbrainzdata(mbp[i]);
             }
-        } else if(!$("#searchmetadataview").hasClass('d-none')) {
+        } else if($("#searchmetadataview").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
             $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
@@ -1099,7 +1100,7 @@ $(document).ready(function() {
             }
             $("#searchmetadataview").addClass('d-none');
             $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
-        } else if(!$("#searchmetadataview").hasClass('d-none')) {
+        } else if($("#searchmetadataview").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
             $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
@@ -1115,7 +1116,7 @@ $(document).ready(function() {
                 $("#searchmetadataview").addClass('d-none');
                 $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
             }
-        } else if(!$("#searchmetadataview").hasClass('d-none')) {
+        } else if($("#searchmetadataview").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn").addClass('d-none');
             $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');

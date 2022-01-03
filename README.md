@@ -47,6 +47,9 @@
 ## :dart: About ##
 
 MetaTube downloads video from YouTube and can add metadata from a specified metadata provider on the downloaded file. 
+Normal view | Dark mode|
+--- | ---
+![startpage](https://user-images.githubusercontent.com/47184046/147980156-e3ee71e4-a4cd-4fee-808b-c4b3c9530e9f.png) | ![darkstartpage](https://user-images.githubusercontent.com/47184046/147980017-bd3bc8bf-2589-4ee5-8d9c-1785ba906982.png)
 
 ## :sparkles: Features ##
 

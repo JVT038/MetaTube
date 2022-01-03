@@ -28,9 +28,20 @@ $(document).ready(function() {
             });
         });
     };
+    
     $.fn.hasAttr = function(name) {  
         return this.attr(name) !== undefined;
     };
+
+
+    function navtoggler() {
+        if($(window).width() < 960) {
+            $("#darkSwitch").parent('span').removeClass('nav-link');
+        } else {
+            $("#darkSwitch").parent('span').addClass('nav-link');
+        }
+    }
+    navtoggler();
     
     $(document).on('focus', '.num_input', function() {
         $(this).ForceNumericOnly()
@@ -39,4 +50,6 @@ $(document).ready(function() {
     $('body').tooltip({
         selector: '[data-toggle=tooltip]'
     });
+
+    $(window).resize(navtoggler);
 });
