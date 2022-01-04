@@ -1,6 +1,7 @@
 var socket = io();
 $(document).ready(function() {
     $("#metadataview").find('input').attr('autocomplete', 'off');
+    $("#searchitem").val('');
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
         let downloadform = document.createElement('div');
@@ -1414,6 +1415,17 @@ $(document).ready(function() {
 
     socket.on('searchitem', (data) => {
         $("#recordstable").children('tbody').empty();
+        if(data.length < 1) {
+            let tr = document.createElement('tr');
+            let td = document.createElement('td');
+            let h5 = document.createElement('h5');
+            td.setAttribute('colspan', '6');
+            h5.textContent = 'No items found!';
+            h5.classList.add("text-center", 'text-dark');
+            td.append(h5);
+            tr.append(td);
+            $("#recordstable").children('tbody').append(tr);
+        }
         for(let i = 0; i < data.length; i++) {
             additem({"data": data[i]});
         }

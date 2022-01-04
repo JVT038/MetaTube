@@ -185,7 +185,7 @@ $(document).ready(function() {
         socket.emit('deletetemplate', id);
         $("#removetemplatemodal").modal('hide');
     });
-    $(document).on('click', 'changetemplatebtn', function(e) {
+    $(document).on('click', '.changetemplatebtn', function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
         } else {
@@ -331,6 +331,8 @@ $(document).ready(function() {
         } else if(msg.status == 'newtemplate') {
             $("#templatesmodal").modal('hide');
             addtemplate(msg.data);
+        } else if(msg.status == 'changedtemplate') {
+            $("#templatesmodal").modal('hide');
         }
     });
     
