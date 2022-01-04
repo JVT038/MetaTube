@@ -329,6 +329,7 @@ $(document).ready(function() {
             $(".defaulttemplate").tooltip('hide');
             $("#templatestab").find('tbody').prepend($(".defaulttemplate").parents('tr'));
         } else if(msg.status == 'newtemplate') {
+            $("#templatesmodal").modal('hide');
             addtemplate(msg.data);
         }
     });

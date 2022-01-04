@@ -2,8 +2,8 @@
 {% block content %}
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
 <div class="container">
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Search for downloaded video..." aria-label="Downloaded video name">
+    <div class="input-group">
+        <input type="text" class="form-control" id="searchitem" placeholder="Search for downloaded video..." aria-label="Downloaded video name">
         <div class="input-group-append">
             <button type="button" id="addvideo" class="btn btn-success input-group-text bg-success" data-toggle="tooltip" data-placement="top" title="Download an item"><i class="bi bi-plus-lg"></i></button>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,7 +16,7 @@
             <p class="text-center" id="overviewlog"></p>
         </div>
     </div>
-    <div class="table-responsive-md">
+    <div class="table-responsive-md" style="max-height: 80vh; overflow-y: scroll;">
         <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>

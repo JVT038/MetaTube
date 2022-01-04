@@ -149,6 +149,9 @@ class Database(db.Model):
     audio_id = db.Column(db.String(128))
     youtube_id = db.Column(db.String(16), unique=True)
     
+    def searchrecords(query):
+        return Database.query.filter(Database.name.like(query + "%")).all()
+    
     def getrecords():
         return Database.query.all()
     

@@ -28,6 +28,42 @@ def index():
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform)
 
+@socketio.on('searchitem')
+def searchitem(query):
+    items = Database.searchrecords(query)
+    list = []
+    for itemdata in items:
+        item = {
+            "name": itemdata.name,
+            "artist": itemdata.artist,
+            "album": itemdata.album,
+            "date": itemdata.date,
+            "filepath": itemdata.filepath,
+            "ytid": itemdata.youtube_id,
+            "id": itemdata.id,
+            "image": itemdata.cover
+        }
+        list.append(item)
+    sockets.searchitem(list)
+
+@socketio.on('fetchallitems')
+def searchitem():
+    items = Database.getrecords()
+    list = []
+    for itemdata in items:
+        item = {
+            "name": itemdata.name,
+            "artist": itemdata.artist,
+            "album": itemdata.album,
+            "date": itemdata.date,
+            "filepath": itemdata.filepath,
+            "ytid": itemdata.youtube_id,
+            "id": itemdata.id,
+            "image": itemdata.cover
+        }
+        list.append(item)
+    sockets.searchitem(list)
+
 @socketio.on('ytdl_search')
 def search(query):
     if query is not None and len(query) > 1:

@@ -277,7 +277,15 @@ $(document).ready(function() {
     }
 
     function additem(data) {
+        function addLeadingZeros(n) {
+            if (n <= 9) {
+              return "0" + n;
+            }
+            return n
+        }
         let itemdata = data.data;
+        let dateobj = new Date(itemdata["date"]);
+        let date = addLeadingZeros(dateobj.getDate()) + "-" + addLeadingZeros(dateobj.getMonth() + 1) + "-" + dateobj.getFullYear();
         let tr = document.createElement('tr');
         let td_name = document.createElement('td');
         let td_artist = document.createElement('td');
@@ -294,11 +302,14 @@ $(document).ready(function() {
         let viewanchor = document.createElement('a');
         let deleteanchor = document.createElement('a');
         let cover = document.createElement('img');
+        let covercol = document.createElement('div');
+        let namecol = document.createElement('div');
+        let namespan = document.createElement('span');
+        let namerow = document.createElement('div');
         
-        td_name.innerText = itemdata["name"];
         td_artist.innerText = itemdata["artist"].replace('/', ';');
         td_album.innerText = itemdata["album"];
-        td_date.innerText = itemdata["date"];
+        td_date.innerText = date;
         td_ext.innerText = itemdata["filepath"].split('.')[itemdata["filepath"].split('.').length - 1].toUpperCase();
         dropdownbtn.innerText = 'Select action';
         editfileanchor.innerText = 'Change file data';
@@ -306,6 +317,15 @@ $(document).ready(function() {
         downloadanchor.innerText = 'Download item';
         viewanchor.innerText = 'View YouTube video';
         deleteanchor.innerText = 'Delete item';
+        namespan.innerText = itemdata["name"];
+
+        namerow.classList.add('row', 'd-flex', 'justify-content-center');
+        namecol.classList.add('align-self-center');
+        namespan.classList.add('align-middle');
+        if($(window).width() > 991) {
+            covercol.classList.add('col');
+            namecol.classList.add('col');
+        }
 
         td_name.setAttribute('style', 'vertical-align: middle;');
         td_artist.setAttribute('style', 'vertical-align: middle;');
@@ -351,7 +371,10 @@ $(document).ready(function() {
         dropdown.append(dropdownbtn, dropdownmenu);
         td_actions.appendChild(dropdown);
 
-        td_name.prepend(cover);
+        namecol.appendChild(namespan);
+        covercol.appendChild(cover);
+        namerow.append(covercol, namecol);
+        td_name.appendChild(namerow);
 
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
         $("#emptyrow").remove();
@@ -902,6 +925,15 @@ $(document).ready(function() {
         }
     });
 
+    $("#searchitem").on('keyup', function() {
+        var table = $("#recordstable").children('tbody').clone(true, true);
+        if($(this).val().length > 2) {
+            socket.emit('searchitem', $(this).val());
+        } else if($(this).val() == '') {
+            socket.emit('fetchallitems')
+        }
+    });
+
     $("#addvideo").on('click', function() {
         if($("#progress").text() == '100%') {
             $("#defaultview, #downloadbtn").removeClass('d-none');
@@ -1379,4 +1411,11 @@ $(document).ready(function() {
             $("#albumspan").after('<br/><span id="filenamespan">Filename: '+data+'</span>');
         }
     })
+
+    socket.on('searchitem', (data) => {
+        $("#recordstable").children('tbody').empty();
+        for(let i = 0; i < data.length; i++) {
+            additem({"data": data[i]});
+        }
+    });
 });
