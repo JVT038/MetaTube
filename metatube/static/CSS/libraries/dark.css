@@ -25,8 +25,14 @@
 }
 
 [data-theme="dark"] .dropdown-item,
-[data-theme="dark"] .navbar-toggler {
-  color: white;
+[data-theme="dark"] .navbar-toggler,
+[data-theme="dark"] .navbar-nav > .nav-item > a:hover,
+[data-theme="dark"] .navbar-nav > .active > a {
+  color: white !important;
+}
+
+[data-theme="dark"] .navbar-nav > .nav-item > a {
+  color: #9d9a9a;
 }
 
 [data-theme="dark"] .dropdown-item:hover {
@@ -43,7 +49,7 @@
 [data-theme="dark"] .input-group-text,
 [data-theme="dark"] #switchlabel,
 [data-theme="dark"] #item_filepath,
-[data-theme="dark"] [data-toggle="tab"] {
+[data-theme="dark"] .nav-tabs > .nav-item > .nav-link {
   background-color: #333;
   color: white;
 }

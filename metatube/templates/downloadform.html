@@ -6,7 +6,7 @@
             <label for="#template">Template</label>
             <select class="custom-select" id="template">
                 {% for template in templates %}
-                    <option value="{{ template.id }}">{{ template.name }}</option>
+                    <option value="{{ template.id }}" {% if template.default is sameas True %} selected {% endif %}>{{ template.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -14,32 +14,32 @@
     <div class="form-row">
         <div class="col">
             <label for="#type">Type</label>
-            <input id="type" class="form-control disabled" value="{{ templates[0].type }}" disabled />
+            <input id="type" class="form-control disabled" value="{{ default.type }}" disabled />
         </div>
         <div class="col">
             <label for="#outputname">Output format**</label>
-            <input type="text" class="form-control" value="{{ templates[0].output_name }}" id="outputname" />
+            <input type="text" class="form-control" value="{{ default.output_name }}" id="outputname" />
         </div>
         <div class="col">
             <label for="#extension">Extension</label>
             <select class="custom-select" id="extension">
                 <optgroup label="Audio">
-                    <option value="aac" nosupport>AAC (Metadata not supported)</option>
-                    <option value="flac">FLAC</option>
-                    <option value="mp3" selected>MP3</option>
-                    <option value="m4a_audio">M4A</option>
-                    <option value="opus">Opus</option>
-                    <option value="vorbis" nosupport>OGG (with Vorbis codec)</option>
-                    <option value="wav">WAV</option>
+                    <option {% if default.extension|lower == 'aac' %} selected {% endif %} value="aac" nosupport>AAC (Metadata not supported)</option>
+                    <option {% if default.extension|lower == 'flac' %} selected {% endif %} value="flac">FLAC</option>
+                    <option {% if default.extension|lower == 'mp3' %} selected {% endif %} value="mp3" selected>MP3</option>
+                    <option {% if default.extension|lower == 'm4a_audio' %} selected {% endif %} value="m4a_audio">M4A</option>
+                    <option {% if default.extension|lower == 'opus' %} selected {% endif %} value="opus">Opus</option>
+                    <option {% if default.extension|lower == 'vorbis' %} selected {% endif %} value="vorbis" nosupport>OGG (with Vorbis codec)</option>
+                    <option {% if default.extension|lower == 'wav' %} selected {% endif %} value="wav">WAV</option>
                 </optgroup>
                 <optgroup label="Video">
-                    <option value="mp4">MP4</option>
-                    <option value="m4a_video">M4A</option>
-                    <option value="flv" nosupport>Flash Video (FLV & Metadata not supported)</option>
-                    <option value="webm" nosupport>WebM (Metadata not supported)</option>
-                    <option value="ogg">Ogg</option>
-                    <option value="mkv" nosupport>Matroska (MKV & Metadata not supported)</option>
-                    <option value="avi" nosupport>AVI (Metadata not supported)</option>
+                    <option {% if default.extension|lower == 'mp4' %} selected {% endif %} value="mp4">MP4</option>
+                    <option {% if default.extension|lower == 'm4a' %} selected {% endif %} value="m4a_video">M4A</option>
+                    <option {% if default.extension|lower == 'flv' %} selected {% endif %} value="flv" nosupport>Flash Video (FLV & Metadata not supported)</option>
+                    <option {% if default.extension|lower == 'webm' %} selected {% endif %} value="webm" nosupport>WebM (Metadata not supported)</option>
+                    <option {% if default.extension|lower == 'ogg' %} selected {% endif %} value="ogg">Ogg</option>
+                    <option {% if default.extension|lower == 'mkv' %} selected {% endif %} value="mkv" nosupport>Matroska (MKV & Metadata not supported)</option>
+                    <option {% if default.extension|lower == 'avi' %} selected {% endif %} value="avi" nosupport>AVI (Metadata not supported)</option>
                 </optgroup>
             </select>
         </div>
@@ -47,21 +47,22 @@
     <div class="form-row">
         <div class="col">
             <label for="#output_folder">Output folder*</label>
-            <input type="text" id="output_folder" value="{{ templates[0].output_folder }}" class="form-control" />
+            <input type="text" id="output_folder" value="{{ default.output_folder }}" class="form-control" />
         </div>
         <div class="col">
             <label for="#bitrate">Bitrate***</label>
-            <input type="text" class="form-control" id="bitrate" value="{{ templates[0].bitrate }}" />
+            <input type="text" class="form-control" id="bitrate" value="{{ default.bitrate }}" />
         </div>
     </div>
-    <div class="form-row d-none" id="videorow">
+    <div class="form-row {{'d-none' if default.type == 'Audio' else '' }}   " id="videorow">
+        {% set resolution = default.resolution.split(';') %}
         <div class="col">
             <label for="width">Video width (in pixels)</label>
-            <input type="text" value="1920" class="form-control num_input" id="width" />
+            <input type="text" value="{{ resolution[0] }}" class="form-control num_input" id="width" />
         </div>
         <div class="col">
             <label for="height">Video height (in pixels)</label>
-            <input type="text" value="1080" class="form-control num_input" id="height" />
+            <input type="text" value="{{ resolution[1] }}" class="form-control num_input" id="height" />
         </div>
         <div class="col d-none d-lg-block">
             <label for="#resolution">Resolution****</label>
@@ -107,9 +108,9 @@
                         <input type="text" class="form-control timestamp_input num_input" id="segmentend_{{ i }}" value="{{ segments[i]['segment'][1]|int }}" />
                         <div class="input-group-append">
                             {% if i > 0 %}
-                                <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="fi-xwsuxl-minus-solid" style="color: white;"></i></button>
+                                <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="bi bi-dash" style="color: white;"></i></button>
                             {% else %}
-                                <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
+                                <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-dash" style="color: white;"></i></button>
                             {% endif %}
                         </div>
                     </div>
@@ -132,7 +133,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control timestamp_input num_input" id="segmentend_0"/>
                     <div class="input-group-append">
-                        <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="fi-xwsuxl-plus-solid" style="color: white;"></i></button>
+                        <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-plus-lg" style="color: white;"></i></button>
                     </div>
                 </div>
             </div>
@@ -148,29 +149,29 @@
         <div class="col">
             <label for="#proxy_type">Select proxy type</label>
             <select id="proxy_type" class="custom-select">
-                <option value="None" selected>Don't use proxy</option>
-                <option value="HTTP">HTTP</option>
-                <option value="HTTPS">HTTPS</option>
-                <option value="SOCKS5">SOCKS5</option>
+                <option {% if default.proxy_type|upper == 'NONE' %} selected {% endif %} value="None">None</option>
+                <option {% if default.proxy_type|upper == 'HTTP' %} selected {% endif %} value="HTTP">HTTP</option>
+                <option {% if default.proxy_type|upper == 'HTTPS' %} selected {% endif %} value="HTTPS">HTTPS</option>
+                <option {% if default.proxy_type|upper == 'SOCKS5' %} selected {% endif %} value="SOCKS5">SOCKS5</option>
             </select>
         </div>
     </div>
-    <div class="form-row d-none" id="proxy_row">
+    <div class="form-row {{ 'd-none' if default.proxy_status is sameas False else '' }}" id="proxy_row">
         <div class="col">
             <label for="#proxy_address">Address</label>
-            <input type="text" class="form-control" id="proxy_address" required/>
+            <input value="{{ default.proxy_address }}" type="text" class="form-control" id="proxy_address" required/>
         </div>
         <div class="col">
             <label for="#proxy_port">Port</label>
-            <input type="text" class="form-control num_input" id="proxy_port" required/>
+            <input value="{{ default.proxy_port }}" type="text" class="form-control num_input" id="proxy_port" required/>
         </div>
         <div class="col">
             <label for="#proxy_username">Username</label>
-            <input type="text" class="form-control" id="proxy_username" />
+            <input value="{{ default.proxy_username }}" type="text" class="form-control" id="proxy_username" />
         </div>
         <div class="col">
             <label for="#proxy_password">Password</label>
-            <input type="text" class="form-control" id="proxy_password" />
+            <input value="{{ default.proxy_password }}" type="text" class="form-control" id="proxy_password" />
         </div>
     </div>
 </form>

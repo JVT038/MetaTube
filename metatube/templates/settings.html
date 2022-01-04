@@ -11,7 +11,7 @@
                 <a class="nav-link" href="#templatestab" data-toggle="tab">Template settings</a>
             </li>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fi-xnsuxl-three-bars-solid"></i>
+                <i class="bi bi-list"></i>
             </button>
         </ul>
     </nav>
@@ -87,7 +87,7 @@
                     </div>
                     <input type="password" class="form-control" value="{{ spotify[0] }}" id="spotifyclientSecret" />
                     <div class="input-group-append">
-                        <span class="input-group-text" style="cursor: pointer" id="togglesecret"><i class="fi-xnpuxl-eye"></i></span>
+                        <span class="input-group-text" style="cursor: pointer" id="togglesecret"><i class="bi bi-eye-slash-fill"></i></span>
                     </div>
                 </div>
             </div>
@@ -120,13 +120,18 @@
                                 <td class="text-dark td_output_name">{{ template.output_name }}</td>
                                 <td class="text-dark td_output_folder">{{ template.output_folder }}</td>
                                 <td>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-edit-solid"></i></button>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn {{ 'defaultbtn' if template.name == 'Default' else '' }}"><i class="fi-xnsuxl-trash-bin"></i></button>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Show more info" class="btn btn-primary expandtemplatebtn"><i class="fi-xwsdxl-caret-solid"></i></button>
+                                    {% if template.default is sameas True %}
+                                        <button type="button" data-toggle="tooltip" data-placement="top" title="Template is already the default template" class="btn btn-info disabled defaulttemplate" disabled><i class="bi bi-check-lg"></i></button>
+                                    {% else %}
+                                        <button type="button" data-toggle="tooltip" data-placement="top" title="Set as default template" class="btn btn-info setdefaulttemplate"><i class="bi bi-check-lg"></i></button>
+                                    {% endif %}
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn"><i class="bi bi-pencil-square"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn"><i class="bi bi-trash-fill"></i></button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Show more info" class="btn btn-primary expandtemplatebtn"><i class="bi bi-caret-down-fill"></i></button>
                                 </td>
                             </tr>
-                            <tr id="proxy_{{ template.id }}" class="d-none">
-                                <td class="td_proxy text-dark" colspan="7">
+                            <tr id="hidden_{{ template.id }}" class="d-none">
+                                <td class="text-dark" colspan="7">
                                     <p>
                                     Bitrate: {{ template.bitrate }} <br />
                                     {% if template.type == 'Video' %}
@@ -146,8 +151,8 @@
                                 </td>
                             </tr>
                         {% endfor %}
-                        <tr>
-                            <td colspan="7" class="text-center"><button type="button" data-toggle="tooltip" data-placement="top" title="Add template" class="btn btn-success" id="addtemplatemodalbtn"><i class="fi-swluxl-plus-solid"></i></button></td>
+                        <tr id="addtemplaterow">
+                            <td colspan="7" class="text-center"><button type="button" data-toggle="tooltip" data-placement="top" title="Add template" class="btn btn-success" id="addtemplatemodalbtn"><i class="bi bi-plus"></i></button></td>
                         </tr>
                     </tbody>
                 </table>

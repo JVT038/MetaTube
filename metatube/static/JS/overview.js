@@ -61,7 +61,7 @@ $(document).ready(function() {
         
         $("#defaultview").empty().append(ytcol);
         $("#ytcol").append(media, downloadform.firstChild);
-        friconix_update();
+        
         $("#searchvideomodalfooter").removeClass('d-none')
         $("#resetviewbtn, #editmetadata, #downloadbtn").addClass('d-none');
         $('#nextbtn, #ytcol, hr').removeClass('d-none');
@@ -272,7 +272,7 @@ $(document).ready(function() {
         row.appendChild(col_type);
         $('.personrow:last').after(row);
 
-        friconix_update();
+        
         return $('.personrow:last');
     }
 
@@ -356,7 +356,7 @@ $(document).ready(function() {
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
         $("#emptyrow").remove();
         $("#recordstable").children("tbody").append(tr);
-        friconix_update();
+        
     }
 
     function downloadURI(uri, name) {
@@ -444,6 +444,11 @@ $(document).ready(function() {
             $('.mbp-item').addClass('media');
             $(".mbp-item").children('img').removeClass(['mw-100', 'w-75']);
         }
+        if($(window).width() < 992) {
+            $(".td_name").find('.col').removeClass('col');
+        } else {
+            $(".td_name").children('.row').children('div').addClass('col');
+        }
     }).resize();
 
     $(document).on('mouseenter', '.mbp-item, .youtuberesult', function() {
@@ -519,7 +524,7 @@ $(document).ready(function() {
         row.appendChild(endcol);
 
         $(".timestamp_row:last").after(row);
-        friconix_update();
+        
     });
 
     $(document).on('click', '#segments_check', function() {
@@ -1058,7 +1063,7 @@ $(document).ready(function() {
             if($("#edititemmodal").css('display').toLowerCase() == 'block') {
                 $("#progresstextedit").text(msg.message);
                 $("#progressedit").attr('aria-valuenow', 100);
-                $("#progressedit").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
+                $("#progressedit").html('ERROR <i class="bi bi-emoji-frown"></i>');
                 $("#progressedit").css('width', '100%');
             } else {
                 progress_text.text(msg.message);
@@ -1331,7 +1336,7 @@ $(document).ready(function() {
         if(data.metadata.mbp_releasegroupid == '' && data.metadata.mbp_releaseid == '' && $("#spotify_trackid").length > 0) {
             $("#spotify_trackid").val(data.metadata.audio_id);
         }
-        friconix_update();
+        
         $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);
         $("#edititemmodal").modal('show');
     });
@@ -1354,7 +1359,7 @@ $(document).ready(function() {
         $("#downloadsection").find('hr').remove();
         $("#edititemmodal").attr({'itemid': data.filedata.itemid, 'ytid': data.filedata.youtube_id});
         $("hr").addClass('d-none');
-        friconix_update();
+        
         $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);
         $("#edititemmodal").modal('show');
     });

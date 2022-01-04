@@ -97,7 +97,6 @@ class YouTube:
                 
     def postprocessor_hook(d):
         if d['status'] == 'finished':
-            print(d["postprocessor"])
             sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
             
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
@@ -195,7 +194,7 @@ class YouTube:
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
         
-    def fetch_video(video, templates, metadata_sources):
+    def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])
         segments = sb if type(sb) == list else 'error'
         env = Environment(
@@ -204,6 +203,6 @@ class YouTube:
         )
         downloadtemplate = env.get_template('downloadform.html')
         metadatatemplate = env.get_template('metadataform.html')
-        downloadform = downloadtemplate.render(templates=templates, segments=segments)
+        downloadform = downloadtemplate.render(templates=templates, segments=segments, default=defaulttemplate)
         metadataform = metadatatemplate.render(metadata_sources=metadata_sources)
         sockets.youtuberesults(video, downloadform, metadataform)

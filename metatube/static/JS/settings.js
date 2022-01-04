@@ -5,6 +5,7 @@ $(document).ready(function() {
     $(".defaultbtn").css('cursor', 'not-allowed');
     $(".defaultbtn").addClass('disabled');
     $(".defaultbtn").attr('disabled', true);
+    $("#templatestab").find('tbody').prepend($(".defaulttemplate").parents('tr'))
 
     if($("#current_hw").val().includes('vaapi')) {
         $("#vaapi_device").parent().removeClass('d-none');
@@ -17,6 +18,118 @@ $(document).ready(function() {
 
     if($("#spotifycheck").hasAttr('checked')) {
         $("#spotifyrow").removeClass('d-none');
+    }
+
+    function addtemplate(data) {
+        function setAttributes(element, attributes) {
+            Object.keys(attributes).forEach(attr => {
+              element.setAttribute(attr, attributes[attr]);
+            });
+        }
+        
+        let tr_visible = document.createElement('tr');
+        let tr_hidden = document.createElement('tr');
+        let td_hidden = document.createElement('td');
+        let p_hidden = document.createElement('p');
+        let td_name = document.createElement('td');
+        let td_type = document.createElement('td');
+        let td_extension = document.createElement('td');
+        let td_output_folder = document.createElement('td');
+        let td_output_name = document.createElement('td');
+        let td_buttons = document.createElement('td');
+        let defaultbtn = document.createElement('button');
+        let editbtn = document.createElement('button');
+        let deletebtn = document.createElement('button');
+        let expandbtn = document.createElement('button');
+        let defaulticon = document.createElement('i');
+        let editicon = document.createElement('i');
+        let deleteicon = document.createElement('i');
+        let expandicon = document.createElement('i');
+
+        tr_visible.id = data["id"];
+        tr_hidden.id = "hidden_" + data["id"];
+        td_hidden.setAttribute('colspan', '7');
+
+        tr_hidden.classList.add('d-none');
+        td_hidden.classList.add('text-dark');
+        td_name.classList.add('text-dark', 'td_name');
+        td_type.classList.add('text-dark', 'td_td_type');
+        td_extension.classList.add('text-dark', 'td_extension');
+        td_output_folder.classList.add('text-dark', 'td_output_folder');
+        td_output_name.classList.add('text-dark', 'td_output_name');
+
+        td_name.innerText = data["name"];
+        td_type.innerText = data["type"];
+        td_extension.innerText = data["ext"];
+        td_output_folder.innerText = data["output_folder"];
+        td_output_name.innerText = data["output_name"];
+
+        defaultbtn.classList.add('btn', 'btn-info', 'setdefaulttemplate', 'mr-1');
+        editbtn.classList.add('btn', 'btn-success', 'changetemplatebtn', 'mr-1');
+        deletebtn.classList.add('btn', 'btn-danger', 'deltemplatebtn', 'mr-1');
+        expandbtn.classList.add('btn', 'btn-primary', 'expandtemplatebtn', 'mr-1');
+
+        setAttributes(defaultbtn, {
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Set as default template'
+        });
+        setAttributes(editbtn, {
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Edit template'
+        });
+        setAttributes(deletebtn, {
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Delete template'
+        });
+        setAttributes(expandbtn, {
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'title': 'Show more info'
+        });
+
+        defaulticon.classList.add('bi', 'bi-check-lg');
+        editicon.classList.add('bi', 'bi-pencil-square');
+        deleteicon.classList.add('bi', 'bi-trash-fill');
+        expandicon.classList.add('bi', 'bi-caret-down-fill');
+
+        p_hidden.innerHTML = 'Bitrate: ' + data["bitrate"];
+
+        if(data["type"] == 'Video') {
+            p_hidden.innerHTML += '<br/>Width: ' + data["resolution"].split(';')[0] + "<br/>Height: " + data["resolution"].split(';')[1];
+        }
+        if(data['proxy']["status"] == true) {
+            p_hidden.innerHTML += '<br/>Proxy status: True <br/>Proxy type: ' + data["proxy"]["type"] + "<br/>Proxy address: " + data["proxy"]["address"] + "<br/>Proxy port: " + data["proxy"]["port"];
+            if(data["proxy"]["username"] != '') {
+                p_hidden.innerHTML += "<br/>Proxy username: " + data["proxy"]["username"];
+            } else {
+                p_hidden.innerHTML += "<br/>Proxy username: None";
+            }
+            if(data["proxy"]["password"] != '') {
+                p_hidden.innerHTML += "<br/>Proxy password: " + data["proxy"]["password"];
+            } else {
+                p_hidden.innerHTML += "<br/>Proxy password: None";
+            }
+        } else {
+            p_hidden.innerHTML += '<br/>Proxy status: False'
+        }
+
+        td_hidden.appendChild(p_hidden);
+        tr_hidden.appendChild(td_hidden);
+
+        defaultbtn.appendChild(defaulticon);
+        editbtn.appendChild(editicon);
+        deletebtn.appendChild(deleteicon);
+        expandbtn.appendChild(expandicon);
+        td_buttons.append(defaultbtn, editbtn, deletebtn, expandbtn);
+        tr_visible.append(td_name, td_type, td_extension, td_output_name, td_output_folder, td_buttons);
+        $("#addtemplaterow").before(tr_visible, tr_hidden);
+    }
+
+    function changedtemplate(data) {
+
     }
     
     $(document).on('click', ".templatebtn", function() {
@@ -48,10 +161,15 @@ $(document).ready(function() {
     });
 
     $("#removetemplatemodal, #templatesmodal").on('hidden.bs.modal', function() {
-        $(this).removeClass(['d-flex', 'justify-content-center']);
+        $(this).removeClass(['d-flex', 'justify-content-center']); 
     });
 
-    $(".deltemplatebtn").on('click', function(e) {
+    $(document).on('click', '.setdefaulttemplate', function() {
+        let id = $(this).parents('tr').attr("id");
+        socket.emit('setdefaulttemplate', id);
+    });
+
+    $(document).on('click', ".deltemplatebtn", function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
         } else {
@@ -65,10 +183,9 @@ $(document).ready(function() {
     $("#deltemplatebtnmodal").on('click', function(){
         let id = $(this).attr('id');
         socket.emit('deletetemplate', id);
-        $("tr#"+id).remove();
         $("#removetemplatemodal").modal('hide');
     });
-    $(".changetemplatebtn").on('click', function(e) {
+    $(document).on('click', 'changetemplatebtn', function(e) {
         if($(this).hasClass('defaultbtn')) {
             e.preventDefault();
         } else {
@@ -117,9 +234,9 @@ $(document).ready(function() {
         $("#proxyrow").children('div.col:not(:first)').toggleClass('d-none');
     });
 
-    $(".expandtemplatebtn").on('click', function() {
+    $(document).on('click', '.expandtemplatebtn', function() {
         let id = $(this).parents('tr').attr('id');
-        $(this).parents('tr').siblings('#proxy_'+id).toggleClass('d-none');
+        $(this).parents('tr').siblings('#hidden_'+id).toggleClass('d-none');
         
     });
 
@@ -195,7 +312,25 @@ $(document).ready(function() {
     });
 
     socket.on('templatesettings', function(msg) {
-        $("#templateslog").text(msg);
+        $("#templateslog").text(msg.msg);
+        if(msg.status == 'delete') {
+            $("tr#"+msg.templateid).remove();
+            $("tr#hidden_"+msg.templateid).remove();
+        } else if(msg.status == 'setdefault') {
+            $(".defaulttemplate").prop('disabled', false);
+            $('.defaulttemplate').attr({'title': 'Set as default template', 'data-original-title': 'Set as default template'})
+            $(".defaulttemplate").removeClass(['defaulttemplate', 'disabled']);
+
+            $("tr#"+msg.templateid).find('.setdefaulttemplate').addClass(['defaulttemplate', 'disabled']);
+            $("tr#"+msg.templateid).find('.setdefaulttemplate').removeClass('setdefaulttemplate');
+            $("tr#"+msg.templateid).find('.defaulttemplate').attr({'title': 'Template is already the default template', 'data-original-title': 'Template is already the default template'})
+            $("tr#"+msg.templateid).find('.defaulttemplate').prop('disabled', true);
+            
+            $(".defaulttemplate").tooltip('hide');
+            $("#templatestab").find('tbody').prepend($(".defaulttemplate").parents('tr'));
+        } else if(msg.status == 'newtemplate') {
+            addtemplate(msg.data);
+        }
     });
     
     socket.on('changetemplate', function(msg) {
@@ -232,21 +367,17 @@ $(document).ready(function() {
         $("#addtemplatebtn").attr('id', 'changetemplatebtn');
         $("#changetemplatebtn").text('Change template');
         $("#changetemplatebtn").attr('goal', 'edit');
-        if(data["proxy_status"] == 'True') {
-            let proxy_type = data["proxy_type"];
-            let proxy_address = data["proxy-address"];
-            let proxy_port = data["proxy_port"];
-            let proxy_username = data["proxy_username"];
-            let proxy_password = data["proxy_password"];
+        if(data["proxy_status"] == true) {
+            let proxy_type = data["proxy_type"].toUpperCase();
             $("#advancedtoggle").text('Hide advanced');
             $("#advancedrow").removeClass('d-none');
             $("#proxy_status").val('true').trigger('click')
-            $("#advancedrow").children('.d-none').removeClass('d-none');
-            $("#proxy_type option[value='"+proxy_type+"']").attr('selected', 'selected');
-            $("#proxy_address").val(proxy_address);
-            $("#proxy_port").val(proxy_port)
-            $("#proxy_username").val(proxy_username);
-            $("#proxy_password").val(proxy_password);
+            $("#proxyrow").children().removeClass('d-none');
+            $("#proxy_type option[value='"+proxy_type+"']").prop('selected', true);
+            $("#proxy_address").val(data["proxy_address"]);
+            $("#proxy_port").val(data["proxy_port"])
+            $("#proxy_username").val(data["proxy_username"]);
+            $("#proxy_password").val(data["proxy_password"]);
         }
         $("#templatesmodal").addClass(['d-flex', 'justify-content-center']);
         $("#templatesmodal").modal("show");

@@ -35,7 +35,7 @@ $(document).ready(function() {
 
 
     function navtoggler() {
-        if($(window).width() < 960) {
+        if($(window).width() < 992) {
             $("#darkSwitch").parent('span').removeClass('nav-link');
         } else {
             $("#darkSwitch").parent('span').addClass('nav-link');

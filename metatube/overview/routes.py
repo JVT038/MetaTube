@@ -36,8 +36,9 @@ def search(query):
             video = yt.fetch_url(query, verbose)
             if Database.checkyt(video["id"]) is None:
                 templates = Templates.fetchalltemplates()
+                defaulttemplate = Templates.searchdefault()
                 metadata_sources = Config.get_metadata_sources()
-                socketio.start_background_task(yt.fetch_video, video, templates, metadata_sources)
+                socketio.start_background_task(yt.fetch_video, video, templates, metadata_sources, defaulttemplate)
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
@@ -262,9 +263,10 @@ def editfile(id):
         'itemid': item.id
     }
     templates = Templates.fetchalltemplates()
+    defaulttemplate = Templates.searchdefault()
     segment_results = sb.segments(itemdata["youtube_id"])
     segments = segment_results if type(segment_results) == list else 'error'
-    downloadform = render_template('downloadform.html', templates=templates, segments=segments)
+    downloadform = render_template('downloadform.html', templates=templates, segments=segments, default=defaulttemplate)
     sockets.editfile({'filedata': itemdata, 'downloadview': downloadform})
     
 @socketio.on('editfilerequest')

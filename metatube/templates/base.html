@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MetaTube</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap-icons.css') }}" />
     <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/icon type">
     <script src="{{ url_for('static', filename='JS/libraries/jquery-3.6.0.min.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/libraries/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/libraries/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='JS/libraries/friconix.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/libraries/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/global.js') }}"></script>
     {{ JSGlue.include() }}
@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
-                    <a class="nav-link text-dark" href="{{ url_for('overview.index') }}">Overview</a>
+                    <a class="nav-link" href="{{ url_for('overview.index') }}">Overview</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
@@ -31,7 +31,7 @@
                     </span>
                 </li>
                 <li class="nav-item {{ 'active' if current_page == 'settings' else '' }} ">
-                    <a class="nav-link text-dark" href="{{ url_for('settings.settings') }}">Settings <i class="fi-xnsuxl-setting-solid"></i></a>
+                    <a class="nav-link" href="{{ url_for('settings.settings') }}">Settings <i class="bi bi-gear-fill"></i></a>
                 </li>
             </ul>
         </div>
@@ -39,7 +39,7 @@
         
     {% block content %}{% endblock %}
     <footer class="d-flex container-fluid justify-content-end mt-auto fixed-bottom bg-light">
-            <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star me on Github<i class="fi-xnsuxl-github"></i></a></p>
+            <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star me on Github<i class="bi bi-github"></i></a></p>
     </footer>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/dark.css') }}" />
     <script src="{{ url_for('static', filename='JS/libraries/dark.min.js') }}"></script>

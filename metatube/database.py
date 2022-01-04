@@ -1,15 +1,15 @@
 from metatube import db, logger, sockets
+from sqlalchemy.sql import expression
 from dateutil import parser
 
 class Config(db.Model):
     key = db.Column(db.Integer, primary_key=True)
-    auth = db.Column(db.Boolean, default=False)
     ffmpeg_directory = db.Column(db.String(128))
     amount = db.Column(db.Integer)
     hardware_transcoding = db.Column(db.String(16), default="None")
-    metadata_sources = db.Column(db.String(128), default='musicbrainz')
+    metadata_sources = db.Column(db.String(128), default='deezer')
     spotify_api = db.Column(db.String(128))
-    auth = db.Column(db.Boolean)
+    auth = db.Column(db.Boolean, server_default=expression.false())
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
     
@@ -62,7 +62,8 @@ class Templates(db.Model):
     output_name = db.Column(db.String(32), nullable=True)
     bitrate = db.Column(db.String(8))
     resolution = db.Column(db.String(16))
-    proxy_status = db.Column(db.Boolean, default=False)
+    default = db.Column(db.Boolean, unique=False, server_default=expression.false())
+    proxy_status = db.Column(db.Boolean, server_default=expression.false())
     proxy_type = db.Column(db.String(16))
     proxy_username = db.Column(db.String(128))
     proxy_password = db.Column(db.String(128))
@@ -71,6 +72,9 @@ class Templates(db.Model):
     
     def check_existing(value):
         return True if Templates.query.filter_by(name = value).count() > 0 else False
+    
+    def counttemplates():
+        return Templates.query.count()
     
     def add(data):
         row = Templates(
@@ -82,6 +86,7 @@ class Templates(db.Model):
             bitrate = data["bitrate"],
             resolution = data["resolution"],
             proxy_status = data["proxy"]["status"],
+            proxy_type = data["proxy"]["type"],
             proxy_username = data["proxy"]["username"],
             proxy_password = data["proxy"]["password"],
             proxy_address = data["proxy"]["address"],
@@ -90,6 +95,7 @@ class Templates(db.Model):
         db.session.add(row)
         db.session.commit()
         logger.info('Added template %s', data["name"])
+        return row.id
     
     def fetchtemplate(input_id):
         return Templates.query.filter_by(id = input_id).first()
@@ -102,6 +108,17 @@ class Templates(db.Model):
         db.session.delete(self)
         db.session.commit()
         
+    def searchdefault():
+        return Templates.query.filter_by(default = True).first()
+        
+    def setdefault(self, defaulttemplate):
+        self.default = True
+        if defaulttemplate is not None:
+            defaulttemplate.default = False
+        db.session.commit()
+        msg = f'Set template \'{self.name}\' as default template'
+        logger.info(msg)
+        sockets.templatesettings({'status': 'setdefault', 'msg': msg, 'templateid': self.id})
     
     def edit(self, data):
         self.name = data["name"]

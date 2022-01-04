@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/overview.css') }}" />
 <div class="container">
     <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Search for downloaded video..." aria-label="Downloaded video name">
         <div class="input-group-append">
-            <button type="button" id="addvideo" class="btn btn-success input-group-text bg-success" data-toggle="tooltip" data-placement="top" title="Download an item"><i class="fi-xwsuxl-plus-solid"></i></button>
+            <button type="button" id="addvideo" class="btn btn-success input-group-text bg-success" data-toggle="tooltip" data-placement="top" title="Download an item"><i class="bi bi-plus-lg"></i></button>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fi-xnsuxl-three-bars-solid"></i>
+                <i class="bi bi-list"></i>
             </button>
         </div>
     </div>
@@ -17,7 +16,7 @@
             <p class="text-center" id="overviewlog"></p>
         </div>
     </div>
-    <div class="table-responsive-sm">
+    <div class="table-responsive-md">
         <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>
@@ -37,10 +36,17 @@
                         </td>
                     </tr>
                 </noscript>
-                {% if record|length > 0 %}
+                {% if records|length > 0 %}
                     {% for record in records %}
                         <tr id="{{ record.id }}">
-                            <td class="td_name text-dark"><img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" /> <span>{{ record.name }}</span></td>
+                            <td class="td_name text-dark" style="min-width: 120px;">
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col">
+                                        <img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" />
+                                    </div>
+                                    <div class="col align-self-center"><span class="align-middle">{{ record.name }}</span></div>
+                                </div>
+                            </td>
                             <td class="td_artist text-dark" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>
                             <td class="td_album text-dark" style="vertical-align: middle;">{{ record.album }}</td>
                             <td class="td_date text-dark" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
@@ -86,7 +92,7 @@
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" id="query" placeholder="Enter URL or a name of a YouTube video" aria-describedby="basic-addon2" autocomplete="off" aria-autocomplete="Query to what to search for">
                                 <div class="input-group-append">
-                                    <button type="button" id="searchsongbtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
+                                    <button type="button" id="searchsongbtn" class="btn btn-success"><i class="bi bi-search"></i></button>
                                 </div>
                             </div>
                             <p class="text-center" id="searchlog"></p>
@@ -100,7 +106,7 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="metadataquery" />
                                 <div class="input-group-append">
-                                    <button type="button" id="searchmetadatabtn" class="btn btn-success"><i class="fi-xnsuhl-search"></i></button>
+                                    <button type="button" id="searchmetadatabtn" class="btn btn-success"><i class="bi bi-search"></i></button>
                                 </div>
                             </div>
                         </form>

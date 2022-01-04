@@ -72,32 +72,41 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = '
         elif data["ext"] in ["mp4", "m4a_video", "flv", "webm", "ogg", "mkv", "avi"]:
             data["type"] = 'Video'
         
-        if data["type"] == 'Audio' and len(data["bitrate"]) < 1:
-            sockets.changetemplate('Enter a bitrate when selecting an audio output type!')
-            
-        if data["type"] == 'Video' and (len(data["width"]) < 1 or len(data["height"]) < 1):
-            sockets.changetemplate('Enter a resolution when selecting an audio output type!')
-        
         if goal == 'add':
             if Templates.check_existing(data["name"]):
                 sockets.changetemplate('Name is already in use')
                 return False
-            Templates.add(data)
-            sockets.changetemplate('Template successfully added')
+            data['id'] = Templates.add(data)
+            sockets.templatesettings({'status': 'newtemplate', 'msg': 'Template successfully added', 'data': data})
         
         elif goal == 'edit':
             template = Templates.fetchtemplate(id)
             template.edit(data)
-            sockets.changetemplate('Template successfully changed')
+            sockets.templatesettings({'status': 'changedtemplate', 'msg': 'Template successfully changed', 'data': data})
     
 @socketio.on('deletetemplate')
 def deltemplate(id):
-    if len(id) < 1 or int(id) == 0:
-        sockets.templatesettings('Select a valid template')
+    if len(id) < 1:
+        sockets.templatesettings({'status': 'error', 'msg': 'Select a valid template'})
+        return False
+    if Templates.counttemplates() < 2:
+        sockets.templatesettings({'status': 'error', 'msg': 'You must have one existing template!'})
         return False
     template = Templates.fetchtemplate(input_id=id)
+    if template.default is True:
+        sockets.templatesettings({'status': 'error', 'msg': 'You can\'t  delete the default template!'})
+        return False
     template.delete()
-    sockets.templatesettings('Template successfully removed')
+    sockets.templatesettings({'status': 'delete', 'msg': 'Template successfully removed', 'templateid': id})
+    
+@socketio.on('setdefaulttemplate')
+def defaulttemplate(id):
+    if len(id) < 1:
+        sockets.templatesettings({'status': 'error', 'msg': 'Select a valid template'})
+        return False
+    template = Templates.fetchtemplate(input_id=id)
+    default = Templates.searchdefault()
+    template.setdefault(default)
 
 @socketio.on('updatesettings')
 def updatesettings(ffmpeg_path, amount, hardware_transcoding, metadata_sources, extradata):

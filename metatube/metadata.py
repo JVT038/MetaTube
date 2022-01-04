@@ -398,7 +398,7 @@ class MetaData:
     def mergevideodata(data):
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
-        dateobj = datetime.strptime(data["release_date"], '%d-%m-%Y') if len(data["release_date"]) > 0 else datetime.now().date()
+        dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d') if len(data["release_date"]) > 0 else datetime.now().date()
         year = dateobj.year
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
         video["\xa9nam"] = data["title"]

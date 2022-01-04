@@ -24,7 +24,7 @@ class Default():
             ffmpeg_directory = self._ffmpeg,
             amount = 5,
             hardware_transcoding = "None",
-            metadata_sources='musicbrainz',
+            metadata_sources='deezer',
             auth = False,
             auth_username = "",
             auth_password = ""
@@ -48,6 +48,7 @@ class Default():
             output_name = f"%(title)s.%(ext)s",
             bitrate = 'best',
             resolution = 'None',
+            default = True,
             proxy_status = False,
             proxy_username = "",
             proxy_password = "",

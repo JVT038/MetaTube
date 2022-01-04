@@ -1,8 +1,0 @@
-@media (max-width: @screen-xs) {
-  body{font-size: 10px;}
-}
-
-@media (max-width: @screen-sm) {
-  body{font-size: 14px;}
-}
-
