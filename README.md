@@ -78,7 +78,6 @@ The following tools were used in this project:
 - [Bootstrap 4.6](https://getbootstrap.com/docs/4.6)
 - [Dark Mode Switch](https://github.com/coliff/dark-mode-switch)
 - [jQuery 3.6.0](https://jquery.com/)
-- [Friconix](https://friconix.com/)
 - [Youtube-DLP](https://github.com/yt-dlp/yt-dlp)
 - [youtube-search-python](https://github.com/alexmercerind/youtube-search-python)
 - [Spotipy](https://github.com/plamere/spotipy)

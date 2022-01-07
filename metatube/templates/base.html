@@ -15,7 +15,7 @@
     <script src="{{ url_for('static', filename='JS/global.js') }}"></script>
     {{ JSGlue.include() }}
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
@@ -38,7 +38,7 @@
     </nav>
         
     {% block content %}{% endblock %}
-    <footer class="d-flex container-fluid justify-content-end mt-auto fixed-bottom bg-light">
+    <footer class="d-flex container-fluid justify-content-end mt-auto footer bg-light" style="bottom: 0;">
             <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star me on Github<i class="bi bi-github"></i></a></p>
     </footer>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/dark.css') }}" />
