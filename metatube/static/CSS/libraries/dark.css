@@ -27,7 +27,8 @@
 [data-theme="dark"] .dropdown-item,
 [data-theme="dark"] .navbar-toggler,
 [data-theme="dark"] .navbar-nav > .nav-item > a:hover,
-[data-theme="dark"] .navbar-nav > .active > a {
+[data-theme="dark"] .navbar-nav > .active > a,
+[data-theme="dark"] .close {
   color: white !important;
 }
 

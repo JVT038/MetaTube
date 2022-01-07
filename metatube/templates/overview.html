@@ -16,7 +16,15 @@
             <p class="text-center" id="overviewlog"></p>
         </div>
     </div>
-    <div class="table-responsive-md" style="max-height: 80vh; overflow-y: scroll;">
+    <div class="d-none row" id="bulkactionsrow">
+        <div class="col">
+            <div class="btn-group float-right">
+                <button type="button" class="btn btn-success" id="downloaditems">Download selected items</button>
+                <button type="button" class="btn btn-danger" id="deleteitems">Delete selected items</button>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive-md" style="max-height: 80vh; overflow-y: auto;">
         <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>
@@ -25,7 +33,7 @@
                     <th scope="col" class="text-dark">Album</th>
                     <th scope="col" class="text-dark">Date</th>
                     <th scope="col" class="text-dark">Extension</th>
-                    <th scope="col" class="text-dark">Actions</th>
+                    <th scope="col" style="vertical-align: middle;" class="text-dark align-middle"><span>Actions</span><input class="float-right mr-2 align-middle" type="checkbox" id="selectall" /></th>
                 </tr>
             </thead>
             <tbody>
@@ -51,16 +59,19 @@
                             <td class="td_album text-dark" style="vertical-align: middle;">{{ record.album }}</td>
                             <td class="td_date text-dark" style="vertical-align: middle;">{{ record.date.strftime('%d-%m-%Y') }}</td>
                             <td class="td_ext text-dark" style="vertical-align: middle;">{{ get_ext(record.filepath) }}</td>
-                            <td style="vertical-align: middle;">
-                                <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
-                                    <div class="dropdown-menu">
-                                        <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
-                                        <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
-                                        <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
-                                        <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
-                                        <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
+                            <td style="vertical-align: middle;" colspan="2">
+                                <div class="d-flex justify-content-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
+                                        <div class="dropdown-menu">
+                                            <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
+                                            <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
+                                            <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
+                                            <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
+                                            <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
+                                        </div>
                                     </div>
+                                    <div class="form-check ml-2"><input type="checkbox" class="form-check-input selectitem" /></div>
                                 </div>
                             </td>
                         </tr>

@@ -2,6 +2,7 @@ var socket = io();
 $(document).ready(function() {
     $("#metadataview").find('input').attr('autocomplete', 'off');
     $("#searchitem").val('');
+    $(".selectitem, #selectall").prop('checked', false);
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
         let downloadform = document.createElement('div');
@@ -294,6 +295,9 @@ $(document).ready(function() {
         let td_date = document.createElement('td');
         let td_ext = document.createElement('td');
         let td_actions = document.createElement('td');
+        let input_group = document.createElement('div');
+        let form_check = document.createElement('div');
+        let checkbox = document.createElement('input');
         let dropdown = document.createElement('div');
         let dropdownbtn = document.createElement('button');
         let dropdownmenu = document.createElement('div');
@@ -335,11 +339,16 @@ $(document).ready(function() {
         td_ext.setAttribute('style', 'vertical-align: middle;');
         td_actions.setAttribute('style', 'vertical-align: middle;');
 
-        td_name.classList.add('td_name', 'text-dark')
-        td_artist.classList.add('td_artist', 'text-dark')
-        td_album.classList.add('td_album', 'text-dark')
-        td_date.classList.add('td_date', 'text-dark')
-        td_ext.classList.add('td_ext', 'text-dark')
+        td_name.classList.add('td_name', 'text-dark');
+        td_artist.classList.add('td_artist', 'text-dark');
+        td_album.classList.add('td_album', 'text-dark');
+        td_date.classList.add('td_date', 'text-dark');
+        td_ext.classList.add('td_ext', 'text-dark');
+
+        input_group.classList.add('d-flex', 'justify-content-end');
+        form_check.classList.add('form-check', 'ml-2');
+        checkbox.classList.add('form-check-input', 'selectitem');
+        checkbox.type = 'checkbox';
         
         dropdown.classList.add('dropdown');
         dropdownbtn.classList.add('btn', 'btn-primary', 'dropdown-toggle');
@@ -368,9 +377,12 @@ $(document).ready(function() {
         cover.setAttribute('style', 'width: 100px; height: 100px;');
         cover.src = itemdata["image"];
 
+        form_check.appendChild(checkbox);       
+
         dropdownmenu.append(editfileanchor, editmetadataanchor, downloadanchor, viewanchor, deleteanchor);
         dropdown.append(dropdownbtn, dropdownmenu);
-        td_actions.appendChild(dropdown);
+        input_group.append(dropdown, form_check);
+        td_actions.appendChild(input_group);
 
         namecol.appendChild(namespan);
         covercol.appendChild(cover);
@@ -618,6 +630,18 @@ $(document).ready(function() {
             $("#proxy_row").removeClass('d-none');
         }
     });
+
+    $(document).on('change', ".selectitem", function() {
+        if($(".selectitem:checked").length > 0) {
+            if($(".selectitem:checked").length == $(".selectitem").length) {
+                $("#selectall").prop('checked', true);
+            }
+            $("#bulkactionsrow").removeClass('d-none');
+        } else {
+            $("#selectall").prop('checked', false);
+            $("#bulkactionsrow").addClass('d-none');
+        }
+    });
     
     $(document).on('click', ".deleteitembtn", function() {
         $("#removeitemmodal").find('.btn-danger').attr('id', $(this).parents('tr').attr('id'));
@@ -830,6 +854,36 @@ $(document).ready(function() {
         }
     });
 
+    $("#selectall").on('click', function(e) {
+        if($(".selectitem").length > 0) {
+            if($(this).is(':checked')) {
+                $("#bulkactionsrow").removeClass('d-none');
+                $(".selectitem").prop('checked', true);
+            } else {
+                $("#bulkactionsrow").addClass('d-none');
+                $(".selectitem").prop('checked', false);
+            }
+        } else {
+            e.preventDefault()
+        }
+    });
+
+    $("#downloaditems").on('click', function() {
+        let items = [];
+        for(let i = 0; i < $(".selectitem:checked").length; i++) {
+            items.push($($(".selectitem:checked")[i]).parents('tr').attr('id'));
+        }
+        socket.emit('downloaditems', items);
+    });
+
+    $("#deleteitems").on('click', function() {
+        let items = [];
+        for(let i = 0; i < $(".selectitem:checked").length; i++) {
+            items.push($($(".selectitem:checked")[i]).parents('tr').attr('id'));
+        }
+        socket.emit('deleteitems', items);
+    });
+
     $("#delitembtnmodal").on('click', function() {
         let id = $(this).attr('id');
         $("tr#"+id).remove();
@@ -979,8 +1033,8 @@ $(document).ready(function() {
     });
 
     socket.on('downloadprogress', function(msg) {
-        function setprogress(percentage) {
-            let progress = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progressedit") : $("#progress");
+        var progress = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progressedit") : $("#progress");
+        function setprogress(percentage) { 
             progress.attr({
                 'aria-valuenow': percentage + "%",
                 'style': 'width: ' + parseInt(percentage) + '%'
@@ -1093,18 +1147,26 @@ $(document).ready(function() {
             $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
             socket.emit('insertitem', msg.data);
         } else if(msg.status == 'error') {
-            if($("#edititemmodal").css('display').toLowerCase() == 'block') {
-                $("#progresstextedit").text(msg.message);
-                $("#progressedit").attr('aria-valuenow', 100);
-                $("#progressedit").html('ERROR <i class="bi bi-emoji-frown"></i>');
-                $("#progressedit").css('width', '100%');
-            } else {
-                progress_text.text(msg.message);
-                $("#progress").attr('aria-valuenow', 100);
-                $("#progress").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
-                $("#progress").css('width', '100%');
+            progress_text.text(msg.message);
+            progress.attr('aria-valuenow', 100);
+            progress.html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
+            progress.css('width', '100%');
+            progress_text.text(msg.message);
+            if($("#edititemmodal").css('display').toLowerCase() != 'block') {
                 $("#resetviewbtn").removeClass('d-none');
             }
+            // if($("#edititemmodal").css('display').toLowerCase() == 'block') {
+            //     $("#progresstextedit").text(msg.message);
+            //     $("#progressedit").attr('aria-valuenow', 100);
+            //     $("#progressedit").html('ERROR <i class="bi bi-emoji-frown"></i>');
+            //     $("#progressedit").css('width', '100%');
+            // } else {
+            //     progress_text.text(msg.message);
+            //     $("#progress").attr('aria-valuenow', 100);
+            //     $("#progress").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
+            //     $("#progress").css('width', '100%');
+            //     $("#resetviewbtn").removeClass('d-none');
+            // }
         }
     });
 
@@ -1339,6 +1401,11 @@ $(document).ready(function() {
             tr.find('.td_filepath').text(data.data.filepath.split('.')[data.data.filepath.split('.').length - 1]);
             $("#overviewlog").text("Item metadata has been changed!");
             $("#edititemmodal").modal('hide');
+        } else if(data.msg == 'deleteitems') {
+            $(".selectitem:checked").parents('tr').remove();
+            $("#bulkactionsrow").addClass('d-none');
+            $("#selectall").prop('checked', false);
+            $("#overviewlog").text(data.data);
         } else {
             $("#overviewlog").text(data.msg);
         }

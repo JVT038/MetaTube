@@ -1,4 +1,4 @@
-from mimetypes import guess_type
+from magic import Magic
 from re import M
 from mutagen.id3 import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
@@ -53,15 +53,18 @@ class MetaData:
         length = ""
         genres = ""
         cover_path = cover_source if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
-        cover_mime_type = guess_type(cover_path)[0]
+        magic = Magic(mime=True)
         if cover_path != os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png'):
             try:
                 response = requests.get(cover_path)
                 image = response.content
+                magic = Magic(mime=True)
+                cover_mime_type = magic.from_buffer(image)
             except Exception:               
                 sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False
         else:
+            cover_mime_type = "image/png"
             file = open(cover_path, 'rb')
             image = file.read()
         
@@ -131,15 +134,17 @@ class MetaData:
         for artist in metadata_source["artists"]:
             spotify_artists += artist["name"] + "; "
         artists = spotify_artists[0:len(spotify_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
-        cover_mime_type = guess_type(cover_path)
         if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
                 image = response.content
+                magic = Magic(mime=True)
+                cover_mime_type = magic.from_buffer(image)
             except Exception:               
                 sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False
         else:
+            cover_mime_type = "image/png"
             file = open(cover_path, 'rb')
             image = file.read()
         data = {
@@ -180,17 +185,19 @@ class MetaData:
             if contributor["type"].lower() == 'artist':
                 deezer_artists += contributor["name"] + "; "
         artists = deezer_artists[0:len(deezer_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
-        cover_mime_type = guess_type(cover_path)
         if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
                 image = response.content
+                magic = Magic(mime=True)
+                cover_mime_type = magic.from_buffer(image)
             except Exception:               
                 sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False
         else:
             file = open(cover_path, 'rb')
             image = file.read()
+            cover_mime_type = "image/png"
         data = {
             'filename': filename,
             'album': album,
@@ -218,6 +225,8 @@ class MetaData:
                 cover_path = metadata_user["cover"]
                 response = requests.get(metadata_user["cover"])
                 image = response.content
+                magic = Magic(mime=True)
+                cover_mime_type = magic.from_buffer(image)
             except Exception:
                 sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False
@@ -225,6 +234,8 @@ class MetaData:
             cover_path = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
             file = open(cover_path, 'rb')
             image = file.read()
+            cover_mime_type = "image/png"
+        
         data = {
             'filename': filename,
             'album': metadata_user.get('album', ''),
@@ -239,7 +250,7 @@ class MetaData:
             'isrc': "",
             'length': "",
             'cover_path': cover_path,
-            'cover_mime_type': guess_type(cover_path),
+            'cover_mime_type': cover_mime_type,
             'image': image,
             'title': metadata_user.get('title', ''),
             'genres': ""

@@ -1,6 +1,7 @@
+import shutil
+from magic import Magic
 from metatube.overview import bp
 from metatube.database import *
-from mimetypes import guess_type
 from metatube.youtube import YouTube as yt
 from metatube.metadata import MetaData
 from metatube.deezer import Deezer
@@ -13,12 +14,17 @@ from threading import Thread
 from dateutil import parser
 from distutils.util import strtobool
 from shutil import move
+from tempfile import TemporaryDirectory, mkdtemp
+from time import sleep
+from zipfile import ZipFile
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import json
 import os
 import asyncio
 import requests
+import random
+import string
 
 @bp.route('/')
 def index():
@@ -229,6 +235,42 @@ def updateitem(data):
     item = Database.fetchitem(id)
     data["youtube_id"] = item.youtube_id
     item.update(data)
+    
+@socketio.on('downloaditems')
+def downloaditems(items):
+    try:
+        output_string = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(5))
+        tmpdir = mkdtemp()
+        zipfilename = "items_" + output_string + ".zip"
+        zipfilepath = os.path.join(tmpdir, zipfilename)
+        zipfile = ZipFile(zipfilepath, 'w')
+        for item in items:
+            filepath = Database.fetchitem(item).filepath
+            filename = os.path.split(filepath)[1]
+            zipfile.write(filepath, filename)
+        zipfile.close()
+        file = open(zipfilepath, 'rb')
+        content = file.read()
+        file.close()
+        magic = Magic(mime=True)
+        mime = magic.from_file(zipfilepath)
+        sockets.overview({'msg': 'download_file', 'data': content, 'filename': zipfilename, 'mimetype': mime})
+    finally:
+        try:
+            shutil.rmtree(tmpdir)
+        except OSError as e:
+            logger.error('An error occured whilst deleting the temporary file: %s', str(e))
+    
+@socketio.on('deleteitems')
+def deleteitems(items):
+    for id in items:
+        item = Database.fetchitem(id)
+        try:
+            os.unlink(item.filepath)
+        except Exception:
+            pass
+        item.delete()
+    sockets.overview({'msg': 'deleteitems', 'data': 'Items have succesfully been deleted'})
         
 @socketio.on('deleteitem')
 def deleteitem(id):
@@ -253,7 +295,8 @@ def downloaditem(input):
         if Database.checkfile(path) is not None:
             extension = path.split('.')[len(path.split('.')) - 1]
             filename = str(item.name) + "." + str(extension)
-            mimetype = guess_type(path)
+            magic = Magic(mime=True)
+            mimetype = magic.from_file(path)
             with open(path, 'rb') as file:
                 content = file.read()
             sockets.overview({'msg': 'download_file', 'data': content, 'filename': filename, 'mimetype': mimetype})
@@ -315,7 +358,8 @@ def editfilerequest(filepath, id):
             try:
                 response = requests.get(item.cover)
                 image = response.content
-                mime_type = guess_type(item.cover)
+                magic = Magic(mime=True)
+                mime_type = magic.from_buffer(image)
             except Exception:               
                 sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
                 return False

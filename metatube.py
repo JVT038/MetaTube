@@ -11,7 +11,6 @@ if __name__ == "__main__":
     host = os.environ.get('HOST', '0.0.0.0')
     debug = os.environ.get('DEBUG', False)
     log_output = os.environ.get('LOG', False)
-    
     get_hub().NOT_ERROR += (KeyboardInterrupt,)
     try:
         print(u'Starting the webserver on http://%s:%s...'%(host, port))

@@ -201,6 +201,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add custom YouTube-DLP options
 - [ ] Add support for H.265 / HEVC
 - [ ] Add authentication system with an optional reverse proxy
+- [ ] Add support for subpath (such as `localhost:5000/metatube`)
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
@@ -213,7 +214,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add some nice animations
 - [ ] Add a cancel download button when the video is being downloaded
 - [ ] Add button in settings to download the entire SQlite3 Database
-- [ ] Add button in settings to download all the downloaded content
+- [X] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
 - [ ] Add support for HTTPS / SSL
