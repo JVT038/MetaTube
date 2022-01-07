@@ -154,6 +154,13 @@ $ cd ../
 # Install dependencies
 $ pip install -r requirements.txt
 
+# If you're using Windows, you need to install python-magic-bin
+$ pip install python-magic-bin
+# If you're using Debian / Ubuntu, you'll need to install libmagic1
+$ sudo apt-get install libmagic1
+# If you're using iOS, you'll need to install libmagic
+$ brew install libmagic
+
 # Run the file
 $ python metatube.py
 
