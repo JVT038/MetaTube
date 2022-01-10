@@ -10,11 +10,12 @@ EXPOSE $PORT
 COPY . /config/
 RUN \
     apk update && \
-    apk add --no-cache python3-dev libffi-dev gcc musl-dev make ffmpeg libmagic build-deps file && \
+    apk add -t build-deps --no-cache python3-dev libffi-dev gcc musl-dev make file && \
+    apk add --no-cache ffmpeg libmagic && \
     mkdir -p /config && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r /config/requirements.txt && \
-    apk del --purge python3-dev libffi-dev gcc musl-dev make build-deps file && \
+    apk del --purge build-deps && \
     mkdir -p $DOWNLOADS
 
 ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]
