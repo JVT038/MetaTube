@@ -4,7 +4,8 @@ LABEL Author=JVT038 \
     Name=MetaTube
 ENV PORT=5000 \
     FFMPEG=/usr/bin \
-    DOWNLOADS=/downloads
+    DOWNLOADS=/downloads \ 
+    DATABASE_URL=sqlite:////database/app.db
 EXPOSE $PORT
 COPY . /config/
 RUN \

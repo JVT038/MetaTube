@@ -1,3 +1,4 @@
+from flask import render_template
 from metatube import socketio
 from metatube.database import Templates
 import json
@@ -26,3 +27,6 @@ def fetchtemplate(id):
         socketio.emit('template', response)
     else:
         socketio.emit('template', {'response': 'Invalid ID'})
+        
+def error(e):
+    return render_template('errors.html', e=e)

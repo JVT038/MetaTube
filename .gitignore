@@ -9,6 +9,7 @@ __pycache__
 .vscode
 .flaskenv
 *.db
+*.pem
 migrations
 bin
 downloads/*

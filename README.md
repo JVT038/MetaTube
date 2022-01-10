@@ -103,7 +103,6 @@ docker run \
   -p 5000:5000 \
   -e PORT=5000 \
   -e HOST=0.0.0.0 \
-  -e DATABASE_URL=sqlite:////database/app.db \
   -v /downloads:/downloads:rw \
   -v /metatube:/database:rw \
   jvt038/metatube:latest
@@ -121,7 +120,6 @@ services:
         environment:
             - PORT=5000
             - HOST=0.0.0.0
-            - 'DATABASE_URL=sqlite:////database/app.db'
         volumes:
             - '/downloads:/downloads:rw'
             - '/metatube:/database:rw'        
@@ -177,6 +175,7 @@ DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/
 LOG | Whether to keep logs or not | False
 SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
 LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 10
+URL_SUBPATH | Set the URL subpath, if you want to run MetaTube on a subpath. Example: `/metatube` will run the server on `host:port/metatube` | /
 BUFFER_SIZE | The maximum size of the websockets **in bytes**; adjust if your covers are too large to be sent | 10000000 (10 million); equal to 10MB
 ```bash
 # On Windows 10, you can set an environment variable like this: 

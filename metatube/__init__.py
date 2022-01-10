@@ -23,6 +23,8 @@ logger.addHandler(console)
 
 from metatube.settings import bp as bp_settings
 from metatube.overview import bp as bp_overview
+from metatube.routes import error
+
 from metatube.init import init as init_db
 
 def create_app(config_class=Config):
@@ -32,7 +34,7 @@ def create_app(config_class=Config):
         FLASK_DEBUG=False,
         FLASK_ENV='production'
     )
-    
+    app.register_error_handler(Exception, error)
     app.logger.removeHandler(default_handler)
     app.logger.addHandler(logger)
     console.setLevel(int(app.config["LOG_LEVEL"]))
@@ -47,4 +49,4 @@ def create_app(config_class=Config):
     init_db(app)
     return app
 
-import metatube.database, metatube.routes
+import metatube.database

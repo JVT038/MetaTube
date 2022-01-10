@@ -1,3 +1,4 @@
 from flask import Blueprint
-bp = Blueprint('overview', __name__, static_folder='../static', template_folder='../templates/')
+from metatube import Config
+bp = Blueprint('overview', __name__, static_folder='../static', template_folder='../templates/', url_prefix=Config.URL_SUBPATH)
 from metatube.overview import routes

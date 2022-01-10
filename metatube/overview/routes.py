@@ -100,12 +100,12 @@ def searchmetadata(data):
     sources = Config.get_metadata_sources()
     data["max"] = Config.get_max()
     if 'musicbrainz' in sources:
-        Thread(target = musicbrainz.webui, args=(data, )).start()
+        socketio.start_background_task(musicbrainz.webui, data)
     if 'spotify' in sources:
         cred = Config.get_spotify().split(';')
-        Thread(target = Spotify.searchspotify, args=(data, cred, )).start()
+        socketio.start_background_task(Spotify.searchspotify, data, cred)
     if 'deezer' in sources:
-        Thread(target = Deezer.socketsearch, args=(data, )).start()
+        socketio.start_background_task(Deezer.socketsearch, data)
 
 @socketio.on('ytdl_download')
 def download(data):
