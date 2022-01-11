@@ -10,7 +10,7 @@ EXPOSE $PORT
 COPY . /config/
 RUN \
     apk update && \
-    apk add -t build-deps --no-cache python3-dev libffi-dev gcc g++ musl-dev make file && \
+    apk add -t build-deps --no-cache python3-dev libffi-dev gcc musl-dev make file && \
     apk add --no-cache ffmpeg libmagic && \
     mkdir -p /config && \
     python3 -m pip install --upgrade pip && \
