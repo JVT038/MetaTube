@@ -39,11 +39,10 @@ def create_app(config_class=Config):
     app.logger.addHandler(logger)
     console.setLevel(int(app.config["LOG_LEVEL"]))
     socket_log = logger if strtobool(str(app.config["SOCKET_LOG"])) == 1 else False
-    buffer_size = int(app.config["BUFFER_SIZE"])
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True, ping_interval=60)
     jsglue.init_app(app)
-    socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log, max_http_buffer_size=buffer_size) # Allow maximum 10MB to be sent through web sockets
+    socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log) # Allow maximum 10MB to be sent through web sockets
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     init_db(app)

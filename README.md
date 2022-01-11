@@ -176,7 +176,6 @@ LOG | Whether to keep logs or not | False
 SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
 LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 10
 URL_SUBPATH | Set the URL subpath, if you want to run MetaTube on a subpath. Example: `/metatube` will run the server on `host:port/metatube` | /
-BUFFER_SIZE | The maximum size of the websockets **in bytes**; adjust if your covers are too large to be sent | 10000000 (10 million); equal to 10MB
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -196,42 +195,24 @@ I am not responsible for any legal consequences the user may or may not face by 
 Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038</a>
 
 ## To-Do
+### Finished
+
 - [X] Add support for the use of proxies to download YouTube videos
 - [X] Add Docker support
-- [ ] Add Docker support for ARM devices (such as Raspberry Pi)
 - [X] Add Github action / workflow thing, to automatically create Docker image upon a new commit
-- [ ] Add it to the PyPi library
-- [ ] Add support for sites other than YouTube
-- [ ] Add support for YouTube playlists
-- [ ] Add custom YouTube-DLP options
-- [ ] Add support for H.265 / HEVC
-- [ ] Add authentication system with an optional reverse proxy
-- [ ] Add support for subpath (such as `localhost:5000/metatube`)
-- [ ] Add support for TheAudioDB
-- [ ] Add support for YouTube Music 
-- [ ] Add support for Last.fm!
 - [X] Add support for Spotify
 - [X] Add support for Deezer
-- [ ] Add translations
+- [X] Add support for subpath (such as `localhost:5000/metatube`)
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
-- [ ] Add in-built file explorer, making manual paths optional
-- [ ] Add some nice animations
-- [ ] Add a cancel download button when the video is being downloaded
-- [ ] Add button in settings to download the entire SQlite3 Database
 - [X] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
-- [ ] Add support for HTTPS / SSL
 - [X] Preview filenames when entering an output template
 - [X] Make the Docker file smaller, because it's huge
 - [X] Build a logger
-- [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
 - [X] Catch and show errors properly
 - [X] Support looking for YouTube videos and downloading them
-- [ ] Support querying the Musicbrainz database and matching YouTube videos with them
-- [ ] Support MySQL
-- [ ] Make a CLI to download and match music
 - [X] Store the information of downloaded songs in a SQL database
 - [X] Make it mobile-friendly
 - [X] Use Sponsorblock and yt-dlp to automatically skip fragments
@@ -245,6 +226,29 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [X] Make sure the search for downloaded song field works
+ 
+### Not finished
+
+- [ ] Add Docker support for ARM devices (such as Raspberry Pi)
+- [ ] Add it to the PyPi library
+- [ ] Add support for sites other than YouTube
+- [ ] Add support for YouTube playlists
+- [ ] Add custom YouTube-DLP options
+- [ ] Add support for H.265 / HEVC
+- [ ] Add authentication system with an optional reverse proxy
+- [ ] Add support for TheAudioDB
+- [ ] Add support for YouTube Music 
+- [ ] Add support for Last.fm!
+- [ ] Add translations
+- [ ] Add in-built file explorer, making manual paths optional
+- [ ] Add some nice animations
+- [ ] Add a cancel download button when the video is being downloaded
+- [ ] Add button in settings to download the entire SQlite3 Database
+- [ ] Add support for HTTPS / SSL
+- [ ] Give the user the option which level of logs to show / log and whether to save the logs to a file
+- [ ] Support querying the Musicbrainz database and matching YouTube videos with them
+- [ ] Support MySQL
+- [ ] Make a CLI to download and match music
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests

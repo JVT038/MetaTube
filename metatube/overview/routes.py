@@ -260,9 +260,10 @@ def downloaditems(items):
             shutil.rmtree(tmpdir)
         except OSError as e:
             logger.error('An error occured whilst deleting the temporary file: %s', str(e))
-    
-@socketio.on('deleteitems')
-def deleteitems(items):
+        
+@socketio.on('deleteitem')
+def deleteitem(items):
+    items = json.loads(items)
     for id in items:
         item = Database.fetchitem(id)
         try:
@@ -270,17 +271,8 @@ def deleteitems(items):
         except Exception:
             pass
         item.delete()
-    sockets.overview({'msg': 'deleteitems', 'data': 'Items have succesfully been deleted'})
-        
-@socketio.on('deleteitem')
-def deleteitem(id):
-    item = Database.fetchitem(id)
-    try:
-        os.unlink(item.filepath)
-    except Exception:
-        pass
-    item.delete()
     sockets.overview({'msg': 'Item succesfully deleted!'})
+    return 'OK'
 
 @socketio.on('downloaditem')
 def downloaditem(input):

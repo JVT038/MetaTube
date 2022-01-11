@@ -21,5 +21,4 @@ class Config(object):
     PORT = os.environ.get('PORT', 5000)
     FFMPEG =  os.environ.get('FFMPEG', "")
     DOWNLOADS = os.environ.get('DOWNLOADS', os.path.join(basedir, 'downloads'))
-    BUFFER_SIZE = os.environ.get('BUFFER_SIZE', 10000000)
     URL_SUBPATH = os.environ.get('URL_SUBPATH', '/')

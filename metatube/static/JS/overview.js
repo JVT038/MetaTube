@@ -644,9 +644,10 @@ $(document).ready(function() {
     });
     
     $(document).on('click', ".deleteitembtn", function() {
-        $("#removeitemmodal").find('.btn-danger').attr('id', $(this).parents('tr').attr('id'));
+        $("#removeitemmodal").find('.btn-danger').attr('id', '["' + $(this).parents('tr').attr('id') + '"]');
         $("#removeitemmodaltitle").text('Delete ' + $(this).parents('tr').children(':first').text())
         $("#removeitemmodal").addClass(['d-flex', 'justify-content-center']);
+        $("#removeitemmodal").find('p').html('Are you sure you want to delete this item? <br />This action will delete the file itself too!');
         $("#removeitemmodal").modal('show');
     });
 
@@ -721,7 +722,7 @@ $(document).ready(function() {
                 } else {
                     // Get ID by removing all letters from the ID, so the number remains
                     let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
-                    if($(this).attr('id').replace(/[0-9]/g, '') == 'artist_relations_name') {
+                    if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
                         people[id].name = $(this).val();
                     } else {
                         people[id].type = $(this).val();
@@ -881,14 +882,22 @@ $(document).ready(function() {
         for(let i = 0; i < $(".selectitem:checked").length; i++) {
             items.push($($(".selectitem:checked")[i]).parents('tr').attr('id'));
         }
-        socket.emit('deleteitems', items);
+        $("#removeitemmodal").find('.btn-danger').attr('id', JSON.stringify(items));
+        $("#removeitemmodaltitle").text('Deleting ' + items.length + " items");
+        $("#removeitemmodal").find('p').html('Are you sure you want to delete these items? <br />This action will delete the files themselves too!')
+        $("#removeitemmodal").modal('show');
     });
 
     $("#delitembtnmodal").on('click', function() {
-        let id = $(this).attr('id');
-        $("tr#"+id).remove();
-        $("#removeitemmodal").modal('hide');
-        socket.emit('deleteitem', id);
+        let items = JSON.parse(this.id);
+        socket.emit('deleteitem', this.id, function(ack) {
+            if(ack == 'OK') {
+                for(let i = 0; i < items.length; i++) {
+                    $("tr#"+items[i]).remove();
+                }
+                $("#removeitemmodal").modal('hide');
+            }
+        });
     });
 
     $("#queryform").on('submit', function(e) {
@@ -1102,7 +1111,7 @@ $(document).ready(function() {
                         } else {
                             // Get ID by removing all letters from the ID, so the number remains
                             let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
-                            if($(this).attr('id').replace(/[0-9]/g, '') == 'artist_relations_name') {
+                            if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
                                 people[id].name = $(this).val();
                             } else {
                                 people[id].type = $(this).val();
