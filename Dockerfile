@@ -5,8 +5,7 @@ LABEL Author=JVT038 \
 ENV PORT=5000 \
     FFMPEG=/usr/bin \
     DOWNLOADS=/downloads \ 
-    DATABASE_URL=sqlite:////database/app.db \
-    PYTHONPATH=/usr/lib/python3.9/site-packages
+    DATABASE_URL=sqlite:////database/app.db
 EXPOSE $PORT
 COPY . /config/
 RUN \
