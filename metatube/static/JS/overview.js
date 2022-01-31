@@ -3,6 +3,12 @@ $(document).ready(function() {
     $("#metadataview").find('input').attr('autocomplete', 'off');
     $("#searchitem").val('');
     $(".selectitem, #selectall").prop('checked', false);
+    function outputtemplate() {
+        let val = $("#outputname").val()
+        let url = $("#thumbnail_yt").attr('ytid');
+        let info_dict = $("#thumbnail_yt").attr('info_dict');
+        socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
+    }
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
         let downloadform = document.createElement('div');
@@ -331,6 +337,7 @@ $(document).ready(function() {
             covercol.classList.add('col');
             namecol.classList.add('col');
         }
+        namecol.style.margin = "0 10px 0 10px";
 
         td_name.setAttribute('style', 'vertical-align: middle;');
         td_artist.setAttribute('style', 'vertical-align: middle;');
@@ -505,12 +512,7 @@ $(document).ready(function() {
         socket.emit('fetchtemplate', id)
     });
 
-    $(document).on('keydown', '#outputname', function() {
-        let val = $(this).val();
-        let url = $("#thumbnail_yt").attr('ytid');
-        let info_dict = $("#thumbnail_yt").attr('info_dict');
-        socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
-    });
+    $(document).on('keydown', '#outputname', outputtemplate)
 
     $(document).on('click', ".removesegment", function() {
         $(this).parents('.form-row').remove();
@@ -588,6 +590,7 @@ $(document).ready(function() {
             $("#nextbtn").removeClass('d-none');
             $("#downloadbtn").addClass('d-none');
         }
+        outputtemplate();
     });
 
     $(document).on('change', '#resolution', function() {
@@ -1183,6 +1186,7 @@ $(document).ready(function() {
         console.info('Got YouTube info');
         $("#metadataview").empty().prepend(metadataform);
         insertYTcol(video, downloadform);
+        outputtemplate();
         ytdata = video;
     });
 
@@ -1482,10 +1486,12 @@ $(document).ready(function() {
     });
 
     socket.on('ytdl_template', (data) => {
+        let extension = $("#extension").val().indexOf('m4a') > -1 ? 'm4a' : $("#extension").val();
+        let filename = data.split('.').slice(0, data.split('.').length - 1).join('.') + "." + extension
         if($("#filenamespan").length > 0) {
-            $("#filenamespan").text("Filename: " + data);
+            $("#filenamespan").text("Filename: " + filename);
         } else {
-            $("#albumspan").after('<br/><span id="filenamespan">Filename: '+data+'</span>');
+            $("#albumspan").after('<br/><span id="filenamespan">Filename: '+filename+'</span>');
         }
     })
 

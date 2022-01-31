@@ -48,11 +48,11 @@
                     {% for record in records %}
                         <tr id="{{ record.id }}">
                             <td class="td_name text-dark" style="min-width: 120px;">
-                                <div class="row d-flex justify-content-center">
-                                    <div class="col">
+                                <div class="row justify-content-center">
+                                    <div class="col d-flex justify-content-center">
                                         <img class="img-fluid cover_img" style="width: 100px; height: 100px;" src="{{ record.cover }}" />
                                     </div>
-                                    <div class="col align-self-center"><span class="align-middle">{{ record.name }}</span></div>
+                                    <div class="col align-self-center" style="margin: 0 10px 0 10px"><span class="align-middle">{{ record.name }}</span></div>
                                 </div>
                             </td>
                             <td class="td_artist text-dark" style="vertical-align: middle;">{{ record.artist.replace('/', ';') }}</td>

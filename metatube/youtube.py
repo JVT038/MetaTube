@@ -1,11 +1,10 @@
 import yt_dlp, json, os
-from yt_dlp.postprocessor.ffmpeg import PostProcessingError as FFmpegError
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
 from youtubesearchpython.__future__ import VideosSearch
 from threading import Thread
 from urllib.error import URLError
 from yt_dlp.utils import ExtractorError, DownloadError, PostProcessingError
-from metatube import sockets, logger
+from metatube import sockets, logger, socketio
 from metatube.sponsorblock import segments as findsegments
 from jinja2 import Environment, PackageLoader, select_autoescape
     
@@ -54,9 +53,6 @@ class YouTube:
             except ExtractorError as e:
                 logger.error('Extractor error: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'An extractor error has occured. Check logs for more info.'})
-            except FFmpegError as e:
-                logger.error('FFmpeg error: %s', str(e))
-                sockets.downloadprogress({'status': 'error', 'message': 'An error involving FFmpeg has occured. Check logs for more info.'})
             except FFmpegPostProcessorError as e:
                 logger.error('FFmpegPostProcessor error: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'An processing error involving FFmpeg has occured. Check logs for more info.'})
@@ -75,29 +71,50 @@ class YouTube:
     
     def download_hook(d):
         if d['status'] == 'finished':
-            sockets.downloadprogress({'status': 'finished_ytdl'})
+            socketio.emit('downloadprogress', {'status': 'finished_ytdl'})
+            # sockets.downloadprogress({'status': 'finished_ytdl'})
         elif d['status'] == 'downloading':
             if "total_bytes_estimate" in d:
-                sockets.downloadprogress({
+                socketio.emit('downloadprogress', {
                     'status': 'downloading', 
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes_estimate']
                 })
+                # sockets.downloadprogress({
+                #     'status': 'downloading', 
+                #     'downloaded_bytes': d['downloaded_bytes'], 
+                #     'total_bytes': d['total_bytes_estimate']
+                # })
             elif 'total_bytes' in d:
-                sockets.downloadprogress({
+                socketio.emit('downloadprogress', {
                     'status': 'downloading', 
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes']
                 })
+                # sockets.downloadprogress({
+                #     'status': 'downloading', 
+                #     'downloaded_bytes': d['downloaded_bytes'], 
+                #     'total_bytes': d['total_bytes']
+                # })
             else:
-                sockets.downloadprogress({
+                socketio.emit('downloadprogress', {
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
+                # sockets.downloadprogress({
+                #     'status': 'downloading',
+                #     'total_bytes': 'Unknown'
+                # })
                 
     def postprocessor_hook(d):
         if d['status'] == 'finished':
-            sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
+            socketio.emit('downloadprogress', {
+                'status': 'finished_ffmpeg', 
+                'filepath': d['info_dict']['filepath'], 
+                'postprocessor': d["postprocessor"]
+            })
+            logger.info(d["postprocessor"])
+            # sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
             
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
@@ -152,7 +169,7 @@ class YouTube:
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_amf'])
                 elif hw_transcoding == 'omx':
                     postprocessor_args["videoconvertor"].extend(['-c:v', 'h264_omx'])
-                                        
+                    
         # If segments have been submitted by the user to exclude, add a ModifyChapters key and add ranges
         if len(segments) > 0:
             ranges = []

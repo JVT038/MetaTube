@@ -7,7 +7,8 @@
   background-color: #333 !important;
 }
 
-[data-theme="dark"] .bg-white {
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .dropdown-item:hover {
   background-color: #000 !important;
 }
 
@@ -15,7 +16,13 @@
   background-color: #eee !important;
 }
 
-[data-theme="dark"] .text-dark {
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .navbar-toggler,
+[data-theme="dark"] .navbar-nav > .nav-item > a:hover,
+[data-theme="dark"] .navbar-nav > .active > a,
+[data-theme="dark"] .close,
+[data-theme="dark"] code {
   color: #eee !important;
 }
 
@@ -24,20 +31,8 @@
   background-color: #333;
 }
 
-[data-theme="dark"] .dropdown-item,
-[data-theme="dark"] .navbar-toggler,
-[data-theme="dark"] .navbar-nav > .nav-item > a:hover,
-[data-theme="dark"] .navbar-nav > .active > a,
-[data-theme="dark"] .close {
-  color: white !important;
-}
-
 [data-theme="dark"] .navbar-nav > .nav-item > a {
   color: #9d9a9a;
-}
-
-[data-theme="dark"] .dropdown-item:hover {
-  background-color: black;
 }
 
 [data-theme="dark"] .table-hover > tbody > tr:hover {

@@ -10,12 +10,10 @@ from metatube import socketio, sockets
 from metatube import Config as env
 from flask import render_template
 from datetime import datetime
-from threading import Thread
 from dateutil import parser
 from distutils.util import strtobool
 from shutil import move
-from tempfile import TemporaryDirectory, mkdtemp
-from time import sleep
+from tempfile import mkdtemp
 from zipfile import ZipFile
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
@@ -271,7 +269,8 @@ def deleteitem(items):
         except Exception:
             pass
         item.delete()
-    sockets.overview({'msg': 'Item succesfully deleted!'})
+    socketdata = {'msg': 'Item succesfully deleted!'} if len(items) > 1 else {'msg': 'deleteitems'}
+    sockets.overview(socketdata)
     return 'OK'
 
 @socketio.on('downloaditem')

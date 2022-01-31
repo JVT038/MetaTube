@@ -47,7 +47,7 @@ class Default():
             output_folder = self._downloads,
             output_name = f"%(title)s.%(ext)s",
             bitrate = 'best',
-            resolution = 'None',
+            resolution = 'best;best',
             default = True,
             proxy_status = False,
             proxy_username = "",
@@ -67,8 +67,8 @@ class Default():
                 if len(os.listdir(directory)) > 0:
                     shutil.rmtree(directory)
             init(directory)
-            self.removealembic()
-            
+            if os.path.exists(self._url) and os.path.isfile(self._url):
+                self.removealembic()
         self.migrations()
         for method in self._methods:
             getattr(self, method)()
