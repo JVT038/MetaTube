@@ -199,6 +199,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 
 - [X] Add support for the use of proxies to download YouTube videos
 - [X] Add Docker support
+- [X] Add Docker support for ARM64/v8 devices (such as Raspberry Pi 4)
 - [X] Add Github action / workflow thing, to automatically create Docker image upon a new commit
 - [X] Add support for Spotify
 - [X] Add support for Deezer
@@ -229,7 +230,6 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
  
 ### Not finished
 
-- [ ] Add Docker support for ARM devices (such as Raspberry Pi)
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
 - [ ] Add support for YouTube playlists
