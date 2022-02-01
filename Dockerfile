@@ -10,7 +10,7 @@ EXPOSE $PORT
 COPY . /config/
 RUN \
     apk update && \
-    apk add --no-cache --upgrade alpine-sdk ffmpeg libmagic && \
+    apk add --no-cache --upgrade alpine-sdk libffi-dev ffmpeg libmagic && \
     mkdir -p {/config,$DOWNLOADS,/database} && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r /config/requirements.txt && \

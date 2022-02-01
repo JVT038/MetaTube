@@ -11,7 +11,7 @@ EXPOSE $PORT
 COPY . /config/
 RUN \
     apk update && \
-    apk add --no-cache --upgrade alpine-sdk py3-gevent py3-pycryptodomex ffmpeg libmagic && \
+    apk add --no-cache --upgrade alpine-sdk py3-gevent libffi-dev py3-pycryptodomex ffmpeg libmagic && \
     mkdir -p {/config,$DOWNLOADS} && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r /config/requirements.txt && \
