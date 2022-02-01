@@ -152,6 +152,12 @@ class Database(db.Model):
     def searchrecords(query):
         return Database.query.filter(Database.name.like(query + "%")).all()
     
+    def itemtodict(item):
+        dict = {}
+        for column in item.__table__.columns:
+                dict[column.name] = str(getattr(item, column.name))
+        return dict
+    
     def getrecords():
         return Database.query.all()
     

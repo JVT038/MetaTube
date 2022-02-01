@@ -1,4 +1,5 @@
 import shutil
+from h11 import Data
 from magic import Magic
 from metatube.overview import bp
 from metatube.database import *
@@ -291,6 +292,27 @@ def downloaditem(input):
             with open(path, 'rb') as file:
                 content = file.read()
             sockets.overview({'msg': 'download_file', 'data': content, 'filename': filename, 'mimetype': mimetype})
+        else:
+            sockets.overview({'msg': 'Filepath invalid'})
+    else:
+        sockets.overview({'msg': 'Filepath invalid'})
+        
+@socketio.on('playitem')
+def playitem(input):
+    item = Database.fetchitem(input)
+    if item is None:
+        item = Database.checkfile(input)
+        if item is None:
+            sockets.overview({'msg': 'Filepath invalid'})
+            return False
+    path = item.filepath
+    if os.path.exists(path) and os.path.isfile(path):
+        if Database.checkfile(path) is not None:
+            magic = Magic(mime=True)
+            mimetype = magic.from_file(path)
+            with open(path, 'rb') as file:
+                content = file.read()
+            sockets.overview({'msg': 'play_file', 'data': content, 'itemdata': Database.itemtodict(item), 'mimetype': mimetype})
         else:
             sockets.overview({'msg': 'Filepath invalid'})
     else:

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
+<script src="{{ url_for('static', filename='JS/libraries/APlayer.min.js') }}"></script>
 <script src="{{ url_for('static', filename='JS/overview.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/APlayer.min.css') }}" />
 <div class="container">
     <div class="input-group">
         <input type="text" class="form-control" id="searchitem" placeholder="Search for downloaded video..." aria-label="Downloaded video name" autocomplete="off">
@@ -24,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="table-responsive-md" style="max-height: 80vh; overflow-y: auto;">
+    <div class="table-responsive-md" style="max-height: 75vh; overflow-y: auto;">
         <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>
@@ -67,6 +69,7 @@
                                             <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
                                             <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
                                             <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
+                                            <a href="javascript:void(0)" class="dropdown-item playitembtn">{% if path_exists(record.filepath) %} Play item {% else %} Item has been moved or deleted {% endif %}</a>
                                             <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
                                             <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
                                         </div>
@@ -84,6 +87,7 @@
             </tbody>
         </table>
     </div>
+    <div id="audioplayer" class="d-none"></div>
 </div>
 <div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-hidden="true">
     <div class="modal-dialog modal-lg mw-100 w-75">

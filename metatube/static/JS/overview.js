@@ -1,5 +1,11 @@
 var socket = io();
 $(document).ready(function() {
+    ap = new APlayer({
+        container: document.getElementById('audioplayer'),
+        autoplay: true,
+        mini: false,
+        loop: 'none'
+    });
     $("#metadataview").find('input').attr('autocomplete', 'off');
     $("#searchitem").val('');
     $(".selectitem, #selectall").prop('checked', false);
@@ -310,6 +316,7 @@ $(document).ready(function() {
         let editfileanchor = document.createElement('a');
         let editmetadataanchor = document.createElement('a');
         let downloadanchor = document.createElement('a');
+        let playanchor = document.createElement('a');
         let viewanchor = document.createElement('a');
         let deleteanchor = document.createElement('a');
         let cover = document.createElement('img');
@@ -326,6 +333,7 @@ $(document).ready(function() {
         editfileanchor.innerText = 'Change file data';
         editmetadataanchor.innerText = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV'].indexOf(td_ext.innerText) > -1 ? 'Change metadata' : 'Item has been moved or deleted or metadata is not supported';
         downloadanchor.innerText = 'Download item';
+        playanchor.innerText = 'Play item';
         viewanchor.innerText = 'View YouTube video';
         deleteanchor.innerText = 'Delete item';
         namespan.innerText = itemdata["name"];
@@ -370,6 +378,9 @@ $(document).ready(function() {
         
         downloadanchor.href = "javascript:void(0)";
         downloadanchor.classList.add('dropdown-item', 'downloaditembtn');
+
+        playanchor.href = "javascript:void(0)";
+        playanchor.classList.add('dropdown-item', 'playitembtn');
         
         viewanchor.href = "https://youtu.be/" + itemdata["ytid"];
         viewanchor.classList.add('dropdown-item');
@@ -386,7 +397,7 @@ $(document).ready(function() {
 
         form_check.appendChild(checkbox);       
 
-        dropdownmenu.append(editfileanchor, editmetadataanchor, downloadanchor, viewanchor, deleteanchor);
+        dropdownmenu.append(editfileanchor, editmetadataanchor, downloadanchor, playanchor, viewanchor, deleteanchor);
         dropdown.append(dropdownbtn, dropdownmenu);
         input_group.append(dropdown, form_check);
         td_actions.appendChild(input_group);
@@ -667,6 +678,11 @@ $(document).ready(function() {
     $(document).on('click', '.downloaditembtn', function() {
         let id = $(this).parents('tr').attr('id');
         socket.emit('downloaditem', id)
+    });
+
+    $(document).on('click', '.playitembtn', function() {
+        let id = $(this).parents('tr').attr('id');
+        socket.emit('playitem', id)
     });
 
     $(document).on('click', "#fetchmbpreleasebtn", function(){
@@ -1398,10 +1414,20 @@ $(document).ready(function() {
             let blob = new Blob([filedata], {'type': data.mimetype});
             let uri = URL.createObjectURL(blob);
             downloadURI(uri, data.filename);
-        } else if(data.msg == 'load_cover') {
-            let blob = new Blob([data.data]);
+        } else if(data.msg == 'play_file') {
+            let filedata = data.data;
+            let itemdata=  data.itemdata;
+            let blob = new Blob([filedata], {'type': data.mimetype});
             let uri = URL.createObjectURL(blob);
-            $("tr#"+data.id).find('img.cover_img').attr('src', uri);
+            ap.list.add([{
+                name: itemdata["name"],
+                artist: itemdata["artist"],
+                url: uri,
+                cover: itemdata["cover"]
+            }]);
+            ap.play();
+            $("#recordstable").parent().css('max-height', '65vh');
+            $("#audioplayer").removeClass('d-none')
         } else if(data.msg == 'changed_metadata') {
             socket.emit('updateitem', data.data);
         } else if(data.msg == 'changed_metadata_db') {
@@ -1512,4 +1538,16 @@ $(document).ready(function() {
             additem({"data": data[i]});
         }
     });
+
+    ap.on('ended', function() {
+        if($(".aplayer-list").children('ol').children().length > 1) {
+            ap.list.remove($(".aplayer-list-light").index() - 1);
+        } else {
+            ap.list.clear();
+        }
+    });
+    ap.on('listclear', function() {
+        $("#recordstable").parent().css('max-height', '75vh');
+        $("#audioplayer").addClass('d-none');
+    })
 });
