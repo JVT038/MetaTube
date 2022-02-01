@@ -5,15 +5,16 @@ LABEL Author=JVT038 \
 ENV PORT=5000 \
     FFMPEG=/usr/bin \
     DOWNLOADS=/downloads \ 
-    DATABASE_URL=sqlite:////database/app.db
+    DATABASE_URL=sqlite:////database/app.db \
+    PYTHONPATH=/usr/lib/python3.9/site-packages
 EXPOSE $PORT
 COPY . /config/
 RUN \
     apk update && \
-    apk add --no-cache --upgrade alpine-sdk libffi-dev ffmpeg libmagic && \
+    apk add --no-cache --upgrade alpine-sdk py3-gevent py3-pycryptodomex ffmpeg libmagic && \
     mkdir -p {/config,$DOWNLOADS} && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r /config/requirements.txt && \
-    apk del --purge alpine-sdk libffi-dev
+    apk del --purge alpine-sdk
 
 ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]
