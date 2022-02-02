@@ -12,7 +12,7 @@ musicbrainzngs==0.7.1
 sponsorblock.py==0.1.0
 python-dateutil==2.8.2
 python-dotenv==0.19.1
-python-magic==0.4.24
+python-magic==0.4.25
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.2
 spotipy==2.19.0
