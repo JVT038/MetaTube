@@ -14,7 +14,7 @@ python-dateutil==2.8.2
 python-dotenv==0.19.1
 python-magic==0.4.24
 ffmpeg-python==0.2.0
-youtube-search-python==1.5.3
+youtube-search-python==1.6.2
 spotipy==2.19.0
 urllib3==1.26.7
 deezer-python==4.3.0
