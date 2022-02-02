@@ -42,7 +42,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True, ping_interval=60)
     jsglue.init_app(app)
-    socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log) # Allow maximum 10MB to be sent through web sockets
+    socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     init_db(app)

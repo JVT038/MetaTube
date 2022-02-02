@@ -30,7 +30,7 @@ class ffmpeg():
     # Turns out, yt-dlp has an in-built functions to exclude fragments from the download.
     # So this whole function was all for nothing, and I wasted a lot of time.
     # Because I spent so much time on this, I don't want to delete it, so I'll just leave it here, unused in my project
-                
+    '''
     def segments(self, filepath: str, segments: dict, length: str):
         """[summary]
 
@@ -133,3 +133,4 @@ class ffmpeg():
         #     os.remove(file)
         print('Done converting')
         return True
+    '''

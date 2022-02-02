@@ -15,6 +15,6 @@ if __name__ == "__main__":
     get_hub().NOT_ERROR += (KeyboardInterrupt,)
     try:
         print(u'Starting the webserver on http://%s:%s...'%(host, port))
-        socketio.run(app, str(host), int(port), log_output=strtobool(str(log_output)), keyfile='key.pem', certfile='cert.pem')
+        socketio.run(app, str(host), int(port), log_output=strtobool(str(log_output)))
     except KeyboardInterrupt:
         print('Stopped server because of KeyboardInterrupt')
