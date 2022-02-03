@@ -4,11 +4,12 @@ class Deezer():
        
     def socketsearch(data):
         client = deezer.Client()
-        searchresults = client.search(data["title"], limit=data["max"], artist=data["artist"])
+        searchresults = client.search(data["title"], artist=data["artist"])
         list = []
         for result in searchresults:
             list.append(result.as_dict())
-        sockets.deezersearch(list)
+        maxlist = list[0:int(data["max"])]
+        sockets.deezersearch(maxlist)
     
     def searchid(id):
         client = deezer.Client()

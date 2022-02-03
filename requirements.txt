@@ -9,7 +9,7 @@ Flask-Migrate==3.1.0
 Flask-JSGlue==0.3.1
 Flask-SQLAlchemy==2.5.1
 musicbrainzngs==0.7.1
-sponsorblock.py==0.1.0
+sponsorblock.py==0.2.1
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 python-magic==0.4.25
