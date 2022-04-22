@@ -53,7 +53,7 @@ Normal view | Dark mode|
 
 ## :sparkles: Features ##
 
-It's almost finished and these features are currently supported:
+It's finished (for now) and these features are currently supported:
 
 :heavy_check_mark: Fetch information from a YouTube video based on an URL <br />
 :heavy_check_mark: Query and fetch results from the Musicbrainz API, the Spotify Web API, and the Deezer API <br />
@@ -67,6 +67,8 @@ It's almost finished and these features are currently supported:
 :heavy_check_mark: Store the information about downloaded releases in the database, to edit the downloaded metadata or the file itself later after the download <br />
 :heavy_check_mark: Dark mode is available <br />
 :heavy_check_mark: Docker is [supported](#whale-using-docker)
+
+I'm currently not planning on adding any new features; I'll only fix any bugs, but if you have a nice feature, feel free to create an issue, and I'll decide whether I'll actually do it.
 
 ## :rocket: Technologies ##
 
@@ -229,7 +231,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [X] Make sure the search for downloaded song field works
  
-### Not finished
+### Not finished (I probably will never finish this)
 
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube

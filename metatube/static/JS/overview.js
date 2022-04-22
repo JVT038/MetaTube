@@ -10,10 +10,12 @@ $(document).ready(function() {
     $("#searchitem").val('');
     $(".selectitem, #selectall").prop('checked', false);
     function outputtemplate() {
-        let val = $("#outputname").val()
-        let url = $("#thumbnail_yt").attr('ytid');
-        let info_dict = $("#thumbnail_yt").attr('info_dict');
-        socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
+        if($("#downloadmodal").css('display') != 'none') {
+            let val = $("#outputname").val()
+            let url = $("#thumbnail_yt").attr('ytid');
+            let info_dict = $("#thumbnail_yt").attr('info_dict');
+            socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
+        }
     }
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
