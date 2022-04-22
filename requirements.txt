@@ -1,6 +1,6 @@
 mutagen==1.45.1
 requests==2.27.1
-yt-dlp==2022.1.21
+yt-dlp==2022.2.4
 gevent==21.8.0
 gevent-websocket==0.10.1
 Flask==2.0.2
@@ -17,4 +17,4 @@ ffmpeg-python==0.2.0
 youtube-search-python==1.6.2
 spotipy==2.19.0
 urllib3==1.26.8
-deezer-python==5.1.0
+deezer-python==5.2.0
