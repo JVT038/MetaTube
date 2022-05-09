@@ -113,10 +113,9 @@
                             <p class="text-center" id="searchlog"></p>
                         </form>
                     </div>
-                    <div class="row d-flex" id="defaultview"></div>
-                    <div id="metadataview" class="d-none"></div>
                     <div id="searchmetadataview" class="d-none">
-                        <p>No matching items found from selected metadata providers :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
+                        <p class="d-none" id="404p">No matching items found from selected metadata providers :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
+                        <p id="otherp">In case the desired item wasn't found, enter an alternative metadata search query here:</p>
                         <form id="metadataqueryform">
                             <div class="input-group">
                                 <input type="text" class="form-control" id="metadataquery" />
@@ -126,6 +125,8 @@
                             </div>
                         </form>
                     </div>
+                    <div class="row d-flex" id="defaultview"></div>
+                    <div id="metadataview" class="d-none"></div>
                     <div id="progressview" class="d-none">
                         <div class="form-row">
                             <div class="col">

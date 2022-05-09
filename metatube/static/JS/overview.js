@@ -24,7 +24,7 @@ $(document).ready(function() {
 
         let data = response;
         let artist = 'artist' in data ? data.artist : "Unknown";
-        let track = 'track' in data ? data.track : "Unknown";
+        let track = 'track' in data && data["track"] != null ? data.track : "Unknown";
         let album = 'album' in data ? data.album : "Unknown";
         let channel = 'channel' in data ? data.channel : data.uploader;
         let thumbnail = "";
@@ -1002,7 +1002,7 @@ $(document).ready(function() {
             }
             socket.emit('ytdl_download', data, function(ack) {
                 if(ack == "OK") {
-                    $("#editmetadata, #downloadbtn, #defaultview, #resetviewbtn, #audiocol, #savemetadata, #metadataview ").addClass('d-none');
+                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #audiocol, #savemetadata, #metadataview ").addClass('d-none');
                     $("#progressview").removeClass('d-none');
                     $("#searchlog").empty();
                 }
@@ -1022,7 +1022,7 @@ $(document).ready(function() {
     $("#addvideo").on('click', function() {
         if($("#progress").text() == '100%') {
             $("#defaultview, #downloadbtn").removeClass('d-none');
-            $("#progressview, #downloadfilebtn, #searchvideomodalfooter").addClass('d-none');
+            $("#progressview, #downloadfilebtn, #searchvideomodalfooter, #searchmetadataview, #404p").addClass('d-none');
             $("#progresstext, #progress").text('');
             $("#progress").attr({
                 'aria-valuenow': '0',
@@ -1210,14 +1210,18 @@ $(document).ready(function() {
 
     socket.on('mbp_response', (mbp) => {
         console.info('Got musicbrainz info');
+        mbpdata = mbp;
+        $("#searchmetadataview").removeClass('d-none');
         if(Object.keys(mbp).length > 0) {
-            for(let i = 0; i < Object.keys(mbp).length; i++) {
+            $("#audiocol").empty();
+            for(let i = 0; i < Object.keys(mbp).length - 2; i++) {
                 insertmusicbrainzdata(mbp[i]);
             }
-        } else if($("#searchmetadataview").hasClass('d-none')) {
+            $("#metadataquery").val(mbp["query"])
+        } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
-            $("#nextbtn").addClass('d-none');
-            $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+            $("#nextbtn, #otherp").addClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
         }
         $("#searchvideomodalfooter").removeClass('d-none');
     });
@@ -1225,32 +1229,36 @@ $(document).ready(function() {
     socket.on('spotify_response', (spotify) => {
         console.info('Spotify info');
         spotifydata = spotify;
+        $("#searchmetadataview").removeClass('d-none');
         if(Object.keys(spotify["tracks"]["items"]).length > 0) {
-            for(let i = 0; i < Object.keys(spotify["tracks"]["items"]).length; i++) {
+            $("#audiocol").empty();
+            for(let i = 0; i < Object.keys(spotify["tracks"]["items"]).length - 2; i++) {
                 insertspotifydata(spotify["tracks"]["items"][i]);
             }
-            $("#searchmetadataview").addClass('d-none');
+            $("#metadataquery").val(spotifydata["query"]);
             $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
-        } else if($("#searchmetadataview").hasClass('d-none')) {
+        } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
-            $("#nextbtn").addClass('d-none');
-            $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+            $("#nextbtn, #otherp").addClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
         }
     });
 
     socket.on('deezer_response', (deezer) => {
         console.info('Deezer info');
         deezerdata = deezer;
+        $("#searchmetadataview").removeClass('d-none');
         if(deezer.length > 0) {
-            for(let i = 0; i < deezer.length; i++) {
+            $("#audiocol").empty();
+            for(let i = 0; i < deezer.length - 2; i++) {
                 insertdeezerdata(deezer[i]);
-                $("#searchmetadataview").addClass('d-none');
                 $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');
             }
-        } else if($("#searchmetadataview").hasClass('d-none')) {
+            $("#metadataquery").val(deezer[deezer.length - 1]);
+        } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
-            $("#nextbtn").addClass('d-none');
-            $("#searchmetadataview, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+            $("#nextbtn, #otherp").addClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
         }
     });
 

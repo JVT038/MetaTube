@@ -8,6 +8,7 @@ def search(args):
     artist = args['artist']
     max = int(args['max'])
     response = musicbrainzngs.search_releases(title, artistname=artist, limit=max)
+    response["query"] = title
     logger.info('Searching for %s, with artist %s', title, artist)
     return response
 

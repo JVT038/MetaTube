@@ -9,6 +9,7 @@ class Deezer():
         for result in searchresults:
             list.append(result.as_dict())
         maxlist = list[0:int(data["max"])]
+        maxlist.append(data["title"])
         sockets.deezersearch(maxlist)
     
     def searchid(id):
