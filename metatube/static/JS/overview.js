@@ -275,7 +275,7 @@ $(document).ready(function() {
         button.classList.add('btn', 'btn-danger', 'bg-danger', 'removeperson');
         button.type = 'button';
         
-        icon.classList.add('fi-xwsuxl-minus-solid');
+        icon.classList.add('bi', 'bi-dash');
         icon.setAttribute('style', 'color: white');
 
         button.appendChild(icon);
@@ -553,7 +553,7 @@ $(document).ready(function() {
         input_group_append.classList.add('input-group-append');
 
         removebtn.classList.add('btn', 'btn-danger', 'bg-danger', 'input-group-text', 'removesegment');
-        removeicon.classList.add('fi-xwsuxl-minus-solid');
+        removeicon.classList.add('bi', 'bi-dash');
         removeicon.setAttribute('style', 'color: white');
 
         startinput.classList.add('form-control', 'timestamp_input');

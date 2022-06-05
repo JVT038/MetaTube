@@ -1,5 +1,4 @@
 import shutil
-from h11 import Data
 from magic import Magic
 from metatube.overview import bp
 from metatube.database import *
@@ -246,7 +245,8 @@ def downloaditems(items):
         for item in items:
             filepath = Database.fetchitem(item).filepath
             filename = os.path.split(filepath)[1]
-            zipfile.write(filepath, filename)
+            if os.path.exists(filepath) and os.path.isfile(filepath):
+                zipfile.write(filepath, filename)
         zipfile.close()
         file = open(zipfilepath, 'rb')
         content = file.read()
