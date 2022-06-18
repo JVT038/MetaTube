@@ -4,7 +4,7 @@ yt-dlp==2022.5.18
 gevent==21.8.0
 gevent-websocket==0.10.1
 Flask==2.1.2
-Flask-SocketIO==5.1.1
+Flask-SocketIO==5.2.0
 Flask-Migrate==3.1.0
 Flask-JSGlue2==0.3.3
 Flask-SQLAlchemy==2.5.1
