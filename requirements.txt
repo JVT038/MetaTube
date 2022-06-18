@@ -11,7 +11,7 @@ Flask-SQLAlchemy==2.5.1
 musicbrainzngs==0.7.1
 sponsorblock.py==0.2.1
 python-dateutil==2.8.2
-python-dotenv==0.19.2
+python-dotenv==0.20.0
 python-magic==0.4.25
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.5
