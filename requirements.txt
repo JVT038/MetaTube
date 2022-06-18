@@ -16,5 +16,5 @@ python-magic==0.4.25
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.5
 spotipy==2.19.0
-urllib3==1.26.8
+urllib3==1.26.9
 deezer-python==5.2.0
