@@ -1,6 +1,6 @@
 mutagen==1.45.1
 requests==2.27.1
-yt-dlp==2022.2.4
+yt-dlp==2022.5.18
 gevent==21.8.0
 gevent-websocket==0.10.1
 Flask==2.0.2
@@ -9,12 +9,12 @@ Flask-Migrate==3.1.0
 Flask-JSGlue2==0.3.3
 Flask-SQLAlchemy==2.5.1
 musicbrainzngs==0.7.1
-sponsorblock.py==0.2.1
+sponsorblock.py==0.2.2
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 python-magic==0.4.25
 ffmpeg-python==0.2.0
-youtube-search-python==1.6.2
+youtube-search-python==1.6.5
 spotipy==2.19.0
 urllib3==1.26.8
 deezer-python==5.2.0
