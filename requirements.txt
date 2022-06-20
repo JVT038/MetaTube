@@ -15,6 +15,6 @@ python-dotenv==0.20.0
 python-magic==0.4.27
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.5
-spotipy==2.19.0
+spotipy==2.20.0
 urllib3==1.26.9
 deezer-python==5.3.3
