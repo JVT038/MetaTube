@@ -9,6 +9,7 @@ class Config(db.Model):
     hardware_transcoding = db.Column(db.String(16), default="None")
     metadata_sources = db.Column(db.String(128), default='deezer')
     spotify_api = db.Column(db.String(128))
+    genius_api = db.Column(db.String(128))
     auth = db.Column(db.Boolean, server_default=expression.false())
     auth_username = db.Column(db.String(128))
     auth_password = db.Column(db.String(128))
@@ -34,6 +35,11 @@ class Config(db.Model):
         db.session.commit()
         logger.info('Changed the Spotify API settings')
         
+    def set_genius(self, genius):
+        self.genius_api = genius
+        db.session.commit()
+        logger.info('Changed the Genius API settings')
+        
     def set_metadata(self, metadata_sources):
         self.metadata_sources = metadata_sources
         db.session.commit()
@@ -49,6 +55,9 @@ class Config(db.Model):
     
     def get_spotify():
         return Config.query.get(1).spotify_api
+    
+    def get_genius():
+        return Config.query.get(1).genius_api
     
     def get_max():
         return Config.query.get(1).amount
@@ -177,7 +186,7 @@ class Database(db.Model):
         row = Database(
             filepath = data["filepath"],
             name = data["name"],
-            artist = data["artist"],
+            artist = '; '.join(data["artist"]),
             album = data["album"],
             date = parser.parse(data["date"]),
             cover = data["image"],
@@ -203,6 +212,12 @@ class Database(db.Model):
         logger.info('Updated item %s', data["name"])
         data["date"] = data["date"].strftime('%d-%m-%Y')
         sockets.overview({'msg': 'changed_metadata_db', 'data': data})
+        
+    def updatefilepath(self, filepath):
+        self.filepath = filepath
+        db.session.commit()
+        logger.info('Updated filepath of item %s to %s', self.name, filepath)
+        sockets.overview({'msg': 'updated_filepath', 'filepath': filepath, 'item': self.id})
     
     def delete(self):
         db.session.delete(self)

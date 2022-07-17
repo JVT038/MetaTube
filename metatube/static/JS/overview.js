@@ -7,7 +7,7 @@ $(document).ready(function() {
         loop: 'none'
     });
     $("#metadataview").find('input').attr('autocomplete', 'off');
-    $("#searchitem").val('');
+    $("#searchitem, #filename").val('');
     $(".selectitem, #selectall").prop('checked', false);
     function outputtemplate() {
         if($("#downloadmodal").css('display') != 'none') {
@@ -16,6 +16,10 @@ $(document).ready(function() {
             let info_dict = $("#thumbnail_yt").attr('info_dict');
             socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
         }
+    }
+    function spinner(msg, location) {
+        let spinner = '<div class="spinner-border text-success" role="status"><span class="sr-only">'+msg+'</span></div>';
+        $(location).prepend(spinner);
     }
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
     function insertYTcol(response, form) {
@@ -94,7 +98,6 @@ $(document).ready(function() {
         let inputgroup = document.createElement('div');
         let checkbox = document.createElement('input');
         let list = document.createElement('li');
-        let audiocol = document.createElement('div');
 
         ul.classList.add('list-unstyled');
         img.classList.add('align-self-center', 'mr-3', 'img-fluid');
@@ -104,9 +107,11 @@ $(document).ready(function() {
         headeranchor.href = data["url"];
         headeranchor.target = '_blank';
         headeranchor.innerText = data["title"];
+        headeranchor.className = 'darkanchor';
 
         img.src = data["cover"];
         img.target = '_blank';
+        img.style = "width: 300px; height: 300px;";
 
         paragraph.innerHTML = data["artists"]+'<br />Type: '+data["type"]+'<br/>Date: '+data["date"]+'<br/>Language: '+data["language"] + "<br />Source: <span class='metadatasource'>" + data["source"] + "</span>";
         
@@ -134,14 +139,26 @@ $(document).ready(function() {
         inputgroup.appendChild(checkbox);
         ul.appendChild(list);
 
-        audiocol.id = 'audiocol';
-        audiocol.setAttribute('style', 'width: 100%;');
-
-        $("#nextbtn").addClass('d-none');
-        $("#editmetadata, #downloadbtn, #resetviewbtn").removeClass('d-none');
-        $("#defaultview").append(audiocol);
+        $("#editmetadata, #downloadbtn, #resetviewbtn, #geniusbtn").removeClass('d-none');
         $(".spinner-border").remove();
-        $("#audiocol").append(ul);
+        $("#nextbtn").addClass('d-none');
+        if(data["source"] == 'Genius') {
+            if(!$("#geniuscol").length) {
+                let geniuscol = document.createElement('div');
+                geniuscol.setAttribute('style', 'width: 100%;');
+                geniuscol.id = 'geniuscol'
+                $("#defaultview").append(geniuscol);
+            }
+            $("#geniuscol").append(ul);
+        } else {
+            if(!$("#audiocol").length) {
+                let audiocol = document.createElement('div');
+                audiocol.setAttribute('style', 'width: 100%;');
+                audiocol.id = 'audiocol'
+                $("#defaultview").append(audiocol);
+            }
+            $("#audiocol").append(ul);
+        }
     }
 
     function insertmusicbrainzdata(mbp_data) {
@@ -161,7 +178,7 @@ $(document).ready(function() {
         }
         $.each(mbp_data["artist-credit"], function(key_artist, value_artist) {
             if(typeof(value_artist) == 'object') {
-                let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" target="_blank">'+value_artist.name+'</a> <br/>';
+                let a = '<a href="https://musicbrainz.org/artist/'+value_artist.artist.id+'" class="darkanchor" target="_blank">'+value_artist.name+'</a> <br/>';
                 artists+=a;
             }
         });
@@ -171,7 +188,7 @@ $(document).ready(function() {
         if("cover" in mbp_data && mbp_data.cover != "None" && mbp_data.cover != 'error') {
             mbp_image = mbp_data.cover.images[0].thumbnails.small.replace(/^http:/, 'https:');
         } else {
-            mbp_image = Flask.url_for('static', {"filename": "images/empty_cover.png"});
+            mbp_image = "/static/images/empty_cover.png";
         }
         let data = {
             'url': mbp_url,
@@ -198,7 +215,7 @@ $(document).ready(function() {
         let cover = "";
         for(let i = 0; i < Object.keys(spotifydata["artists"]).length; i++) {
             if(typeof(spotifydata["artists"][i]) == 'object') {
-                let link = "<a href='https://open.spotify.com/artist/" + spotifydata["artists"][i]["id"]+"' target='_blank'>"+spotifydata["artists"][i]["name"]+"</a> <br />";
+                let link = "<a href='https://open.spotify.com/artist/" + spotifydata["artists"][i]["id"]+"' class='darkanchor' target='_blank'>"+spotifydata["artists"][i]["name"]+"</a> <br />";
                 artists += link;
             }
         }
@@ -223,7 +240,7 @@ $(document).ready(function() {
 
     function insertdeezerdata(deezerdata) {
         let title = deezerdata["title"];
-        let artists = "Artist: <a href='"+deezerdata["link"]+"' target='_blank'>"+deezerdata["artist"]["name"]+"</a>";
+        let artists = "Artist: <a href='"+deezerdata["link"]+"' class='darkanchor' target='_blank'>"+deezerdata["artist"]["name"]+"</a>";
         let type = deezerdata["album"]["type"];
         let url = deezerdata["link"];
         let date = "Unknown";
@@ -238,6 +255,33 @@ $(document).ready(function() {
             'date': date,
             'language': language,
             'source': 'Deezer',
+            'cover': cover,
+            'id': id
+        }
+        createaudiocol(data);
+    }
+
+    function insertgeniusdata(geniusdata) {
+        let title = geniusdata["title"];
+        let artists = geniusdata["featured_artists"].length > 0 ? "Artists: " : "Artist: ";
+        let type = "Song";
+        let url = geniusdata["url"];
+        let date = geniusdata["release_date_components"] != null ? geniusdata["release_date_components"]["day"] + geniusdata["release_date_components"]["month"] + geniusdata["release_date_components"]["year"] : "Unknown"
+        let language = "Unknown";
+        let cover = geniusdata["header_image_thumbnail_url"];
+        let id = geniusdata["id"];
+        artists += "<a href='"+geniusdata["primary_artist"]["url"]+"' class='darkanchor' target='_blank'>"+geniusdata["primary_artist"]["name"]+"</a> <br />";
+        for(let i = 0; i < geniusdata["featured_artists"].length; i++) {
+            artists += "<a href='"+geniusdata["featured_artists"][i]["url"]+"' class='darkanchor' target='_blank'>"+geniusdata["featured_artists"][i]["name"]+"</a> <br />";
+        }
+        let data = {
+            'url': url,
+            'title': title,
+            'artists': artists.slice(0, artists.length - 7),
+            'type': type,
+            'date': date,
+            'language': language,
+            'source': 'Genius',
             'cover': cover,
             'id': id
         }
@@ -292,6 +336,51 @@ $(document).ready(function() {
         return $('.personrow:last');
     }
 
+    function addsegment(id) {
+        let row = document.createElement('div');
+        let startcol = document.createElement('div');
+        let endcol = document.createElement('div');
+        let startinput = document.createElement('input');
+        let endinput = document.createElement('input');
+        let input_group = document.createElement('div');
+        let input_group_append = document.createElement('div');
+        let removebtn = document.createElement('button');
+        let removeicon = document.createElement('i');
+
+        row.classList.add('form-row', 'timestamp_row');
+        row.id = 'row_'+id;
+
+        startcol.classList.add('col');
+        endcol.classList.add('col');
+
+        input_group.classList.add('input-group');
+        input_group_append.classList.add('input-group-append');
+
+        removebtn.classList.add('btn', 'btn-danger', 'bg-danger', 'input-group-text', 'removesegment');
+        removeicon.classList.add('bi', 'bi-dash');
+        removeicon.setAttribute('style', 'color: white');
+
+        startinput.classList.add('form-control', 'timestamp_input');
+        startinput.id = 'segmentstart_'+id;
+        startinput.type = 'text';
+
+        endinput.classList.add('form-control', 'timestamp_input');
+        endinput.id = 'segmentend_'+id;
+        endinput.type = 'text';
+
+        removebtn.appendChild(removeicon);
+        input_group_append.appendChild(removebtn);
+        input_group.appendChild(endinput);
+        input_group.appendChild(input_group_append);        
+
+        startcol.appendChild(startinput);
+        endcol.appendChild(input_group);
+        row.appendChild(startcol);
+        row.appendChild(endcol);
+
+        $(".timestamp_row:last").after(row);
+    }
+
     function additem(data) {
         function addLeadingZeros(n) {
             if (n <= 9) {
@@ -315,29 +404,17 @@ $(document).ready(function() {
         let dropdown = document.createElement('div');
         let dropdownbtn = document.createElement('button');
         let dropdownmenu = document.createElement('div');
-        let editfileanchor = document.createElement('a');
-        let editmetadataanchor = document.createElement('a');
-        let downloadanchor = document.createElement('a');
-        let playanchor = document.createElement('a');
-        let viewanchor = document.createElement('a');
-        let deleteanchor = document.createElement('a');
         let cover = document.createElement('img');
         let covercol = document.createElement('div');
         let namecol = document.createElement('div');
         let namespan = document.createElement('span');
         let namerow = document.createElement('div');
         
-        td_artist.innerText = itemdata["artist"].replace('/', ';');
+        td_artist.innerText = itemdata["artist"].join('; ');
         td_album.innerText = itemdata["album"];
         td_date.innerText = date;
         td_ext.innerText = itemdata["filepath"].split('.')[itemdata["filepath"].split('.').length - 1].toUpperCase();
         dropdownbtn.innerText = 'Select action';
-        editfileanchor.innerText = 'Change file data';
-        editmetadataanchor.innerText = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV'].indexOf(td_ext.innerText) > -1 ? 'Change metadata' : 'Item has been moved or deleted or metadata is not supported';
-        downloadanchor.innerText = 'Download item';
-        playanchor.innerText = 'Play item';
-        viewanchor.innerText = 'View YouTube video';
-        deleteanchor.innerText = 'Delete item';
         namespan.innerText = itemdata["name"];
 
         namerow.classList.add('row', 'd-flex', 'justify-content-center');
@@ -370,26 +447,7 @@ $(document).ready(function() {
         dropdown.classList.add('dropdown');
         dropdownbtn.classList.add('btn', 'btn-primary', 'dropdown-toggle');
         dropdownbtn.setAttribute('data-toggle', 'dropdown');
-        dropdownmenu.classList.add('dropdown-menu');
-
-        editfileanchor.href = "javascript:void(0)";
-        editfileanchor.classList.add('dropdown-item', 'editfilebtn');
-        
-        editmetadataanchor.href = "javascript:void(0)";
-        editmetadataanchor.classList.add('dropdown-item', 'editmetadatabtn');
-        
-        downloadanchor.href = "javascript:void(0)";
-        downloadanchor.classList.add('dropdown-item', 'downloaditembtn');
-
-        playanchor.href = "javascript:void(0)";
-        playanchor.classList.add('dropdown-item', 'playitembtn');
-        
-        viewanchor.href = "https://youtu.be/" + itemdata["ytid"];
-        viewanchor.classList.add('dropdown-item');
-        viewanchor.setAttribute('target', '_blank');
-
-        deleteanchor.href = "javascript:void(0)";
-        deleteanchor.classList.add('dropdown-item', 'deleteitembtn');        
+        dropdownmenu.classList.add('dropdown-menu'); 
         
         tr.id = itemdata["id"];
 
@@ -399,7 +457,6 @@ $(document).ready(function() {
 
         form_check.appendChild(checkbox);       
 
-        dropdownmenu.append(editfileanchor, editmetadataanchor, downloadanchor, playanchor, viewanchor, deleteanchor);
         dropdown.append(dropdownbtn, dropdownmenu);
         input_group.append(dropdown, form_check);
         td_actions.appendChild(input_group);
@@ -412,7 +469,7 @@ $(document).ready(function() {
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
         $("#emptyrow").remove();
         $("#recordstable").children("tbody").append(tr);
-        
+        createdropdownmenu(itemdata["id"], itemdata["ytid"]);
     }
 
     function downloadURI(uri, name) {
@@ -442,11 +499,13 @@ $(document).ready(function() {
         header.href = data.link;
         header.innerText = data.title;
         header.target = '_blank';
+        header.classList.add('youtubelink', 'darkanchor');
 
         img.src = data.thumbnails[0].url;
         channel.href = data.channel.link;
         channel.innerText = data.channel.name;
         channel.target = '_blank';
+        channel.className = 'darkanchor'
 
         ul.setAttribute('style', 'cursor: pointer');
 
@@ -467,6 +526,176 @@ $(document).ready(function() {
         $("#defaultview").find('.spinner-border').remove();
         $("#defaultview").removeClass(['d-flex', 'justify-content-center']);
         $("#defaultview").append(ul);
+    }
+
+    function insertfilebrowseritem(item) {
+        // Thanks to https://stackoverflow.com/a/18650828
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+        
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        let tr = document.createElement('tr');
+        let td_filename = document.createElement('td');
+        let td_lastmodified = document.createElement('td');
+        let td_filesize = document.createElement('td');
+        let span = document.createElement('span');
+        let itemicon = document.createElement('i');
+        let removeicon = document.createElement('i');
+        let removeanchor = document.createElement('a');
+        let nbsp = document.createTextNode('\u00A0');
+        
+        let extensions = item["filename"].split('.')[item["filename"].split('.').length - 1].toUpperCase();
+        let video_extensions = ['MP4', 'M4A', 'FLV', 'WEBM', 'OGG', 'MKV', 'AVI'];
+        let iconclass = 'bi';
+        let timestamp = new Date(item["lastmodified"] * 1000);
+
+        span.innerText = item['filename'];
+        td_lastmodified.innerText = timestamp.toLocaleString();
+        td_filesize.innerText = formatBytes(item["filesize"]);
+
+        td_filename.classList.add('text-dark');
+        td_lastmodified.classList.add('text-dark');
+        td_filesize.classList.add('text-dark');
+
+        td_filename.style.width = '40%';
+        td_lastmodified.style.width = '30%';
+        td_filesize.style.width = '30%';
+
+        if(item["pathtype"] == 'directory') {
+            let confirm = document.createElement('button');
+            let cancel = document.createElement('button');
+            let popovergroup = document.createElement('div');
+    
+            confirm.classList.add('btn', 'btn-danger', 'confirmremoval');
+            cancel.classList.add('btn', 'btn-success', 'cancelremoval');
+            popovergroup.classList.add('btn-group');
+    
+            confirm.type = 'button';
+            cancel.type = 'button';
+            confirm.innerText = 'Confirm';
+            cancel.innerText = 'Cancel';
+    
+            popovergroup.setAttribute('role', 'group');
+            popovergroup.setAttribute('aria-label', 'Button group');
+            popovergroup.setAttribute('filepath', item["filepath"]);
+            popovergroup.append(cancel, confirm);
+
+            removeanchor.href = 'javascript:void(0)';
+            removeanchor.classList.add('text-dark', 'removefolder');
+            removeanchor.style.textDecoration = 'None';
+            removeanchor.style.float = 'right';
+
+            let popoveroptions = {
+                'html': true,
+                'placement': 'auto',
+                'title': 'Delete directory?',
+                'trigger': 'focus',
+                'content': popovergroup,
+            };
+            $(removeanchor).popover(popoveroptions);
+
+            removeicon.classList.add('bi', 'bi-folder-minus')
+            removeanchor.append(removeicon);
+            td_lastmodified.append(removeanchor);
+            iconclass += ' bi-folder-fill';
+        } else {
+            if(video_extensions.indexOf(extensions) > -1) {
+                iconclass += ' bi-camera-video-fill';
+            } else {
+                iconclass += ' bi-file-music-fill';
+            }
+        }
+
+        itemicon.className = iconclass;
+
+        if('createnewfolder' in item) {
+            let input = document.createElement('input');
+            let button = document.createElement('button');
+            let check = document.createElement('i');
+            let form = document.createElement('span');
+            
+            input.classList.add('form-control', 'directory_input', 'w-75');
+            input.setAttribute('placeholder', 'Enter directory name');
+            form.classList.add('form-inline');
+            form.append(itemicon, nbsp, input);
+            td_filename.append(form);
+
+            button.classList.add('btn', 'btn-success', 'createdirectorybtn', 'ml-2');
+            button.type = 'button';
+            button.setAttribute('data-toggle', 'tooltip');
+            button.setAttribute('data-placement', 'right');
+            button.title = 'Create directory';
+            check.classList.add('bi', 'bi-check');
+            button.append(check);
+
+            td_lastmodified.append(button);
+        } else {
+            td_filename.append(itemicon, nbsp, span);
+        }
+        
+        tr.classList.add('filebrowserrow', item["pathtype"]);
+        tr.style.cursor = 'pointer';
+        tr.setAttribute('filepath', item["filepath"]);
+        tr.append(td_filename, td_filesize, td_lastmodified);
+        if($("#filebrowserup").parent().children().length == 1 || !('createnewfolder' in item)) {
+            $("#filebrowserup").parent().children(':last-child').after(tr);
+        }
+        else {
+            if($(".file").length > 0) {
+                $('.file:first').before(tr);
+            } else {
+                $('.directory:last').after(tr);
+            }
+        }
+    }
+
+    function createdropdownmenu(rowid, youtube_id=null) {
+        let editfilebtn = document.createElement('a');
+        let editmetadatabtn = document.createElement('a');
+        let downloaditembtn = document.createElement('a');
+        let playitembtn = document.createElement('a');
+        let moveitembtn = document.createElement('a');
+        let youtubebtn = document.createElement('a');
+        let deletebtn = document.createElement('a');
+
+        let elements = [editfilebtn, editmetadatabtn, downloaditembtn, playitembtn, moveitembtn, youtubebtn, deletebtn];
+        let metadata_extensions = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A'];
+        let extension = $("tr#" + rowid).children('.td_ext').text();
+
+        elements.forEach((button) => {
+            button.href = 'javascript:void(0)';
+            button.className = 'dropdown-item';
+        });
+
+        editfilebtn.innerText = 'Change filedata';
+        editmetadatabtn.innerText = metadata_extensions.indexOf(extension) > -1 ? 'Change metadata' : 'Metadata is not supported';
+        downloaditembtn.innerText = 'Download item';
+        playitembtn.innerText = 'Play item';
+        moveitembtn.innerText = 'Move item\'s file location';
+        youtubebtn.innerText = 'View YouTube video';
+        deletebtn.innerText = 'Delete item';
+
+        editfilebtn.classList.add('d-none', 'd-md-block', 'editfilebtn');
+        editmetadatabtn.classList.add('d-none', 'd-md-block', 'editmetadatabtn');
+        moveitembtn.classList.add('d-none', 'd-md-block', 'moveitembtn');
+        downloaditembtn.classList.add('downloaditembtn');
+        playitembtn.classList.add('playitembtn');
+        deletebtn.classList.add('deleteitembtn');
+
+        if(youtube_id != null) {
+            youtubebtn.href = youtube_id;
+            $("tr#" + rowid).find('.dropdown-menu').append(youtubebtn, deletebtn);
+        }
+        $("tr#" + rowid).find('.dropdown-menu').children(':first-child').before(editfilebtn, editmetadatabtn, downloaditembtn, playitembtn, moveitembtn);
+        $("tr#" + rowid).find('.finditembtn').remove();
     }
 
     $(window).resize(function() {
@@ -532,50 +761,7 @@ $(document).ready(function() {
     });
     $(document).on('click', "#addsegment", function() {
         let id = $(this).parents('.form-row').siblings('.timestamp_row').length > 0 ? parseInt($(this).parents('.form-row').siblings('.timestamp_row:last').attr('id').slice(4)) + 1 : parseInt($(this).parents('.form-row').attr('id').slice(4)) + 1;
-
-        let row = document.createElement('div');
-        let startcol = document.createElement('div');
-        let endcol = document.createElement('div');
-        let startinput = document.createElement('input');
-        let endinput = document.createElement('input');
-        let input_group = document.createElement('div');
-        let input_group_append = document.createElement('div');
-        let removebtn = document.createElement('button');
-        let removeicon = document.createElement('i');
-
-        row.classList.add('form-row', 'timestamp_row');
-        row.id = 'row_'+id;
-
-        startcol.classList.add('col');
-        endcol.classList.add('col');
-
-        input_group.classList.add('input-group');
-        input_group_append.classList.add('input-group-append');
-
-        removebtn.classList.add('btn', 'btn-danger', 'bg-danger', 'input-group-text', 'removesegment');
-        removeicon.classList.add('bi', 'bi-dash');
-        removeicon.setAttribute('style', 'color: white');
-
-        startinput.classList.add('form-control', 'timestamp_input');
-        startinput.id = 'segmentstart_'+id;
-        startinput.type = 'text';
-
-        endinput.classList.add('form-control', 'timestamp_input');
-        endinput.id = 'segmentend_'+id;
-        endinput.type = 'text';
-
-        removebtn.appendChild(removeicon);
-        input_group_append.appendChild(removebtn);
-        input_group.appendChild(endinput);
-        input_group.appendChild(input_group_append);        
-
-        startcol.appendChild(startinput);
-        endcol.appendChild(input_group);
-        row.appendChild(startcol);
-        row.appendChild(endcol);
-
-        $(".timestamp_row:last").after(row);
-        
+        addsegment(id);
     });
 
     $(document).on('click', '#segments_check', function() {
@@ -617,15 +803,21 @@ $(document).ready(function() {
             $(this).parent().siblings().addClass('d-none');
         }
     });
+
+    $(document).on('click', '#metadataviewbtn', function() {
+        $("#geniuscol, #audiocol, #metadataviewbtn, #geniusbtn").toggleClass('d-none');
+    })
     
     $(document).on('click', "#editmetadata", function() {
-        $("#audiocol, #metadataview, #queryform, #downloadbtn, #resetviewbtn").toggleClass('d-none');
+        $("#audiocol, #geniuscol, #queryform, #geniusbtn, #downloadbtn, #resetviewbtn, #metadataviewbtn").addClass('d-none');
+        $("#metadataview").removeClass('d-none')
         $(this).attr('id', 'savemetadata');
         $(this).text('Save metadata')
     });
     
     $(document).on('click', '#savemetadata', function() {
-        $("#audiocol, #metadataview, #queryform, #downloadbtn, #resetviewbtn").toggleClass('d-none');
+        $("#audiocol, #geniuscol, #queryform, #geniusbtn, #downloadbtn, #resetviewbtn, #metadataviewbtn").removeClass('d-none');
+        $("#metadataview").addClass('d-none')
         if($("#audiocol").length < 1) {
             $("#searchmetadataview").removeClass('d-none');
         }
@@ -679,12 +871,24 @@ $(document).ready(function() {
 
     $(document).on('click', '.downloaditembtn', function() {
         let id = $(this).parents('tr').attr('id');
-        socket.emit('downloaditem', id)
+        socket.emit('downloaditem', id);
     });
 
     $(document).on('click', '.playitembtn', function() {
         let id = $(this).parents('tr').attr('id');
-        socket.emit('playitem', id)
+        socket.emit('playitem', id);
+    });
+
+    $(document).on('click', '.finditembtn', function() {
+        let id = $(this).parents('tr').attr('id');
+        let visible = ['files', 'directories'];
+        socket.emit('showfilebrowser', visible, id);
+    });
+
+    $(document).on('click', '.moveitembtn', function() {
+        let id = $(this).parents('tr').attr('id');
+        let visible = ['directories'];
+        socket.emit('showfilebrowser', visible, id);
     });
 
     $(document).on('click', "#fetchmbpreleasebtn", function(){
@@ -720,7 +924,25 @@ $(document).ready(function() {
         if(track_id.length > 0) {
             socket.emit('fetchdeezertrack', track_id)
         } else {
-            $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Spotify track ID!</p>')
+            $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Deezer track ID!</p>')
+        }
+    });
+
+    $(document).on('click', '#fetchgeniussong', function() {
+        let song_id = $(this).parent().siblings('input').val();
+        if(song_id.length > 0) {
+            socket.emit('fetchgeniussong', song_id)
+        } else {
+            $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Genius song ID!</p>')
+        }
+    });
+
+    $(document).on('click', '#fetchgeniusalbum', function() {
+        let album_id = $(this).parent().siblings("input").val();
+        if(album_id.length > 0) {
+            socket.emit("fetchgeniusalbum", album_id)
+        } else {
+            $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Genius song ID!</p>')
         }
     });
 
@@ -836,17 +1058,156 @@ $(document).ready(function() {
         let link = $(this).find('.youtubelink').attr('href');
         socket.emit('ytdl_search', link);
         $("#defaultview").children('ul').remove();
-        let spinner = '<div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div>';
         $("#searchlog, #progresstext").empty();
         $("#defaultview").addClass(['d-none', 'justify-content-center'])
         $("#defaultview").removeClass('d-none');
-        $("#defaultview").empty().prepend(spinner);
+        spinner('Loading', $("#defaultview").empty());
         // Reset the modal
         $("#progress").attr('aria-valuenow', "0").css('width', '0');
         $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn").addClass('d-none');
         $(".removeperson").parents('.personrow').remove();
         $("#metadataview").find('input').val('');
     });
+
+    $(document).on('keyup', '.directory_input', function(e) {
+        e.preventDefault();
+        let match = '^[^<>:;,?"*|/]+$';
+        if(!$(this).val().match(match) && $(this).val() != '') {
+            e.preventDefault();
+            $("#filebrowserlog").text('Directory contains invalid characters!');
+            $(this).parent().parent().siblings(':last-child').children('button').addClass('disabled');
+            $(this).parent().parent().siblings(':last-child').children('button').attr('disabled', '');
+        } else if($(this).val() == '') {
+            $("#filebrowserlog").text('');
+            $(this).parent().parent().siblings(':last-child').children('button').addClass('disabled');
+            $(this).parent().parent().siblings(':last-child').children('button').attr('disabled', '');
+        } else {
+            $("#filebrowserlog").text('');
+            $(this).parent().parent().siblings(':last-child').children('button').removeClass('disabled');
+            $(this).parent().parent().siblings(':last-child').children('button').removeAttr('disabled');
+        }
+    });
+
+    $(document).on('click', '.createdirectorybtn', function() {
+        let directoryname = $(this).parent().siblings(':first-child').find('input.directory_input').val();
+        let currentdirectory = $("#filebrowsertitle").children('span').text();
+        let newrow = $(this).parents('tr');
+        socket.emit('createdirectory', currentdirectory, directoryname, function(response) {
+            $("#filebrowserlog").text(response.msg);
+            if(response.status == 200) {
+                newrow.attr('filepath', response.filepath);
+                let icon = document.createElement('i');
+                let span = document.createElement('span');
+                let nbsp = document.createTextNode('\u00A0');
+                span.innerText = directoryname;
+                icon.classList.add('bi', 'bi-folder-fill');
+                newrow.children(':first-child').empty();
+                newrow.children(':first-child').append(icon, nbsp, span);
+                newrow.find('button').tooltip('hide');
+                newrow.find('button').remove();
+            }
+        });
+    });
+
+    $(document).on('click', '.removefolder', function(e) {
+        e.stopPropagation();
+        $(this).popover('toggle');
+    });
+
+    $(document).on('click', '.cancelremoval', function() {
+        $(this).parents('a.removefolder').popover('hide');
+    });
+    
+    $(document).on('click', '.confirmremoval', function() {
+        let directory = $(this).parents('.btn-group').attr('filepath');
+        socket.emit('removedirectory', directory, function(response) {
+            $("#filebrowserlog").text(response.msg);
+            if(response.status == 200) {
+                $('tr.directory:contains("'+response.directory+'")').remove();
+            }
+        });
+    });
+
+    $(document).on('click', '.filebrowserrow', function() {
+        if($(this).hasClass('directory')) {
+            if($(this).find('input.directory_input').length < 1) {
+                let directorypath = $(this).attr('filepath');
+                let id = $("#filebrowsermodal").attr('item');
+                let visible = $("#filenameform").hasClass('d-none') ? ['files', 'directories'] : ['directories'];
+                socket.emit('showfilebrowser', visible, id, directorypath);
+            }
+        } else {
+            if($(this).hasClass('selectedrow')) {
+                $(this).removeClass('selectedrow');
+                $("#selectfilebtn").addClass('disabled');
+                $("#selectfilebtn").attr('disabled', '');
+                $("#selectedfile").text('');
+            } else if($(".selectedrow").length > 0) {
+                $('.selectedrow').removeClass('selectedrow');
+                $(this).addClass('selectedrow');
+                $("#selectedfile").text('Selected file ' + $(this).find('span').text());
+            } else {
+                $(this).toggleClass('selectedrow');
+                $("#selectfilebtn").removeClass('disabled');
+                $("#selectfilebtn").removeAttr('disabled');
+                $("#selectedfile").text('Selected file ' + $(this).find('span').text());
+            }
+        }
+    });
+
+    $("#filebrowserup").on('click', function() {
+        let currentdirectory = $("#filebrowsertitle").children('span').text();
+        let id = $("#filebrowsermodal").attr('item');
+        let visible = $("#filenameform").hasClass('d-none') ? ['files', 'directories', 'parent'] : ['directories', 'parent'];
+        socket.emit('showfilebrowser', visible, id, currentdirectory);
+    });
+
+    $("#selectfilebtn").on('click', function() {
+        let selectedfile = $('.selectedrow').attr('filepath');
+        let id = $("#filebrowsermodal").attr('item');
+        socket.emit('updatefile', selectedfile, id);
+    });
+
+    $("#filenameform").on('submit', function(e) {
+        e.preventDefault();
+        let filename = $("#filename").val();
+        let directory = $("#filebrowsertitle").children('span').text();
+        let id = $("#filebrowsermodal").attr('item');
+        let overwrite = $("#overwritecheck").is(':checked') ? true : false
+        socket.emit('movefile', directory, filename, id, overwrite, function(msg) {
+            $("#filebrowserlog").text(msg);
+        });
+    });
+
+    $(".addfolder").on('click', function() {
+        item = {
+            'filepath': 'new',
+            'filename': '',
+            'lastmodified': Date.now() / 1000,
+            'filesize': 0,
+            'pathtype': 'directory',
+            'createnewfolder': true
+        };
+        insertfilebrowseritem(item);
+    });
+
+    $("#filename").on('keyup', function(e) {
+        let match = '^[^<>:;,?"*|/]+$';
+        if(!$(this).val().match(match) && $(this).val() != '') {
+            e.preventDefault();
+            $("#filebrowserlog").text('Filename contains invalid characters!');
+            $("#submitfilename").addClass('disabled');
+            $("#submitfilename").attr('disabled', '');
+        } else if($(this).val() == '') {
+            $("#filebrowserlog").text('');
+            $("#submitfilename").addClass('disabled');
+            $("#submitfilename").attr('disabled', '');
+        } else {
+            $("#filebrowserlog").text('');
+            $("#submitfilename").removeClass('disabled');
+            $("#submitfilename").removeAttr('disabled');
+        }
+    })
 
     $("#nextbtn").on('click', function() {
         if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
@@ -868,10 +1229,9 @@ $(document).ready(function() {
                 'type': 'webui'
             };
             socket.emit('searchmetadata', args);
-            let spinner = '<div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div>';
             $("#searchlog, #progresstext").empty();
             $("#defaultview").addClass(['d-flex', 'justify-content-center'])
-            $("#defaultview").prepend(spinner);
+            spinner("Loading metadata...", $("#defaultview"));
             $("#searchvideomodalfooter, #ytcol").addClass('d-none');
         }
     });
@@ -935,15 +1295,14 @@ $(document).ready(function() {
         // Send request to the server
         let query = $("#query").val();
         socket.emit('ytdl_search', query);
-        let spinner = '<div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div>';
         $("#searchlog, #progresstext").empty();
         $("#defaultview").removeClass('d-none');
         $("#defaultview").addClass(['d-flex', 'justify-content-center']);
         $("#defaultview").children('.youtuberesult').remove();
-        $("#defaultview").prepend(spinner);
+        spinner("Loading...", $("#defaultview"));
         // Reset the modal
         $("#progress").attr('aria-valuenow', "0").css('width', '0');
-        $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn").addClass('d-none');
+        $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn, #searchmetadataview").addClass('d-none');
         $(".removeperson").parents('.personrow').remove();
         $("#metadataview").find('input').val('');
         $("#ytcol, #audiocol").empty();
@@ -1002,7 +1361,7 @@ $(document).ready(function() {
             }
             socket.emit('ytdl_download', data, function(ack) {
                 if(ack == "OK") {
-                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #audiocol, #savemetadata, #metadataview ").addClass('d-none');
+                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview").addClass('d-none');
                     $("#progressview").removeClass('d-none');
                     $("#searchlog").empty();
                 }
@@ -1046,10 +1405,23 @@ $(document).ready(function() {
     $("#resetviewbtn").on('click', function() {
         if($("#ytcol").children().length > 0) {
             $("#defaultview, #ytcol, #nextbtn").removeClass('d-none');
-            $("#progressview, #audiocol, #resetviewbtn, #editmetadata, #downloadbtn, #metadataview").addClass('d-none');
+            $("#progressview, #audiocol, #resetviewbtn, #editmetadata, #downloadbtn, #metadataview, #geniusbtn").addClass('d-none');
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
         } else {
             $("#defaultview, #searchlog").empty();
+        }
+    });
+
+    $("#geniusbtn").on('click', function() {
+        if($(".audiocol-checkbox:checked").length < 1 && $("#audiocol").length > 0) {
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+            $("#searchlog").text('Select a release on the right side before searching for lyrics');
+        } else {
+            $("#audiocol").addClass('d-none');
+            let args = { "title": $(".audiocol-checkbox:checked").parent().siblings('.media-body').children("h5").text(), "type": "lyrics" }
+            spinner('Loading Genius data...', $("#defaultview"));
+            socket.emit('searchmetadata', args);
+            $("#searchmetadataview, #searchvideomodalfooter").addClass('d-none');
         }
     });
 
@@ -1060,6 +1432,8 @@ $(document).ready(function() {
             'type': 'webui'
         }
         socket.emit('searchmetadata', args);
+        // $("#defaultview").children('#audiocol').remove();
+        spinner('Loading metadata...', $("#defaultview"));
     });
 
     socket.on('downloadprogress', function(msg) {
@@ -1079,11 +1453,16 @@ $(document).ready(function() {
 
         if(msg.status == 'downloading') {
             if(msg.total_bytes != 'Unknown') {
-                progress_text.text("Downloading...");
-                let percentage = Math.round(((msg.downloaded_bytes / msg.total_bytes) * 100) / phases);
-                setprogress(percentage);
+                if((msg.downloaded_bytes / msg.total_byes) == 1) {
+                    progress_text.text("Extracting audio...");
+                    setprogress(100 / phases);
+                } else {
+                    progress_text.text("Downloading...");
+                    let percentage = Math.round(((msg.downloaded_bytes / msg.total_bytes) * 100) / phases);
+                    setprogress(percentage);
+                }
             } else {
-                progress_text.text("Downloading... Percentage unknown :(");
+                progress_text.text("Downloading...");
             }
         }
         else if(msg.status == 'finished_ytdl') {
@@ -1124,6 +1503,8 @@ $(document).ready(function() {
                     } else if(metadata_source == 'Deezer') {
                         var trackid = $("#deezer_trackid").val();
                         var albumid = $("#deezer_albumid").val();
+                    } else if(metadata_source == 'Genius') { 
+                        var trackid = $("#genius_songid").val();
                     }
         
                     $.each($('.artist_relations'), function() {
@@ -1139,14 +1520,16 @@ $(document).ready(function() {
                             }
                         }
                     });
-        
+
+                    let artists = $("#md_artists").val().split(';');
+                    let albumartists = $("#md_album_artists").val().split(';');
                     let metadata = {
                         'trackid': trackid,
                         'albumid': albumid,
                         'title': $("#md_title").val(),
-                        'artists': $("#md_artists").val(),
+                        'artists': JSON.stringify(artists),
                         'album': $("#md_album").val(),
-                        'album_artists': $("#md_album_artists").val(),
+                        'album_artists': JSON.stringify(albumartists),
                         'album_tracknr': $("#md_album_tracknr").val(),
                         'album_releasedate': $("#md_album_releasedate").val(),
                         'cover': $("#md_cover").val(),
@@ -1221,7 +1604,7 @@ $(document).ready(function() {
         } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn, #otherp").addClass('d-none');
-            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn, #geniusbtn").removeClass('d-none');
         }
         $("#searchvideomodalfooter").removeClass('d-none');
     });
@@ -1230,9 +1613,9 @@ $(document).ready(function() {
         console.info('Spotify info');
         spotifydata = spotify;
         $("#searchmetadataview").removeClass('d-none');
-        if(Object.keys(spotify["tracks"]["items"]).length > 0) {
+        if(spotify["tracks"]["items"].length  > 0) {
             $("#audiocol").empty();
-            for(let i = 0; i < Object.keys(spotify["tracks"]["items"]).length - 2; i++) {
+            for(let i = 0; i < spotify["tracks"]["items"].length; i++) {
                 insertspotifydata(spotify["tracks"]["items"][i]);
             }
             $("#metadataquery").val(spotifydata["query"]);
@@ -1240,7 +1623,7 @@ $(document).ready(function() {
         } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn, #otherp").addClass('d-none');
-            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn, #geniusbtn").removeClass('d-none');
         }
     });
 
@@ -1258,6 +1641,22 @@ $(document).ready(function() {
         } else if($("#404p").hasClass('d-none')) {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn, #otherp").addClass('d-none');
+            $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn, #geniusbtn").removeClass('d-none');
+        }
+    });
+
+    socket.on('genius_response', (genius) => {
+        console.info('Genius info')
+        geniusdata = genius;
+        if(geniusdata["hits"].length > 0) {
+            for(let i = 0; i < genius["hits"].length; i++) {
+                insertgeniusdata(genius["hits"][i]["result"])
+                $("#searchvideomodalfooter, #editmetadata, #metadataviewbtn").removeClass('d-none');
+            }
+            $("#geniusbtn").addClass('d-none');
+        } else if($("#404p").hasClass('d-none')) {
+            $("#defaultview").children('.spinner-border').remove();
+            $("#nextbtn, #otherp, #geniusbtn").addClass('d-none');
             $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
         }
     });
@@ -1407,6 +1806,38 @@ $(document).ready(function() {
         $("#md_cover").val(data["album"]["cover_medium"]);
     });
 
+    socket.on('genius_song', (data) => {
+        console.log(data);
+        let songdata = data["song"];
+        let artists = songdata["primary_artist"]["name"] + "; ";
+        for(let i = 0; i < songdata["featured_artists"].length; i++) {
+            artists += songdata["featured_artists"][i]["name"] + "; ";
+        }
+        $("#md_title").val(songdata["title"]);
+        $("#md_artists").val(artists.slice(0, artists.length - 2));
+        $("#md_album").val(songdata["album"]["name"]);
+        $("#md_cover").val(songdata["song_art_image_thumbnail_url"]);
+        $("#md_album_releasedate").val(songdata["release_date"]);
+        $("#genius_albumid").val(songdata["album"]["id"]);
+    });
+
+    socket.on('genius_album', (data) => {
+        console.log(data);
+        let albumtracks = data["tracks"];
+        let albumartists = albumtracks[0]["song"]["primary_artist"]["name"] + "; ";
+        for(let i = 0; i < albumtracks.length; i++) {
+            if(albumtracks[i]["song"]["featured_artists"].length > 0) {
+                for(let j = 0; j < albumtracks[i]["song"]["featured_artists"].length; j++) {
+                    albumartists += albumtracks[i]["song"]["featured_artists"][j]["name"] + "; ";
+                }
+            }
+            if(albumtracks[i]["song"]["title"] == $("#md_title").val()) {
+                $("#md_album_tracknr").val(i + 1);
+            }
+        }
+        $("#md_album_artists").val(albumartists);
+    });
+
     socket.on('searchvideo', (data) => {
         $("#defaultview").find(".spinner-border").remove();
         $("#searchlog").text(data);
@@ -1436,7 +1867,7 @@ $(document).ready(function() {
                 cover: itemdata["cover"]
             }]);
             ap.play();
-            $("#recordstable").parent().css('max-height', '65vh');
+            $("#recordstable").parent().css('height', '65vh');
             $("#audioplayer").removeClass('d-none')
         } else if(data.msg == 'changed_metadata') {
             socket.emit('updateitem', data.data);
@@ -1455,6 +1886,35 @@ $(document).ready(function() {
             $("#bulkactionsrow").css('visibility', 'hidden');
             $("#selectall").prop('checked', false);
             $("#overviewlog").text(data.data);
+        } else if(data.msg == 'showfilebrowser') {
+            $("#filebrowserup").siblings('tr').remove();
+            if(data.visible.indexOf('files') > -1) {
+                $("#filenameform, #submitfilename").addClass('d-none');
+                $("#selectedfile, #selectfilebtn").removeClass('d-none');
+            } else {
+                $("#filenameform, #submitfilename").removeClass('d-none');
+                $("#selectedfile, #selectfilebtn").addClass('d-none');
+            }
+            if(data.files.length > 0) {
+                for(let i = 0; i < data.files.length; i++) {
+                    insertfilebrowseritem(data.files[i]);
+                }
+            } else {
+                let tr = document.createElement('tr');
+                let td = document.createElement('td');
+                td.setAttribute('colspan', 3);
+                td.classList.add('text-dark', 'text-center');
+                td.innerHTML = 'No files found with any of the following extensions: <br/> AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV, MP4, M4A, FLV, WEBM, OGG, MKV, AVI';
+                tr.append(td);
+                $("#filebrowserup").after(tr);
+            }
+            $("#filebrowsertitle").children('span').text(data.directory);
+            $("#filebrowsermodal").attr('item', data.id);
+            $("#filebrowsermodal").modal('show');
+        } else if(data.msg == 'updated_filepath') {
+            $("#filebrowsermodal").modal('hide');
+            $("#overviewlog").text('File location succesfully updated to ' + data["filepath"])
+            createdropdownmenu(data.item);
         } else {
             $("#overviewlog").text(data.msg);
         }
@@ -1557,7 +2017,7 @@ $(document).ready(function() {
         }
     });
     ap.on('listclear', function() {
-        $("#recordstable").parent().css('max-height', '75vh');
+        $("#recordstable").parent().css('height', '75vh');
         $("#audioplayer").addClass('d-none');
     })
 });

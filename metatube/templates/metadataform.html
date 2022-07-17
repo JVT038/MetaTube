@@ -70,6 +70,30 @@
     </div>
 </div>
 {% endif %}
+{% if 'genius' in metadata_sources %}
+<div class="form-row">
+    <div class="col">
+        <label for="#genius_songid">Genius Song ID</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="genius_songid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchgeniussong" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch song data"><i class="bi bi-download" style="color: white;"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#genius_albumid">Genius Album ID</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="genius_albumid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchgeniusalbum" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="bi bi-download" style="color: white;"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="form-row">
     <div class="col">
         <label for="#md_title">Title of the song</label>

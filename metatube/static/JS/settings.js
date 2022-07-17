@@ -18,6 +18,9 @@ $(document).ready(function() {
 
     if($("#spotifycheck").hasAttr('checked')) {
         $("#spotifyrow").removeClass('d-none');
+    } 
+    if($("#geniuscheck").hasAttr('checked')) {
+        $("#geniusrow").removeClass('d-none');
     }
 
     function addtemplate(data) {
@@ -127,10 +130,6 @@ $(document).ready(function() {
         tr_visible.append(td_name, td_type, td_extension, td_output_name, td_output_folder, td_buttons);
         $("#addtemplaterow").before(tr_visible, tr_hidden);
     }
-
-    function changedtemplate(data) {
-
-    }
     
     $(document).on('click', ".templatebtn", function() {
         let goal = $(this).attr('goal');
@@ -142,9 +141,10 @@ $(document).ready(function() {
         let bitrate = $("#template_bitrate").val() == '' ? 'best' : $("#template_bitrate").val();
         let width = $("#template_resolution").val() == 'best' ? 'best' : $("#template_width").val();
         let height = $("#template_resolution").val() == 'best' ? 'best' : $("#template_height").val();
+        let proxy_type = $("#proxy_status").val() == 'false' ? 'None' : $("#proxy_type").val();
         let proxy_json = JSON.stringify({
             'status': $("#proxy_status").val(),
-            'type': $("#proxy_type").val(),
+            'type': proxy_type,
             'address': $("#proxy_address").val(),
             'username': $("#proxy_username").val(),
             'password': $("#proxy_password").val(),
@@ -251,10 +251,16 @@ $(document).ready(function() {
             } else {
                 $("#spotifyrow").addClass('d-none');
             }
+        } else if($(this).val() == 'genius') {
+            if($(this).is(':checked')) {
+                $("#geniusrow").removeClass('d-none');
+            } else {
+                $("#geniusrow").addClass('d-none');
+            }
         }
     });
 
-    $("#submitdownloadform").on('click', function() {
+    $("#submitdownloadsettingsform").on('click', function() {
         let amount = $("#max_amount").val();
         let ffmpeg_path = $("#ffmpeg_path").val();
         let hardware_transcoding = $("#hardware_acceleration").val();
@@ -273,6 +279,16 @@ $(document).ready(function() {
                 extradata["spotifyapi"] = {
                     'id': $("#spotifyclientID").val(),
                     'secret': $("#spotifyclientSecret").val()
+                };
+            }
+        }
+        if(metadata_sources.indexOf('genius') > -1)  {
+            if($("#geniusaccesstoken").val() == '') {
+                $("#downloadsettingslog").find('p').text('Enter the Genius API credentials!');
+                return false;
+            } else {
+                extradata["geniusapi"] = {
+                    'token': $("#geniusaccesstoken").val()
                 };
             }
         }
@@ -299,11 +315,11 @@ $(document).ready(function() {
         }
     });
 
-    $("#togglesecret").on('click', function() {
-        if($("#spotifyclientSecret").attr('type') == 'password') {
-            $("#spotifyclientSecret").attr('type', 'text');
+    $(".togglesecret").on('click', function() {
+        if($(this).parent().siblings('input').attr('type') == 'password') {
+            $(this).parents().siblings('input').attr('type', 'text');
         } else {
-            $("#spotifyclientSecret").attr('type', 'password');
+            $(this).parent().siblings('input').attr('type', 'password');
         }
     });
 

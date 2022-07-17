@@ -26,7 +26,7 @@
 <h2 align="center">Status</h2>
 
 <h4 align="center"> 
-	🚧  MetaTube 🚀 Under construction...  🚧 <br/>
+	:heavy_check_mark:  MetaTube 🚀 Finished! :heavy_check_mark: <br/>
 </h4>
 
 <hr>
@@ -189,6 +189,13 @@ $ export ENVIRONMENT_VARIABLE = Value
 Additionally you can create a file called `.flaskenv` and set the environment variables in there.
 An example is provided in [example.flaskenv](example.flaskenv). You can use that template and rename the file to `.flaskenv`.
 
+## Fix the artist values
+So I recently discovered I made a mistake in the process of adding artists to files. <br/>
+Some songs have tags multiple artists, and I noticed these tags were misinterpreted by my audio player. <br/>
+Basically, the `TPE1` tag contained was like this: `['artist 1; artist 2']`, while it should've been `['artist 1', 'artist 2']`. <br/>
+Thanks to [#310](https://github.com/quodlibet/mutagen/issues/310) I discovered this, corrected it in `metadata.py` and wrote a small script in [fixartists.py](fixartists.py) to fix the existing audio files that had the tags in the wrong way. <br/>
+Put all the wrong audio files in one directory, run the file and enter the path to the directory containing the incorrect tags, and it should be fixed. <br/>
+My apologies for this (annoying) bug.
 ## :memo: License ##
 
 This project is under license from GNUv3. For more details, see the [LICENSE](LICENSE) file.<br/>
@@ -204,8 +211,9 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add Docker support
 - [X] Add Docker support for ARM64/v8 devices (such as Raspberry Pi 4)
 - [X] Add Github action / workflow thing, to automatically create Docker image upon a new commit
-- [X] Add support for Spotify
-- [X] Add support for Deezer
+- [X] Add support for Spotify as a metadata provider
+- [X] Add support for Deezer as a metadata provider
+- [X] Add support for Genius as a metadata provider
 - [X] Add support for subpath (such as `localhost:5000/metatube`)
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
@@ -231,7 +239,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [X] Make sure the search for downloaded song field works
  
-### Not finished (I probably will never finish this)
+### Not finished (I'll probably never finish this)
 
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
@@ -242,6 +250,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music 
 - [ ] Add support for Last.fm!
+- [ ] Add support for Genius as metadata provider
+- [ ] Add support for embedded lyrics (if possible)
 - [ ] Add translations
 - [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations

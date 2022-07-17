@@ -113,7 +113,7 @@ class YouTube:
                 'filepath': d['info_dict']['filepath'], 
                 'postprocessor': d["postprocessor"]
             })
-            logger.info(d["postprocessor"])
+            logger.info("Finished postprocessor %s", d["postprocessor"])
             # sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
             
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):

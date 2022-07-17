@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="table-responsive-md" style="max-height: 75vh; overflow-y: auto;">
+    <div class="table-responsive-md" style="height: 75vh; overflow-y: auto;">
         <table class="table table-hover table-bordered" id="recordstable">
             <thead>
                 <tr>
@@ -66,10 +66,15 @@
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Select action</button>
                                         <div class="dropdown-menu">
-                                            <a href="javascript:void(0)" class="dropdown-item editfilebtn">{% if path_exists(record.filepath) %} Change filedata {% else %} Item has been moved or deleted {% endif %}</a>
-                                            <a href="javascript:void(0)" class="dropdown-item editmetadatabtn">{% if path_exists(record.filepath) and check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
-                                            <a href="javascript:void(0)" class="dropdown-item downloaditembtn">{% if path_exists(record.filepath) %} Download item {% else %} Item has been moved or deleted {% endif %}</a>
-                                            <a href="javascript:void(0)" class="dropdown-item playitembtn">{% if path_exists(record.filepath) %} Play item {% else %} Item has been moved or deleted {% endif %}</a>
+                                            {% if path_exists(record.filepath) %}
+                                                <a href="javascript:void(0)" class="dropdown-item d-none d-md-block editfilebtn">Change filedata</a>
+                                                <a href="javascript:void(0)" class="dropdown-item d-none d-md-block editmetadatabtn">{% if check_metadata(record.filepath) %} Change metadata {% else %} Metadata is not supported {% endif %}</a>
+                                                <a href="javascript:void(0)" class="dropdown-item downloaditembtn">Download item</a>
+                                                <a href="javascript:void(0)" class="dropdown-item playitembtn">Play item</a>
+                                                <a href="javascript:void(0)" class="dropdown-item d-none d-md-block moveitembtn">Move item's file location</a>
+                                            {% else %}
+                                                <a href="javascript:void(0)" class="dropdown-item d-none d-md-block finditembtn">Select new item location (item has been moved or deleted)</a>    
+                                            {% endif %}
                                             <a href="https://youtu.be/{{record.youtube_id}}" target="_blank" class="dropdown-item">View YouTube video</a>
                                             <a href="javascript:void(0)" class="dropdown-item deleteitembtn">Delete item</a>
                                         </div>
@@ -125,7 +130,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="row d-flex" id="defaultview"></div>
+                    <div id="defaultview" class="row d-flex"></div>
                     <div id="metadataview" class="d-none"></div>
                     <div id="progressview" class="d-none">
                         <div class="form-row">
@@ -153,6 +158,8 @@
                 <button type="button" class="btn btn-warning d-none" id="resetviewbtn">Return to video overview</button>
                 <button type="button" class="btn btn-primary d-none" id="editmetadata">Edit metadata manually</button>
                 <button type="button" class="btn btn-primary d-none" id="downloadfilebtn">Download file</button>
+                <button type="button" class="btn btn-warning d-none" id="metadataviewbtn">Return to metadata source</button>
+                {% if genius is sameas True %} <button type="button" class="btn btn-warning d-none" id="geniusbtn">Choose lyrics</button> {% endif %}
                 <button type="button" class="btn btn-success d-none" id="downloadbtn">Download</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
@@ -206,6 +213,60 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="editfilebtnmodal">Save item</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Filebrowser Modal -->
+<div class="modal fade" id="filebrowsermodal" tabindex="-1" role="dialog" aria-labelledby="filebrowsermodallabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg mw-100 w-75" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filebrowsertitle">Browsing <span></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <span id="filebrowserlog" class="text-center text-dark"></span>
+                <div class="table-responsive-md">
+                    <table class="table table-hover" id="filebrowsertable">
+                        <thead>
+                            <tr>
+                                <th class="text-dark" scope="col">Filename</th>
+                                <th class="text-dark" scope="col">File size</th>
+                                <th class="text-dark" scope="col">
+                                    <span class="text-left">Last modified</span>
+                                    <a href="javascript:void(0)" class="text-dark addfolder" style="text-decoration: none; float: right;"><i class="bi bi-folder-plus"></i></a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="filebrowserup">
+                                <td colspan="3" class="text-dark" scope="row">...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <a href="#invisiblefilesexplanation" data-toggle="collapse" role="button">Why are some files invisible?</a>
+                <div class="collapse" id="invisiblefilesexplanation">
+                    <div class="card card-body text-dark">
+                        Only files with the following supported extensions are shown: AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV, MP4, M4A, FLV, WEBM, OGG, MKV & AVI. <br/>
+                        Additionally, files that are already linked with an item in the database, will be hidden as well, to prevent a file being linked to multiple items.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form class="form-inline d-none justify-content-end" id="filenameform" style="width: 80%;">
+                    <label class="sr-only" for="filename">Filename excluding extension</label>
+                    <input type="text" class="form-control w-50 mr-2" placeholder="Filename excluding extension" id="filename" />
+                    <button type="submit" class="btn btn-primary d-none disabled" id="submitfilename" disabled>Submit filename</button>
+                    <input type="checkbox" class="form-check-input ml-2" id="overwritecheck" />
+                    <label class="form-check-label" for="overwritecheck">Overwrite existing files</label>
+                </form>
+                <p id="selectedfile"></p>
+                <button type="button" class="btn btn-primary d-none disabled" id="selectfilebtn" disabled>Select</button>
+                <button type="button" class="btn btn-secondary" style="max-width: 10%;" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

@@ -1,0 +1,13 @@
+/**@license
+ *  _____
+ * |_   _|___ ___ ___ ___ ___
+ *   | | | .'| . | . | -_|  _|
+ *   |_| |__,|_  |_  |___|_|
+ *           |___|___|   version 0.4.1
+ *
+ * Tagger - Zero dependency, Vanilla JavaScript Tag Editor
+ *
+ * Copyright (c) 2018-2021 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Released under the MIT license
+ */
+.tagger{border:1px solid #909497}.tagger input[type="hidden"]{display:none}.tagger > ul{display:flex;width:100%;align-items:center;padding:4px 0;justify-content:space-between;box-sizing:border-box;height:auto}.tagger ul{margin:0;list-style:none}.tagger > ul > li{margin:0.4rem 0;padding-left:10px}.tagger > ul > li:not(.tagger-new) a,.tagger > ul > li:not(.tagger-new) a:visited,.tagger-new ul a,.tagger-new ul a:visited{color:black}.tagger .tagger-new ul,.tagger > ul > li:not(.tagger-new) > a,.tagger li:not(.tagger-new) > span{padding:4px 4px 4px 8px;background:#B1C3D7;border:1px solid #4181ed;border-radius:3px}.tagger li a.close{padding:4px;margin-left:4px;float:none;filter: alpha(opacity=100);opacity:1;font-size:16px;line-height:16px}.tagger li a.close:hover{color:white}.tagger li:not(.tagger-new) a{text-decoration:none}.tagger .tagger-new input{border:none;outline:none;box-shadow:none;width:100%;padding-left:0;background:transparent}.tagger .tagger-new{flex-grow:1;position:relative}.tagger .tagger-new ul{padding:5px}.tagger .tagger-completion{position:absolute;z-index:100}.tagger.wrap > ul{flex-wrap:wrap;justify-content:start}

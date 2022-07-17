@@ -3,6 +3,18 @@
   color: #eee;
 }
 
+[data-theme="dark"] .darkanchor {
+  color: #8dc6ff;
+}
+
+[data-theme="dark"] .darkanchor:hover {
+  color: #fff;
+}
+
+[data-theme="dark"] .card-body {
+  background-color: #352e2e;
+}
+
 [data-theme="dark"] .bg-light {
   background-color: #333 !important;
 }
@@ -26,17 +38,22 @@
 
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .dropdown-menu,
-[data-theme="dark"] #audioplayer {
+[data-theme="dark"] #audioplayer,
+[data-theme="dark"] .popover,
+[data-theme="dark"] .popover-header {
   background-color: #333;
 }
 
-[data-theme="dark"] .navbar-nav > .nav-item > a {
-  color: #9d9a9a;
+[data-theme="dark"] .navbar-nav > .nav-item > a,
+[data-theme="dark"] .addfolder:hover,
+[data-theme="dark"] .removefolder:hover {
+  color: #9d9a9a !important;
 }
 
 [data-theme="dark"] .table-hover > tbody > tr:hover,
 [data-theme="dark"] .aplayer-list > ol > li:hover,
-[data-theme="dark"] .aplayer-list-light {
+[data-theme="dark"] .aplayer-list-light,
+[data-theme="dark"] .selectedrow {
   background-color: #281f1f !important;
 }
 
