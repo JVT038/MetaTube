@@ -17,4 +17,4 @@ ffmpeg-python==0.2.0
 youtube-search-python==1.6.6
 spotipy==2.20.0
 urllib3==1.26.10
-deezer-python==5.3.3
+deezer-python==5.4.0
