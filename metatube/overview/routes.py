@@ -6,6 +6,7 @@ from metatube.youtube import YouTube as yt
 from metatube.metadata import MetaData
 from metatube.deezer import Deezer
 from metatube.spotify import spotify_metadata as Spotify
+from metatube.genius import Genius
 from metatube import socketio, sockets
 from metatube import Config as env
 from flask import render_template
@@ -30,7 +31,8 @@ def index():
     records = Database.getrecords()
     metadata_sources = Config.get_metadata_sources()
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
-    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform)
+    genius = True if 'genius' in Config.get_metadata_sources().split(';') else False
+    return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform, genius=genius)
 
 @socketio.on('searchitem')
 def searchitem(query):
@@ -104,6 +106,9 @@ def searchmetadata(data):
         socketio.start_background_task(Spotify.searchspotify, data, cred)
     if 'deezer' in sources:
         socketio.start_background_task(Deezer.socketsearch, data)
+    if 'genius' in sources and data["type"] == 'lyrics':
+        token = Config.get_genius()
+        socketio.start_background_task(Genius.searchsong, data, token)
 
 @socketio.on('ytdl_download')
 def download(data):
@@ -159,6 +164,21 @@ def fetchspotifytrack(input_id):
 def fetchdeezertrack(input_id):
     logger.info('Request for Deezer track with id %s', input_id)
     Deezer.sockets_track(input_id)
+    
+@socketio.on('fetchgeniussong')
+def fetchgeniussong(input_id):
+    logger.info('Request for Genius song with id %s', input_id)
+    token = Config.get_genius()
+    genius = Genius(token)
+    song = genius.fetchsong(input_id)
+    sockets.foundgeniussong(song)
+
+@socketio.on('fetchgeniusalbum')
+def fetchgeniussong(input_id):
+    logger.info('Request for Genius album with id %s', input_id)
+    token = Config.get_genius()
+    genius = Genius(token)
+    genius.fetchalbum(input_id)    
 
 @socketio.on('mergedata')
 def mergedata(filepath, release_id, metadata, cover, source):
@@ -167,7 +187,7 @@ def mergedata(filepath, release_id, metadata, cover, source):
         metadata_user = metadata
         cover_source = cover if cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', cover)
         extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-        if extension in ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV']:
+        if extension in env.META_EXTENSIONS:
             if source == 'Spotify':
                 cred = Config.get_spotify().split(';')
                 spotify = Spotify(cred[1], cred[0])
@@ -179,6 +199,12 @@ def mergedata(filepath, release_id, metadata, cover, source):
             elif source == 'Deezer':
                 metadata_source = Deezer.searchid(release_id)
                 data = MetaData.getdeezerdata(filepath, metadata_user, metadata_source)
+            elif source == 'Genius':
+                token = Config.get_genius()
+                genius = Genius(token)
+                metadata_source = genius.fetchsong(release_id)
+                lyrics = genius.fetchlyrics(metadata_source["song"]["url"])
+                data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source, lyrics)
             elif source == 'Unavailable':
                 data = MetaData.onlyuserdata(filepath, metadata_user)
             if data is not False:
@@ -318,15 +344,104 @@ def playitem(input):
     else:
         sockets.overview({'msg': 'Filepath invalid'})
         
-@socketio.on('fetchcover')
-def fetchcover(id):
+@socketio.on('showfilebrowser')
+def showfilebrowser(visible, id, target_folder=None):
+    default = Templates.searchdefault()
+    if 'parent' in visible and target_folder is not None:
+        folder = os.path.abspath(os.path.join(target_folder, os.pardir))
+    elif target_folder is not None and os.path.isdir(target_folder) and os.path.exists(target_folder):
+        folder = target_folder
+    else:
+        folder = default.output_folder
+    contents = [x for x in os.listdir(folder) if os.path.isdir(os.path.join(folder, x))]
+    contents.extend([x for x in os.listdir(folder) if not os.path.isdir(os.path.join(folder, x))])
+    files = []
+    for file in contents:
+        path = os.path.join(folder, file)
+        if os.path.isfile(path):
+            extension = path.split('.')[len(path.split('.')) - 1].upper()
+            if extension not in env.AUDIO_EXTENSIONS and extension not in env.VIDEO_EXTENSIONS:
+                continue
+            if Database.checkfile(path) is not None:
+                continue
+            if 'files' not in visible:
+                continue
+        lastmodified = os.stat(path).st_mtime
+        filesize = os.path.getsize(path)
+        pathtype = 'file' if os.path.isfile(path) else 'directory'
+        item = {
+            'filepath': path,
+            'filename': file,
+            'lastmodified': lastmodified,
+            'filesize': filesize,
+            'pathtype': pathtype
+        }
+        files.append(item)
+    sockets.overview({'msg': 'showfilebrowser', 'files': files, 'visible': visible, 'directory': folder, 'id': id})
+
+@socketio.on('updatefile')
+def updatefile(filepath, id):
     item = Database.fetchitem(id)
-    sockets.overview({'msg': 'load_cover', 'data': item.cover, 'id': id})
+    item.updatefilepath(filepath)
+
+@socketio.on('movefile')
+def updatefile(directory, filename, id, overwrite=False):
+    item = Database.fetchitem(id)
+    old_filepath = item.filepath
+    if os.path.exists(directory):
+        extension = old_filepath.split('.')[len(old_filepath.split('.')) - 1].lower()
+        if len(filename.split('.')) > 1 and filename.split('.')[len(filename.split('.')) - 1] == extension:
+            new_filepath = os.path.join(directory, filename.strip())
+        else:
+            new_filepath = os.path.join(directory, filename.strip() + "." + extension)
+        if os.path.exists(new_filepath) and overwrite is False:
+            return 'File already exists'
+        else:
+            shutil.move(old_filepath, new_filepath)
+            item.updatefilepath(new_filepath)
+            
+@socketio.on('createdirectory')
+def createdirectory(currentdirectory, directoryname):
+    if os.path.exists(currentdirectory):
+        path = os.path.join(currentdirectory, directoryname)
+        if os.path.exists(path) and os.path.isdir(path):
+            response = {
+                'msg': 'This directory already exists!',
+                'status': 500
+            }
+            return response
+        else:
+            os.mkdir(path)
+            response = {
+                'msg': f'Created directory {path}',
+                'filepath': path,
+                'status': 200
+            }
+            logger.info('Created directory %s', path)
+            return response
         
+@socketio.on('removedirectory')
+def removedirectory(directory):
+    if os.path.exists(directory):
+        shutil.rmtree(directory)
+        name = os.path.basename(directory)
+        response = {
+            'msg': 'Removed directory',
+            'directory': name,
+            'status': 200
+        }
+        logger.info('Removed directory %s', directory)
+        return response
+    else:
+        response = {
+            'msg': 'Directory does not exist!',
+            'status': 500
+        }
+        return response
+            
 @socketio.on('editmetadata')
 def editmetadata(id):
     item = Database.fetchitem(id)
-
     extension = item.filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
     if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
         metadata = MetaData.readaudiometadata(item.filepath)

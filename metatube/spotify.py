@@ -13,7 +13,7 @@ class spotify_metadata():
         searchresults = self.spotify.search(f"track:{data['title']}", data["max"])
         searchresults["query"] = data["title"]
         sockets.spotifysearch(searchresults)
-        logger.info('Searched Spotify for track %s with artist %s', data["title"], data["artist"])
+        logger.info('Searched Spotify for track \'%s\' ', data["title"])
         
     def sockets_track(self, id):
         sockets.foundspotifytrack(self.spotify.track(id))

@@ -1,8 +1,10 @@
+import json
+from importlib_metadata import metadata
 from magic import Magic
 from re import M
 from mutagen.id3 import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
-    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1
+    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1, USLT
 )
 from mutagen.flac import FLAC, Picture
 from mutagen.aac import AAC
@@ -32,13 +34,13 @@ class MetaData:
     def getmusicbrainzdata(filename, metadata_user, metadata_source, cover_source):
         logger.info('Getting Musicbrainz metadata')
         album = metadata_source["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
-        artist_list = ""
+        artist_list = []
         for artist in metadata_source["release"]["artist-credit"]:
             try:
-                artist_list += artist["artist"]["name"] + "/ "
+                artist_list.append(artist["artist"]["name"])
             except Exception:
                 pass
-        artist_list = artist_list.strip()[0:len(artist_list.strip()) - 1] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+        artist_list = artist_list if json.loads(metadata_user["artists"]) == [""] else json.loads(metadata_user["artists"])
         try:
             language = metadata_source["release"]["text-representation"]["language"]
         except Exception:
@@ -130,10 +132,13 @@ class MetaData:
         cover_path = metadata_source["album"]["images"][0]["url"] if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
         title = metadata_source["name"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
         genres = "" # Spotify API doesn't provide genres with tracks
-        spotify_artists = ""
+        spotify_artists = []
         for artist in metadata_source["artists"]:
-            spotify_artists += artist["name"] + "; "
-        artists = spotify_artists[0:len(spotify_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+            spotify_artists.append(artist["name"])
+        print(spotify_artists)
+        artists = spotify_artists if json.loads(metadata_user["artists"]) == [""] else json.loads(metadata_user["artists"])
+        print(artists)
+        print(metadata_user["artists"])
         if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
@@ -183,8 +188,8 @@ class MetaData:
         deezer_artists = ""
         for contributor in metadata_source["contributors"]:
             if contributor["type"].lower() == 'artist':
-                deezer_artists += contributor["name"] + "; "
-        artists = deezer_artists[0:len(deezer_artists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+                deezer_artists.append(contributor["name"])
+        artists = deezer_artists if json.loads(metadata_user["artists"]) == [""] else json.loads(metadata_user["artists"])
         if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
@@ -216,6 +221,58 @@ class MetaData:
             'image': image,
             'title': title,
             'genres': ""
+        }
+        return data
+    
+    def getgeniusdata(filename, metadata_user, metadata_source, lyrics):
+        logger.info('Getting Genius metadata')
+        album = metadata_source["song"]["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
+        trackid = metadata_source["id"] if len(metadata_user["trackid"] < 1) else metadata_user["trackid"]
+        albumid = metadata_source["song"]["album"]["id"] if len(metadata_user["albumid"]) < 1 else metadata_user["albumid"]
+        release_date = metadata_source["song"]["release_date"] if len(metadata_user["album_releasedate"]) < 1 else metadata_user["album_releasedate"]
+        length = 0
+        tracknr = metadata_user["album_tracknr"]
+        total_tracks = 1
+        default_cover = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
+        cover_path = metadata_source["song"]["song_art_image_thumbnail_url"] if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
+        title = metadata_source["song"]["title"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
+        geniusartists = metadata_source["song"]["primary_artist"]["name"] + "; "
+        for artist in metadata_source["song"]["featured_artists"]:
+            geniusartists += artist["name"] + "; "
+        artists = geniusartists[0:len(geniusartists) - 2] if len(metadata_user["artists"]) < 1 else metadata_user["artists"]
+        if cover_path != default_cover:
+            try:
+                response = requests.get(cover_path)
+                image = response.content
+                magic = Magic(mime=True)
+                cover_mime_type = magic.from_buffer(image)
+            except Exception:               
+                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                return False
+        else:
+            cover_mime_type = "image/png"
+            file = open(cover_path, 'rb')
+            image = file.read()
+    
+        data = {
+            'filename': filename,
+            'album': album,
+            'artists': artists,
+            'barcode':  "",
+            'language': "Unknown",
+            'track_id': trackid,
+            'album_id': albumid,
+            'release_date': release_date,
+            'tracknr': tracknr,
+            'total_tracks': total_tracks,
+            'isrc': "",
+            'length': length,
+            'cover_path': cover_path,
+            'cover_mime_type': cover_mime_type,
+            'image': image,
+            'title': title,
+            'genres': "",
+            'lyrics': lyrics
         }
         return data
     
@@ -324,6 +381,10 @@ class MetaData:
             elif data.get('source', '') == 'Deezer':
                 audio.RegisterTXXXKey('deezer_trackid', data["track_id"])
                 audio.RegisterTXXXKey('deezer_albumid', data["album_id"])
+                
+            if 'lyrics' in data:
+                audio.RegisterTextKey('lyrics', "USLT")
+            
         elif data["extension"] == 'FLAC':
             audio = FLAC(data["filename"])
         elif data["extension"] == 'AAC':
@@ -332,7 +393,7 @@ class MetaData:
             audio = OggOpus(data["filename"])
         elif data["extension"] == 'OGG':
             audio = OggVorbis(data["filename"])
-            
+
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
         audio["barcode"] = data["barcode"]
@@ -341,6 +402,8 @@ class MetaData:
         audio["title"] = data["title"]
         audio["date"] = data["release_date"]
         audio["genre"] = data["genres"]
+        if 'lyrics' in data and data["extension"] != 'MP3':
+            audio['lyrics'] = data['lyrics']
         if data.get('source', '') == 'Musicbrainz':
             audio["musicbrainz_releasetrackid"] = data["track_id"]
             audio["musicbrainz_releasegroupid"] = data["album_id"]

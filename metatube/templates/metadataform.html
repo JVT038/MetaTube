@@ -11,7 +11,7 @@
         <div class="input-group">
             <input type="text" class="form-control" id="mbp_releaseid" />
             <div class="input_group_append">
-                <button type="button" id="fetchmbpreleasebtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch release data"><i class="bi bi-download" style="color: white;"></i></button>
+                <button type="button" id="fetchmbpreleasebtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch release data"><i class="bi bi-download" style="color: white;" aria-label="Musicbrainz fetch release data"></i></button>
             </div>
         </div>
     </div>
@@ -22,7 +22,7 @@
         <div class="input-group">
             <input type="text" class="form-control" id="mbp_albumid" />
             <div class="input_group_append">
-                <button type="button" id="fetchmbpalbumbtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="bi bi-download" style="color: white;"></i></button>
+                <button type="button" id="fetchmbpalbumbtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="bi bi-download" style="color: white;" aria-label="Musicbrainz fetch album data"></i></button>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
         <div class="input-group">
             <input type="text" class="form-control" id="spotify_trackid" />
             <div class="input_group_append">
-                <button type="button" id="fetchspotifytrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="bi bi-download" style="color: white;"></i></button>
+                <button type="button" id="fetchspotifytrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="bi bi-download" style="color: white;" aria-label="Spotify fetch track data"></i></button>
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
         <div class="input-group">
             <input type="text" class="form-control" id="deezer_trackid" />
             <div class="input_group_append">
-                <button type="button" id="fetchdeezertrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="bi bi-download" style="color: white;"></i></button>
+                <button type="button" id="fetchdeezertrack" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch track data"><i class="bi bi-download" style="color: white;" aria-label="Deezer fetch track data"></i></button>
             </div>
         </div>
     </div>
@@ -66,6 +66,30 @@
         <label for="#deezer_albumid">Deezer Album ID*</label>
         <div class="input-group">
             <input type="text" class="form-control" id="deezer_albumid" />
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if 'genius' in metadata_sources %}
+<div class="form-row">
+    <div class="col">
+        <label for="#genius_songid">Genius Song ID</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="genius_songid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchgeniussong" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch song data"><i class="bi bi-download" style="color: white;" aria-label="Genius fetch song data"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#genius_albumid">Genius Album ID</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="genius_albumid" />
+            <div class="input_group_append">
+                <button type="button" id="fetchgeniusalbum" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch album data"><i class="bi bi-download" style="color: white;" aria-label="Genius fetch album data"></i></button>
+            </div>
         </div>
     </div>
 </div>
@@ -127,7 +151,7 @@
         <div class="input-group">
             <input type="text" class="form-control artist_relations" id="artist_relations_type0" />
             <div class="input-group-append">
-                <button type="button" class="btn btn-success bg-success addperson"><i class="bi bi-plus-lg" style="color: white;"></i></button>
+                <button type="button" class="btn btn-success bg-success addperson"><i class="bi bi-plus-lg" style="color: white;" aria-label="Add a relation"></i></button>
             </div>
         </div>
     </div>

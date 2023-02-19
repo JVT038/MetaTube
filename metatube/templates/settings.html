@@ -71,6 +71,10 @@
                         <input type="checkbox" class="custom-control-input metadatainput" value="deezer" id="deezercheck" {% if 'deezer' in metadata_sources %} checked {% endif %}/>
                         <label class="custom-control-label" for="#deezercheck">Deezer</label>
                     </div>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input metadatainput" value="genius" id="geniuscheck" {% if 'genius' in metadata_sources %} checked {% endif %}/>
+                        <label class="custom-control-label" for="#geniuscheck">Genius (for lyrics only)</label>
+                    </div>
                 </div>
             </div>
             <div class="form-row d-none" id="spotifyrow">
@@ -87,14 +91,25 @@
                     </div>
                     <input type="password" class="form-control" value="{{ spotify[0] }}" id="spotifyclientSecret" />
                     <div class="input-group-append">
-                        <span class="input-group-text" style="cursor: pointer" id="togglesecret"><i class="bi bi-eye-slash-fill"></i></span>
+                        <span class="input-group-text togglesecret" style="cursor: pointer"><i class="bi bi-eye-slash-fill"></i></span>
                     </div>
                 </div>
             </div>
+            <div class="form-row d-none" id="geniusrow">
+                <p class="mt-3">You can get Genius API credentials <a href="https://genius.com/api-clients" target="_blank">here</a> <br />
+                You don't have to enter a redirect URI, as you only need the access token. After creating the client, you can go back to the overview and click on 'Generate access token' <br />
+                If you're wondering why you should choose Genius over the other sources: Only Genius can fetch lyrics and embed lyrics in the audio files, while the others can't</p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Genius access token</span>
+                    </div>
+                    <input type="text" class="form-control" value="{{ genius }}" id="geniusaccesstoken" />
+                </div>
+        </div>
             <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
                 ** The root directory is the same directory where <code>metatube.py</code> is located
             </p>
-            <button type="button" class="btn btn-success" id="submitdownloadform">Update settings</button>
+            <button type="button" class="btn btn-success" id="submitdownloadsettingsform">Update settings</button>
         </div>
         <div class="tab-pane" id="templatestab">
             <h4 class="text-center">Template settings</h4>

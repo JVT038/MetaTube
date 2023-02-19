@@ -45,6 +45,15 @@ def youtubesearch(data):
 def spotifysearch(data):
     socketio.emit('spotify_response', data)
     
+def geniussearch(data):
+    socketio.emit('genius_response', data)
+    
+def foundgeniussong(data):
+    socketio.emit('genius_song', data)
+
+def foundgeniusalbum(data):
+    socketio.emit("genius_album", data)
+
 def foundspotifytrack(data):
     socketio.emit('spotify_track', data)
 

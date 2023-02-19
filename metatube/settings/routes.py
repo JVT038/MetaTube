@@ -15,6 +15,7 @@ def settings():
     hw_transcoding = db_config.hardware_transcoding
     metadata_sources = db_config.metadata_sources.split(';')
     spotify = db_config.spotify_api.split(';') if db_config.spotify_api is not None else ['', '']
+    genius = db_config.genius_api if db_config.genius_api is not None else ''
     templates = Templates.query.all()
     
     return render_template('settings.html', 
@@ -24,7 +25,8 @@ def settings():
                            templates=templates, 
                            hw_transcoding=hw_transcoding,
                            metadata_sources=metadata_sources,
-                           spotify=spotify)
+                           spotify=spotify,
+                           genius=genius)
     
 @socketio.on('updatetemplate')
 def template(name, output_folder, output_ext, output_name, id, goal, bitrate = 'best', width = 'best', height = 'best', proxy_json = {'status': False,'type': '','address': '','port': '','username': '','password': ''}):
@@ -47,7 +49,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = '
         'username': proxy['username'],
         'password': proxy['password']
     }
-    
+    print(data["proxy"]["status"])
     if len(data["name"]) < 1 or len(data["output_folder"]) < 1 or len(data["ext"]) < 1 or len(goal) < 1 or len(id) < 1 or data["name"] == 'Default' or len(data["output_name"]) < 1:
         sockets.changetemplate('Enter all fields!')
     elif data["proxy"]["status"] is True and (len(data["proxy"]["address"]) < 1 or len(data["proxy"]["type"]) < 1 or len(data["proxy"]["port"]) < 1):
@@ -141,16 +143,22 @@ def updatesettings(ffmpeg_path, amount, hardware_transcoding, metadata_sources, 
         response += 'Hardware Transcoding setting has succesfully been updated! <br />'
         
     if ';'.join(sorted(metadata_sources)) != ';'.join(sorted(db_config.metadata_sources.split(';'))):
-        if len(metadata_sources) > 0:
+        if (len(metadata_sources) == 1 and 'genius' not in metadata_sources) or (len(metadata_sources) > 1):
             db_config.set_metadata(';'.join(sorted(metadata_sources)))
             response += 'Metadata setting has succesfully been updated! <br />'
         else:
-            response += 'At least one metadata source must be selected! <br />'
+            response += 'At least one metadata source excluding Genius must be selected! <br />'
     
     if 'spotify' in metadata_sources and 'spotifyapi' in extradata:
         spotifydata =  extradata["spotifyapi"]["secret"] + ";" +  extradata["spotifyapi"]["id"]
         if str(db_config.spotify_api) != spotifydata:
             db_config.set_spotify(spotifydata)
             response += 'Spotify API settings have succesfully been updated! <br />'
+            
+    if 'genius' in metadata_sources and 'geniusapi' in extradata:
+        geniusdata = extradata['geniusapi']['token']
+        if str(db_config.genius_api) != geniusdata:
+            db_config.set_genius(geniusdata)
+            response += 'Genius API settings have succesfully been updated! <br/>'
             
     sockets.downloadsettings(response)
