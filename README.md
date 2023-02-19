@@ -51,6 +51,13 @@ Normal view | Dark mode|
 --- | ---
 ![startpage](https://user-images.githubusercontent.com/47184046/147980156-e3ee71e4-a4cd-4fee-808b-c4b3c9530e9f.png) | ![darkstartpage](https://user-images.githubusercontent.com/47184046/147980017-bd3bc8bf-2589-4ee5-8d9c-1785ba906982.png)
 
+
+
+
+https://user-images.githubusercontent.com/47184046/187272055-3de98de0-592b-4ad1-895d-221b2695a147.mp4
+
+https://user-images.githubusercontent.com/47184046/187272050-7cbf7c71-f494-4ea8-9fcf-bc7156b1de20.mp4
+
 ## :sparkles: Features ##
 
 It's finished (for now) and these features are currently supported:
