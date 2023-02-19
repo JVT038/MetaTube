@@ -234,12 +234,14 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add support for Spotify as a metadata provider
 - [X] Add support for Deezer as a metadata provider
 - [X] Add support for Genius as a metadata provider
+- [x] Add support for embedded lyrics (if possible)
 - [X] Add support for subpath (such as `localhost:5000/metatube`)
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
 - [X] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
+- [x] Add in-built file explorer, making manual paths optional
 - [X] Preview filenames when entering an output template
 - [X] Make the Docker file smaller, because it's huge
 - [X] Build a logger
@@ -270,9 +272,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for TheAudioDB
 - [ ] Add support for YouTube Music
 - [ ] Add support for Last.fm!
-- [ ] Add support for embedded lyrics (if possible)
 - [ ] Add translations
-- [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
 - [ ] Add a cancel download button when the video is being downloaded
 - [ ] Add button in settings to download the entire SQlite3 Database
