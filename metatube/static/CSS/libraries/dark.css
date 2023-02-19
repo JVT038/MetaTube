@@ -19,8 +19,13 @@
   background-color: #333 !important;
 }
 
+[data-theme="dark"] #outputfolderbtn {
+  border-color: #eee;
+}
+
 [data-theme="dark"] .bg-white,
-[data-theme="dark"] .dropdown-item:hover {
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] #outputfolderbtn:hover {
   background-color: #000 !important;
 }
 
@@ -63,6 +68,7 @@
 [data-theme="dark"] .input-group-text,
 [data-theme="dark"] #switchlabel,
 [data-theme="dark"] #item_filepath,
+[data-theme="dark"] #outputfolderbtn,
 [data-theme="dark"] .nav-tabs > .nav-item > .nav-link {
   background-color: #333;
   color: white;
