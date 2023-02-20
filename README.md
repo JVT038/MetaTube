@@ -195,6 +195,7 @@ LOG | Whether to keep logs or not | False
 SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
 LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 10
 URL_SUBPATH | Set the URL subpath, if you want to run MetaTube on a subpath. Example: `/metatube` will run the server on `host:port/metatube` | /
+INIT_DB | Automatically initialize the database and make all migrations. Set to 'False' if you're having issues with migrations | True
 
 ```bash
 # On Windows 10, you can set an environment variable like this: 

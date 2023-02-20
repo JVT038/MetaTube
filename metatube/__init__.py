@@ -42,7 +42,8 @@ def create_app(config_class=Config):
     socketio.init_app(app, json=json, engineio_logger=socket_log, logger=socket_log)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
-    init_db(app)
+    if app.config.get('INIT_DB') != True:
+        init_db(app)
     return app
 
 import metatube.database
