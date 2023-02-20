@@ -117,7 +117,8 @@ docker run \
   -e PORT=5000 \
   -e HOST=0.0.0.0 \
   -v /downloads:/downloads:rw \
-  -v /metatube:/database:rw \
+  -v /metatube/database:/database:rw \
+  -v /metatube/migrations:/config/migrations \
   jvt038/metatube:latest
 ```
 
@@ -137,7 +138,8 @@ services:
             - HOST=0.0.0.0
         volumes:
             - '/downloads:/downloads:rw'
-            - '/metatube:/database:rw'        
+            - '/metatube/database:/database:rw'
+            - '/metatube/migrations:/config/migrations:rw'      
 ```
 
 You need to set the variable `DATABASE_URL` to a custom mount point (in these examples `/database`), because otherwise your database file will reset everytime the Docker container updates.
