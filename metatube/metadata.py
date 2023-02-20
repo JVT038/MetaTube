@@ -135,10 +135,7 @@ class MetaData:
         spotify_artists = []
         for artist in metadata_source["artists"]:
             spotify_artists.append(artist["name"])
-        print(spotify_artists)
         artists = spotify_artists if json.loads(metadata_user["artists"]) == [""] else json.loads(metadata_user["artists"])
-        print(artists)
-        print(metadata_user["artists"])
         if cover_path != default_cover:
             try:
                 response = requests.get(cover_path)
@@ -185,7 +182,7 @@ class MetaData:
         default_cover = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
         cover_path = metadata_source["album"].get('cover_xl', default_cover) if len(metadata_user["cover"]) < 1 else metadata_user["cover"]
         title = metadata_source["title"] if len(metadata_user["title"]) < 1 else metadata_user["title"]
-        deezer_artists = ""
+        deezer_artists = []
         for contributor in metadata_source["contributors"]:
             if contributor["type"].lower() == 'artist':
                 deezer_artists.append(contributor["name"])

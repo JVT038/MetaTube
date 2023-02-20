@@ -50,7 +50,7 @@ def template(name, output_folder, output_ext, output_name, id, goal, bitrate = '
         'password': proxy['password']
     }
     print(data["proxy"]["status"])
-    if len(data["name"]) < 1 or len(data["output_folder"]) < 1 or len(data["ext"]) < 1 or len(goal) < 1 or len(id) < 1 or data["name"] == 'Default' or len(data["output_name"]) < 1:
+    if len(data["name"]) < 1 or len(data["output_folder"]) < 1 or len(data["ext"]) < 1 or len(goal) < 1 or len(id) < 1 or len(data["output_name"]) < 1:
         sockets.changetemplate('Enter all fields!')
     elif data["proxy"]["status"] is True and (len(data["proxy"]["address"]) < 1 or len(data["proxy"]["type"]) < 1 or len(data["proxy"]["port"]) < 1):
         sockets.changetemplate('Enter all proxy fields!')

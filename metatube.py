@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # coding: utf-8
-
 from metatube import create_app, socketio
 from gevent import get_hub
 from distutils.util import strtobool

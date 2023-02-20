@@ -80,31 +80,17 @@ class YouTube:
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes_estimate']
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading', 
-                #     'downloaded_bytes': d['downloaded_bytes'], 
-                #     'total_bytes': d['total_bytes_estimate']
-                # })
             elif 'total_bytes' in d:
                 socketio.emit('downloadprogress', {
                     'status': 'downloading', 
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes']
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading', 
-                #     'downloaded_bytes': d['downloaded_bytes'], 
-                #     'total_bytes': d['total_bytes']
-                # })
             else:
                 socketio.emit('downloadprogress', {
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading',
-                #     'total_bytes': 'Unknown'
-                # })
                 
     def postprocessor_hook(d):
         if d['status'] == 'finished':
@@ -209,7 +195,8 @@ class YouTube:
         return ytdl_options
 
     def get_video(self, url, ytdl_options):
-        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        # Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        socketio.start_background_task(self.__download, url, ytdl_options)
         
     def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])
