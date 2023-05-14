@@ -18,3 +18,4 @@ if __name__ == "__main__":
         socketio.run(app, str(host), int(port), log_output=strtobool(str(log_output)))
     except KeyboardInterrupt:
         print('Stopped server because of KeyboardInterrupt')
+    

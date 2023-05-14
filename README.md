@@ -176,7 +176,14 @@ $ sudo apt-get install libmagic1
 # If you're using iOS, you'll need to install libmagic
 $ brew install libmagic
 
-# Run the file
+# Create database, run migrations and create default config and templates
+$ flask db init
+$ flask db migrate
+$ flask db upgrade
+$ flask create-config
+$ flask create-template
+
+# Run the server
 $ python metatube.py
 
 # The server will initialize in the <http://localhost:5000>
@@ -188,7 +195,7 @@ Name | Description | Default value
 PORT|Set the port on which the MetaTube server will be available|5000
 HOST|Set the address on which the MetaTube server will run | 127.0.0.1
 DEBUG|Whether to enable debug mode or not | False
-DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:///app.db
+DATABASE_URL | The URL to your Database. Currently only SQLite3 is supported. | sqlite:////database/app.db
 FFMPEG | An absolute path to the folder containing ffmpeg. | Empty
 DOWNLOADS | An absolute path to the default download folder | /absolute/path/to/MetaTube/downloads; absolute path will be calculated automatically
 LOG | Whether to keep logs or not | False

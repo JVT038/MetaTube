@@ -6,7 +6,6 @@ example.flaskenv
 LICENSE
 downloads
 pyvenv.cfg
-migrations
 .github
 .vscode
 .cache

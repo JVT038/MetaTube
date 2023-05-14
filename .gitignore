@@ -10,7 +10,6 @@ __pycache__
 .flaskenv
 *.db
 *.pem
-migrations
 bin
 downloads/*
 .cache

@@ -5,15 +5,19 @@ LABEL Author=JVT038 \
 ENV PORT=5000 \
     FFMPEG=/usr/bin \
     DOWNLOADS=/downloads \ 
-    DATABASE_URL=sqlite:////database/app.db
+    DATABASE_URL=sqlite:////database/app.db \
+    FLASK_APP=/app/metatube.py
 EXPOSE $PORT
-COPY . /config/
+COPY --chmod=0755 . /app
 RUN \
+    mv /app/migrations /migrations && \
     apk update && \
     apk add --no-cache --upgrade alpine-sdk libffi-dev ffmpeg libmagic && \
-    mkdir -p {/config,$DOWNLOADS,/database} && \
+    mkdir -p {/app,$DOWNLOADS,/database} && \
     python3 -m pip install --upgrade pip && \
-    pip3 install -r /config/requirements.txt && \
+    pip3 install -r /app/requirements.txt && \
     apk del --purge alpine-sdk
+    
 
-ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]
+# ENTRYPOINT ["/usr/local/bin/python3", "app/metatube.py"]
+ENTRYPOINT ["app/entrypoint.sh"]

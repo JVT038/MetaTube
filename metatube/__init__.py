@@ -24,8 +24,8 @@ logger.addHandler(console)
 from metatube.settings import bp as bp_settings
 from metatube.overview import bp as bp_overview
 from metatube.routes import error
+from metatube.cli import register_cli
 
-from metatube.init import init as init_db
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path='/static')
@@ -44,7 +44,7 @@ def create_app(config_class=Config):
     socketio.init_app(app, async_mode='gevent', json=json, engineio_logger=socket_log, logger=socket_log)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
-    init_db(app)
+    register_cli(app)
     return app
 
 import metatube.database
