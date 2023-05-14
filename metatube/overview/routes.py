@@ -71,6 +71,7 @@ def searchitem():
     sockets.searchitem(list)
 
 @socketio.on('ytdl_search')
+@bp.route('/youtubequery')
 def search(query):
     if query is not None and len(query) > 1:
         if yt.is_supported(query):
@@ -84,7 +85,9 @@ def search(query):
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
-            asyncio.run(yt.search(query))
+            result = asyncio.run(yt.search(query))
+            # result = socketio.start_background_task(yt.search, query)
+            sockets.youtubesearch(result)
     else:
         sockets.searchvideo('Enter an URL!')
         

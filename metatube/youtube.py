@@ -40,8 +40,8 @@ class YouTube:
     async def search(query):
         logger.info('Searching YouTube for \'%s\'', query)
         search = VideosSearch(query)
-        result = await search.next()
-        sockets.youtubesearch(result)
+        return await search.next()
+        logger.info('Found YouTube result')
         
     def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
