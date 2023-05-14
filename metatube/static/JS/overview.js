@@ -1602,18 +1602,6 @@ $(document).ready(function() {
             if($("#edititemmodal").css('display').toLowerCase() != 'block') {
                 $("#resetviewbtn").removeClass('d-none');
             }
-            // if($("#edititemmodal").css('display').toLowerCase() == 'block') {
-            //     $("#progresstextedit").text(msg.message);
-            //     $("#progressedit").attr('aria-valuenow', 100);
-            //     $("#progressedit").html('ERROR <i class="bi bi-emoji-frown"></i>');
-            //     $("#progressedit").css('width', '100%');
-            // } else {
-            //     progress_text.text(msg.message);
-            //     $("#progress").attr('aria-valuenow', 100);
-            //     $("#progress").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
-            //     $("#progress").css('width', '100%');
-            //     $("#resetviewbtn").removeClass('d-none');
-            // }
         }
     });
 
@@ -1630,7 +1618,7 @@ $(document).ready(function() {
         mbpdata = mbp;
         $("#searchmetadataview").removeClass('d-none');
         if(Object.keys(mbp).length > 0) {
-            $("#audiocol").empty();
+            // $("#audiocol").empty();
             for(let i = 0; i < Object.keys(mbp).length - 2; i++) {
                 insertmusicbrainzdata(mbp[i]);
             }
@@ -1648,7 +1636,7 @@ $(document).ready(function() {
         spotifydata = spotify;
         $("#searchmetadataview").removeClass('d-none');
         if(spotify["tracks"]["items"].length  > 0) {
-            $("#audiocol").empty();
+            // $("#audiocol").empty();
             for(let i = 0; i < spotify["tracks"]["items"].length; i++) {
                 insertspotifydata(spotify["tracks"]["items"][i]);
             }
@@ -1666,7 +1654,7 @@ $(document).ready(function() {
         deezerdata = deezer;
         $("#searchmetadataview").removeClass('d-none');
         if(deezer.length > 0) {
-            $("#audiocol").empty();
+            // $("#audiocol").empty();
             for(let i = 0; i < deezer.length - 2; i++) {
                 insertdeezerdata(deezer[i]);
                 $("#searchvideomodalfooter, #editmetadata").removeClass('d-none');

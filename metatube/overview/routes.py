@@ -86,7 +86,6 @@ def search(query):
                 sockets.searchvideo('This video has already been downloaded!')
         else:
             result = asyncio.run(yt.search(query))
-            # result = socketio.start_background_task(yt.search, query)
             sockets.youtubesearch(result)
     else:
         sockets.searchvideo('Enter an URL!')
@@ -100,6 +99,9 @@ def filename(data):
 
 @socketio.on('searchmetadata')
 def searchmetadata(data):
+    asyncio.run(runmetadataproviders(data))
+
+async def runmetadataproviders(data):
     sources = Config.get_metadata_sources()
     data["max"] = Config.get_max()
     if 'musicbrainz' in sources:

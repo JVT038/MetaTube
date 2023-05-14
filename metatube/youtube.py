@@ -1,5 +1,6 @@
 import yt_dlp, json, os
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
+from yt_dlp.postprocessor import MetadataParserPP
 from youtubesearchpython.__future__ import VideosSearch
 from threading import Thread
 from urllib.error import URLError
@@ -43,7 +44,7 @@ class YouTube:
         logger.info('Found YouTube result')
         return await search.next()
         
-    def __download(self, url: list, ytdl_options: dict):
+    async def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
                 ytdl.download(url)
@@ -72,7 +73,6 @@ class YouTube:
     def download_hook(d):
         if d['status'] == 'finished':
             socketio.emit('downloadprogress', {'status': 'finished_ytdl'})
-            # sockets.downloadprogress({'status': 'finished_ytdl'})
         elif d['status'] == 'downloading':
             if "total_bytes_estimate" in d:
                 socketio.emit('downloadprogress', {
@@ -80,31 +80,17 @@ class YouTube:
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes_estimate']
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading', 
-                #     'downloaded_bytes': d['downloaded_bytes'], 
-                #     'total_bytes': d['total_bytes_estimate']
-                # })
             elif 'total_bytes' in d:
                 socketio.emit('downloadprogress', {
                     'status': 'downloading', 
                     'downloaded_bytes': d['downloaded_bytes'], 
                     'total_bytes': d['total_bytes']
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading', 
-                #     'downloaded_bytes': d['downloaded_bytes'], 
-                #     'total_bytes': d['total_bytes']
-                # })
             else:
                 socketio.emit('downloadprogress', {
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
-                # sockets.downloadprogress({
-                #     'status': 'downloading',
-                #     'total_bytes': 'Unknown'
-                # })
                 
     def postprocessor_hook(d):
         if d['status'] == 'finished':
@@ -209,7 +195,8 @@ class YouTube:
         return ytdl_options
 
     def get_video(self, url, ytdl_options):
-        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        downloadthread = Thread(target=asyncio.run(self.__download()), args=(url, ytdl_options), name="YouTube-DLP download")
+        
         
     def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])
