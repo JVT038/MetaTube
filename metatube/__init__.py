@@ -1,5 +1,5 @@
 from gevent import monkey
-monkey.patch_all()
+monkey.patch_all(thread=False)
 from flask import Flask, json
 from flask.logging import default_handler
 from flask_sqlalchemy import SQLAlchemy

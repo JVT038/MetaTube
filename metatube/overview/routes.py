@@ -24,6 +24,7 @@ import asyncio
 import requests
 import random
 import string
+import gevent
 
 @bp.route('/')
 def index():
@@ -71,7 +72,6 @@ def searchitem():
     sockets.searchitem(list)
 
 @socketio.on('ytdl_search')
-@bp.route('/youtubequery')
 def search(query):
     if query is not None and len(query) > 1:
         if yt.is_supported(query):

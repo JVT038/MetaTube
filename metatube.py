@@ -2,7 +2,7 @@
 
 # coding: utf-8
 
-from metatube import create_app, socketio
+from metatube import create_app, socketio, logger
 from gevent import get_hub
 from distutils.util import strtobool
 import os
@@ -14,8 +14,7 @@ if __name__ == "__main__":
     log_output = os.environ.get('LOG', False)
     get_hub().NOT_ERROR += (KeyboardInterrupt,)
     try:
-        print(u'Starting the webserver on http://%s:%s...'%(host, port))
+        logger.info(u'Starting the webserver on http://%s:%s...'%(host, port))
         socketio.run(app, str(host), int(port), log_output=strtobool(str(log_output)))
     except KeyboardInterrupt:
-        print('Stopped server because of KeyboardInterrupt')
-    
+        logger.info('Stopped server because of KeyboardInterrupt')
