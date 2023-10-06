@@ -18,3 +18,4 @@ spotipy==2.22.1
 urllib3==1.26.14
 deezer-python==5.8.1
 lyricsgenius==3.0.1
+Werkzeug==2.3.7
