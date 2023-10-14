@@ -29,6 +29,8 @@
  :heavy_check_mark:  MetaTube 🚀 Finished! :heavy_check_mark: <br/>
 </h4>
 
+<h2>Disclaimer: This project will most likely not receive any major features. The focus will be on fixing breaking bugs and updating the dependencies.</h2>
+
 <hr>
 
 <p align="center">
