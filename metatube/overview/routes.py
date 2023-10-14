@@ -103,7 +103,7 @@ def searchmetadata(data):
 
 async def runmetadataproviders(data):
     sources = Config.get_metadata_sources()
-    data["max"] = Config.get_max()
+    data["max"] = Config.get_max()    
     if 'musicbrainz' in sources:
         socketio.start_background_task(musicbrainz.webui, data)
     if 'spotify' in sources:
@@ -117,26 +117,28 @@ async def runmetadataproviders(data):
 
 @socketio.on('ytdl_download')
 def download(data):
-    url = data["url"]
-    ext = data["ext"] or 'mp3'
-    output_folder = data["output_folder"] or '/downloads'
-    output_type = data["type"] or 'Audio'
-    output_format = data["output_format"] or f'%(title)s.%(ext)s'
-    bitrate = data["bitrate"] or '192'
-    skipfragments = data["skipfragments"] or {}
-    proxy_data = data["proxy_data"] or {'proxy_type': 'None'}
+    downloadData = data['donwloadData']
+    url = downloadData["url"]
+    ext = downloadData["ext"] or 'mp3'
+    output_folder = downloadData["output_folder"] or '/downloads'
+    output_type = downloadData["type"] or 'Audio'
+    output_format = downloadData["output_format"] or f'%(title)s.%(ext)s'
+    bitrate = downloadData["bitrate"] or '192'
+    skipfragments = downloadData["skipfragments"] or {}
+    proxy_data = downloadData["proxy_data"] or {'proxy_type': 'None'}
     
-    width = data["width"] or 1920
-    height = data["height"] or 1080
+    width = downloadData["width"] or 1920
+    height = downloadData["height"] or 1080
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = strtobool(str(env.LOGGER))
-    logger.info('Request to download %s', data["url"])
+    logger.info('Request to download %s', downloadData["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
         yt_instance = yt()
-        yt_instance.get_video(url, ytdl_options)
+        # yt_instance.get_video(url, ytdl_options)
+        socketio.start_background_task(yt_instance.get_video, url, ytdl_options)
     return 'OK'
 
 @socketio.on('fetchmbprelease')
@@ -185,65 +187,10 @@ def fetchgeniussong(input_id):
     genius = Genius(token)
     genius.fetchalbum(input_id)    
 
-@socketio.on('mergedata')
+# @socketio.on('mergedata')
 def mergedata(filepath, release_id, metadata, cover, source):
-    if Database.checktrackid(release_id) is None and Database.checktrackid(metadata.get('trackid', '')) is None:
-        
-        metadata_user = metadata
-        cover_source = cover if cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', cover)
-        extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-        if extension in env.META_EXTENSIONS:
-            if source == 'Spotify':
-                cred = Config.get_spotify().split(';')
-                spotify = Spotify(cred[1], cred[0])
-                metadata_source = spotify.fetch_track(release_id)
-                data = MetaData.getspotifydata(filepath, metadata_user, metadata_source)
-            elif source == 'Musicbrainz':
-                metadata_source = musicbrainz.search_id_release(release_id)
-                data = MetaData.getmusicbrainzdata(filepath, metadata_user, metadata_source, cover_source)
-            elif source == 'Deezer':
-                metadata_source = Deezer.searchid(release_id)
-                data = MetaData.getdeezerdata(filepath, metadata_user, metadata_source)
-            elif source == 'Genius':
-                token = Config.get_genius()
-                genius = Genius(token)
-                metadata_source = genius.fetchsong(release_id)
-                lyrics = genius.fetchlyrics(metadata_source["song"]["url"])
-                data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source, lyrics)
-            elif source == 'Unavailable':
-                data = MetaData.onlyuserdata(filepath, metadata_user)
-            if data is not False:
-                data["goal"] = 'add'
-                data["extension"] = extension
-                data["source"] = source
-                if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-                    MetaData.mergeaudiodata(data)
-                elif extension in ['MP4', 'M4A']:
-                    MetaData.mergevideodata(data)
-                elif extension in ['WAV']:
-                    MetaData.mergeid3data(data)
-        else:
-            # The name will be the filename of the downloaded file without the extension
-            filename = os.path.split(filepath)[1]
-            name = filename[0:len(filename) - len(filename.split('.')[len(filename.split('.')) - 1]) - 1]
-            data = {
-                'filepath': filepath,
-                'name': name,
-                'artist': metadata_user.get('artists', 'Unknown'),
-                'album': 'Unknown',
-                'date': datetime.now().strftime('%d-%m-%Y'),
-                'length': 'Unknown',
-                'image': cover_source,
-                'track_id': release_id
-            }
-            sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
-            logger.debug('Metadata unavailable for file %s', data["filepath"])
-    else:
-        sockets.searchvideo(f'{source} item has already been downloaded!')
-        try:
-            os.unlink(filepath)
-        except Exception:
-            pass
+    metadata = MetaData(filepath, release_id, metadata, cover, source)
+    metadata.initiateDataMerge()
         
 @socketio.on('insertitem')
 def insertitem(data):

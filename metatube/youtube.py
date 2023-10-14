@@ -6,10 +6,13 @@ from threading import Thread
 from urllib.error import URLError
 from yt_dlp.utils import ExtractorError, DownloadError, PostProcessingError
 from metatube import sockets, logger, socketio
+from metatube.metadata import MetaData
 from metatube.sponsorblock import segments as findsegments
 from jinja2 import Environment, PackageLoader, select_autoescape
     
 class YouTube:
+    
+    @staticmethod
     def is_supported(url):
         extractors = yt_dlp.extractor.gen_extractors()
         for e in extractors:
@@ -17,6 +20,7 @@ class YouTube:
                 return True
         return False
 
+    @staticmethod
     def fetch_url(url, verbose):
         if YouTube.is_supported(url):
             ytdl_options = {'logger': logger, 'verbose': verbose}
@@ -28,7 +32,8 @@ class YouTube:
                     return str(e)
         else:
             raise ValueError("Invalid URL!")
-        
+    
+    @staticmethod
     def verifytemplate(template, info_dict, verbose):
         ytdl_options = {'logger': logger, 'verbose': verbose}
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
@@ -37,14 +42,14 @@ class YouTube:
                 return filename
             except Exception as e:
                 return str(e)
-        
+    @staticmethod
     async def search(query):
         logger.info('Searching YouTube for \'%s\'', query)
         search = VideosSearch(query)
         logger.info('Found YouTube result')
         return await search.next()
-        
-    async def __download(self, url: list, ytdl_options: dict):
+
+    def __download(self, url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
                 ytdl.download(url)
@@ -70,9 +75,13 @@ class YouTube:
                 logger.exception('Error during downloading video: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'Something has gone wrong. Check logs for more info'})
     
+    @staticmethod
     def download_hook(d):
         if d['status'] == 'finished':
             socketio.emit('downloadprogress', {'status': 'finished_ytdl'})
+            metadata = MetaData()
+            
+            
         elif d['status'] == 'downloading':
             if "total_bytes_estimate" in d:
                 socketio.emit('downloadprogress', {
@@ -91,7 +100,8 @@ class YouTube:
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
-                
+    
+    @staticmethod
     def postprocessor_hook(d):
         if d['status'] == 'finished':
             socketio.emit('downloadprogress', {
@@ -100,9 +110,9 @@ class YouTube:
                 'postprocessor': d["postprocessor"]
             })
             logger.info("Finished postprocessor %s", d["postprocessor"])
-            # sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
-            
-    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
+        
+    @staticmethod    
+    def get_options(ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)
@@ -195,9 +205,11 @@ class YouTube:
         return ytdl_options
 
     def get_video(self, url, ytdl_options):
-        downloadthread = Thread(target=asyncio.run(self.__download()), args=(url, ytdl_options), name="YouTube-DLP download")
+        # downloadthread = Thread(target=asyncio.run(self.__download()), args=(url, ytdl_options), name="YouTube-DLP download")
+        # socketio.start_background_task(self.__download, url, ytdl_options)
+        self.__download(url, ytdl_options)
         
-        
+    @staticmethod
     def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])
         segments = sb if type(sb) == list else 'error'

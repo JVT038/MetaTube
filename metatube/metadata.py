@@ -1,10 +1,9 @@
 import json
-from importlib_metadata import metadata
 from magic import Magic
 from re import M
 from mutagen.id3 import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
-    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1, USLT
+    ID3, APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1
 )
 from mutagen.flac import FLAC, Picture
 from mutagen.aac import AAC
@@ -14,12 +13,23 @@ from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover
-from metatube import sockets, Config, logger
+from metatube import sockets, Config as env, logger, musicbrainz
+from metatube.spotify import spotify_metadata as Spotify
+from metatube.database import Database, Config
+from metatube.genius import Genius
+from metatube.deezer import Deezer
 from datetime import datetime
 import requests, base64, os
 
 class MetaData:
-    def getresponse(data):
+    def __init__(self, filepath, release_id, metadata, cover, source) :
+        self.filepath = filepath
+        self.release_id = release_id
+        self.metadata = metadata
+        self.cover = cover
+        self.source = source
+    
+    def getresponse(self, data):
         return {
             'filepath': os.path.join(Config.BASE_DIR, data["filename"]),
             'name': data["title"],
@@ -30,8 +40,66 @@ class MetaData:
             'image': data["cover_path"],
             'track_id': data["track_id"]
         }
+        
+    def initiateDataMerge(self) : 
+        if Database.checktrackid(self.release_id) is None and Database.checktrackid(self.metadata.get('trackid', '')) is None:
+            cover_source = self.cover if self.cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', self.cover)
+            extension = self.filepath.split('.')[len(self.filepath.split('.')) - 1].upper()
+            data = False
+            if extension in env.META_EXTENSIONS:
+                if self.source == 'Spotify':
+                    cred = Config.get_spotify().split(';')
+                    spotify = Spotify(cred[1], cred[0])
+                    metadata_source = spotify.fetch_track(self.release_id)
+                    data = self.getspotifydata(self.filepath, self.metadata, metadata_source)
+                elif self.source == 'Musicbrainz':
+                    metadata_source = musicbrainz.search_id_release(self.release_id)
+                    data = self.getmusicbrainzdata(self.filepath, self.metadata, metadata_source, cover_source)
+                elif self.source == 'Deezer':
+                    metadata_source = Deezer.searchid(self.release_id)
+                    data = self.getdeezerdata(self.filepath, self.metadata, metadata_source)
+                elif self.source == 'Genius':
+                    token = Config.get_genius()
+                    genius = Genius(token)
+                    metadata_source = genius.fetchsong(self.release_id)
+                    lyrics = genius.fetchlyrics(metadata_source["song"]["url"])
+                    data = self.getgeniusdata(self.filepath, self.metadata, metadata_source, lyrics)
+                elif self.source == 'Unavailable':
+                    data = self.onlyuserdata(self.filepath, self.metadata)
+                if data is not False:
+                    data["goal"] = 'add'
+                    data["extension"] = extension
+                    data["source"] = self.source
+                    if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
+                        self.mergeaudiodata(data)
+                    elif extension in ['MP4', 'M4A']:
+                        self.mergevideodata(data)
+                    elif extension in ['WAV']:
+                        self.mergeid3data(data)
+            else:
+                # The name will be the filename of the downloaded file without the extension
+                filename = os.path.split(self.filepath)[1]
+                name = filename[0:len(filename) - len(filename.split('.')[len(filename.split('.')) - 1]) - 1]
+                data = {
+                    'filepath': self.filepath,
+                    'name': name,
+                    'artist': self.metadata.get('artists', 'Unknown'),
+                    'album': 'Unknown',
+                    'date': datetime.now().strftime('%d-%m-%Y'),
+                    'length': 'Unknown',
+                    'image': cover_source,
+                    'track_id': self.release_id
+                }
+                sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
+                logger.debug('Metadata unavailable for file %s', data["filepath"])
+        else:
+            sockets.searchvideo(f'{self.source} item has already been downloaded!')
+            try:
+                os.unlink(self.filepath)
+            except Exception:
+                pass
     
-    def getmusicbrainzdata(filename, metadata_user, metadata_source, cover_source):
+    def getmusicbrainzdata(self, filename, metadata_user, metadata_source, cover_source):
         logger.info('Getting Musicbrainz metadata')
         album = metadata_source["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         artist_list = []
@@ -118,7 +186,7 @@ class MetaData:
         }
         return data
     
-    def getspotifydata(filename, metadata_user, metadata_source):
+    def getspotifydata(self, filename, metadata_user, metadata_source):
         logger.info('Getting Spotify metadata')
         album = metadata_source["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = metadata_source["id"] if len(metadata_user["trackid"]) < 1 else metadata_user["trackid"]
@@ -173,7 +241,7 @@ class MetaData:
         }
         return data
     
-    def getdeezerdata(filename, metadata_user, metadata_source):
+    def getdeezerdata(self, filename, metadata_user, metadata_source):
         album = metadata_source["album"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = str(metadata_source["id"]) if len(metadata_user["trackid"]) < 1 else str(metadata_user["trackid"])
         albumid = str(metadata_source["album"]["id"]) if len(metadata_user["albumid"]) < 1 else str(metadata_user["albumid"])
@@ -224,7 +292,7 @@ class MetaData:
         }
         return data
     
-    def getgeniusdata(filename, metadata_user, metadata_source, lyrics):
+    def getgeniusdata(self, filename, metadata_user, metadata_source, lyrics):
         logger.info('Getting Genius metadata')
         album = metadata_source["song"]["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = metadata_source["id"] if len(metadata_user["trackid"] < 1) else metadata_user["trackid"]
@@ -276,7 +344,7 @@ class MetaData:
         }
         return data
     
-    def onlyuserdata(filename, metadata_user):
+    def onlyuserdata(self, filename, metadata_user):
         if metadata_user["cover"] != '':
             try:
                 cover_path = metadata_user["cover"]
@@ -314,7 +382,7 @@ class MetaData:
         }
         return data
         
-    def mergeaudiodata(data):
+    def mergeaudiodata(self, data):
         '''
         Valid fields for EasyID3:
             "album",
@@ -393,6 +461,8 @@ class MetaData:
             audio = OggOpus(data["filename"])
         elif data["extension"] == 'OGG':
             audio = OggVorbis(data["filename"])
+        else:
+            return False
 
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
@@ -433,7 +503,7 @@ class MetaData:
                 cover_data = cover.write()
                 audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
                 audio.save()
-        response = MetaData.getresponse(data)
+        response = self.getresponse(data)
         if data["goal"] == 'edit':
             response["itemid"] = data["itemid"]
             logger.info('Finished changing metadata of %s', data["title"])
@@ -442,9 +512,11 @@ class MetaData:
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
                 
-    def mergeid3data(data):
+    def mergeid3data(self, data):
         if data["extension"] == 'WAV':
             audio = WAVE(data["filename"])
+        else:
+            return False
         try:
             audio.add_tags()
         except Exception:
@@ -461,7 +533,7 @@ class MetaData:
         audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_albumid', text=data["mbp_albumid"]))
         audio.tags.add(APIC(encoding=3, mime=data["cover_mime_type"], type=3, desc=u'Cover', data=data["image"]))
         
-        response = MetaData.getresponse(data)
+        response = self.getresponse(data)
         if data["goal"] == 'edit':
             response["itemid"] = data["itemid"]
             logger.info('Finished changing metadata of %s', data["title"])
@@ -469,9 +541,10 @@ class MetaData:
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
-    def mergevideodata(data):
-        if data["extension"] in ['M4A', 'MP4']:
-            video = MP4(data["filename"])
+    def mergevideodata(self, data):
+        if data["extension"] not in ['M4A', 'MP4']:
+            return False
+        video = MP4(data["filename"])
         dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d') if len(data["release_date"]) > 0 else datetime.now().date()
         year = dateobj.year
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
@@ -488,7 +561,7 @@ class MetaData:
         video["covr"] = [MP4Cover(data["image"], imageformat)]
         
         video.save()
-        response = MetaData.getresponse(data)
+        response = self.getresponse(data)
         
         if data["goal"] == 'edit':
             response["itemid"] = data["itemid"]
@@ -498,7 +571,7 @@ class MetaData:
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
-    def readaudiometadata(filename):
+    def readaudiometadata(self, filename):
         logger.info('Reading metadata of %s', filename)
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
         if extension == 'MP3':
@@ -516,6 +589,8 @@ class MetaData:
         elif extension == 'OGG':
             audio = OggVorbis(filename)
             data = OggVorbis(filename)
+        else:
+            return False
         
         response = {
             'title': audio.get('title', [''])[0],
@@ -541,10 +616,11 @@ class MetaData:
         
         return response
     
-    def readvideometadata(filename):
+    def readvideometadata(self, filename):
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
-        if extension in ['M4A', 'MP4']:
-            video = MP4(filename)
+        if extension not in ['M4A', 'MP4']:
+            return False
+        video = MP4(filename)
             
         # Bitrate calculation: https://www.reddit.com/r/headphones/comments/3xju4s/comment/cy5dn8h/?utm_source=share&utm_medium=web2x&context=3
         # Mutagen MP4 stream info: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Info
@@ -563,14 +639,14 @@ class MetaData:
         }
         return response
     
-    def FLV(filename):
+    def FLV(self, filename):
         pass
     
-    def WEBM(filename):
+    def WEBM(self, filename):
         pass
     
-    def MKV(filename):
+    def MKV(self, filename):
         pass
     
-    def AVI(filename):
+    def AVI(self, filename):
         pass
