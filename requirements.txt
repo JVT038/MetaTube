@@ -6,7 +6,7 @@ gevent-websocket==0.10.1
 Flask==3.0.0
 Flask-SocketIO==5.3.6
 Flask-Migrate==4.0.4
-Flask-SQLAlchemy==3.0.3
+Flask-SQLAlchemy==3.1.1
 musicbrainzngs==0.7.1
 sponsorblock.py==0.2.2
 python-dateutil==2.8.2
