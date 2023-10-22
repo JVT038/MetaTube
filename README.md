@@ -26,7 +26,7 @@
 <h2 align="center">Status</h2>
 
 <h4 align="center"> 
-	:heavy_check_mark:  MetaTube 🚀 Finished! :heavy_check_mark: <br/>
+MetaTube 🚀 Is still not done!<br/>
 </h4>
 
 <hr>
@@ -50,6 +50,9 @@ MetaTube downloads video from YouTube and can add metadata from a specified meta
 Normal view | Dark mode|
 --- | ---
 ![startpage](https://user-images.githubusercontent.com/47184046/147980156-e3ee71e4-a4cd-4fee-808b-c4b3c9530e9f.png) | ![darkstartpage](https://user-images.githubusercontent.com/47184046/147980017-bd3bc8bf-2589-4ee5-8d9c-1785ba906982.png)
+
+# From this point onward...
+I would focus on making this a standalone module and move the web files into the future, metatube-web and integrate it here via a submodule. Also, move the wiki files onto the wiki.
 
 ## :sparkles: Features ##
 
@@ -131,7 +134,7 @@ You need to set the variable `DATABASE_URL` to a custom mount point (in these ex
 ### :hammer_and_wrench: Manually build and start server ###
 ```bash
 # Clone this project
-$ git clone https://github.com/JVT038/metatube
+$ git clone https://github.com/lasersPew/metatube
 
 # Access
 $ cd metatube
