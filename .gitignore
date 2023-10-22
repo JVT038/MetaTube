@@ -1,6 +1,6 @@
 # For virtual environment
-Lib
-Scripts
+Lib*
+Scripts*
 pyvenv.cfg
 
 share

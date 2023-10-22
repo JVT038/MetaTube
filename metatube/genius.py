@@ -10,7 +10,7 @@ class Genius():
     def search(self, data):
         search =  self.genius.search_songs(data["title"], data["max"])
         sockets.geniussearch(search)
-        logger.info('Searched Genius for track %s', data["title"])
+        logger.info('Searched Genius for track \'%s\' ', data["title"])
     
     def searchsong(data, token):
         genius = Genius(token)
@@ -18,6 +18,9 @@ class Genius():
         
     def fetchsong(self, id):
         return self.genius.song(id)
+    
+    def fetchlyrics(self, url):
+        return self.genius.lyrics(url)
         
     def fetchalbum(self, id):
         sockets.foundgeniusalbum(self.genius.album_tracks(id))

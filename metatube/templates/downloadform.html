@@ -47,7 +47,12 @@
     <div class="form-row">
         <div class="col">
             <label for="#output_folder">Output folder*</label>
-            <input type="text" id="output_folder" value="{{ default.output_folder }}" class="form-control" />
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-secondary" id="outputfolderbtn"><i class="bi bi-folder" aria-hidden="true"></i></button>
+                </div>
+                <input type="text" id="output_folder" value="{{ default.output_folder }}" class="form-control" />
+            </div>
         </div>
         <div class="col">
             <label for="#bitrate">Bitrate***</label>
@@ -108,9 +113,9 @@
                         <input type="text" class="form-control timestamp_input num_input" id="segmentend_{{ i }}" value="{{ segments[i]['segment'][1]|int }}" />
                         <div class="input-group-append">
                             {% if i > 0 %}
-                                <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="bi bi-dash" style="color: white;"></i></button>
+                                <button type="button" class="btn btn-danger bg-danger input-group-text removesegment"><i class="bi bi-dash" style="color: white;" aria-hidden="true"></i></button>
                             {% else %}
-                                <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-dash" style="color: white;"></i></button>
+                                <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-plus" style="color: white;" aria-hidden="true"></i></button>
                             {% endif %}
                         </div>
                     </div>
@@ -133,7 +138,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control timestamp_input num_input" id="segmentend_0"/>
                     <div class="input-group-append">
-                        <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-plus-lg" style="color: white;"></i></button>
+                        <button type="button" id="addsegment" class="btn btn-success input-group-text bg-success"><i class="bi bi-plus-lg" style="color: white;" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>

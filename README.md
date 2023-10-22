@@ -25,20 +25,23 @@
 
 <h2 align="center">Status</h2>
 
+
 <h4 align="center"> 
 MetaTube 🚀 Is still not done!<br/>
 </h4>
 
+<h2>Disclaimer: This project will most likely not receive any major features. The focus will be on fixing breaking bugs and updating the dependencies.</h2>
+
 <hr>
 
 <p align="center">
-  <a href="#dart-about">About</a> &#xa0; | &#xa0; 
+  <a href="#dart-about">About</a> &#xa0; | &#xa0;
   <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
   <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
   <a href="#memo-license">License</a> &#xa0; | &#xa0;
-  <a href="#disclaimer">Disclaimer</a> &#xa0; | &#xa0; 
+  <a href="#disclaimer">Disclaimer</a> &#xa0; | &#xa0;
   <a href="https://github.com/JVT038" target="_blank">Author</a>
 </p>
 
@@ -46,10 +49,14 @@ MetaTube 🚀 Is still not done!<br/>
 
 ## :dart: About ##
 
-MetaTube downloads video from YouTube and can add metadata from a specified metadata provider on the downloaded file. 
-Normal view | Dark mode|
+MetaTube downloads video from YouTube and can add metadata from a specified metadata provider on the downloaded file.
+Light Mode| Dark Mode|
 --- | ---
 ![startpage](https://user-images.githubusercontent.com/47184046/147980156-e3ee71e4-a4cd-4fee-808b-c4b3c9530e9f.png) | ![darkstartpage](https://user-images.githubusercontent.com/47184046/147980017-bd3bc8bf-2589-4ee5-8d9c-1785ba906982.png)
+
+
+Desktop View | Mobile View
+https://user-images.githubusercontent.com/47184046/187272055-3de98de0-592b-4ad1-895d-221b2695a147.mp4 | https://user-images.githubusercontent.com/47184046/187272050-7cbf7c71-f494-4ea8-9fcf-bc7156b1de20.mp4
 
 # From this point onward...
 I would focus on making this a standalone module and move the web files into the future, metatube-web and integrate it here via a submodule. Also, move the wiki files onto the wiki.
@@ -99,8 +106,11 @@ For a complete list, visit the [Dependencies overview](https://github.com/JVT038
 Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Python 3.8 or higher](https://python.org/downloads) installed.
 
 ## :checkered_flag: Starting ##
+
 ### :whale: Using Docker ###
+
 CLI docker:
+
 ```docker
 docker run \
   -d \
@@ -110,10 +120,13 @@ docker run \
   -e PORT=5000 \
   -e HOST=0.0.0.0 \
   -v /downloads:/downloads:rw \
-  -v /metatube:/database:rw \
+  -v /metatube/database:/database:rw \
+  -v /metatube/migrations:/config/migrations \
   jvt038/metatube:latest
 ```
+
 Docker-compose:
+
 ```
 version: '3.3'
 services:
@@ -128,10 +141,14 @@ services:
             - HOST=0.0.0.0
         volumes:
             - '/downloads:/downloads:rw'
-            - '/metatube:/database:rw'        
+            - '/metatube/database:/database:rw'
+            - '/metatube/migrations:/config/migrations:rw'      
 ```
+
 You need to set the variable `DATABASE_URL` to a custom mount point (in these examples `/database`), because otherwise your database file will reset everytime the Docker container updates.
+
 ### :hammer_and_wrench: Manually build and start server ###
+
 ```bash
 # Clone this project
 $ git clone https://github.com/lasersPew/metatube
@@ -169,6 +186,7 @@ $ python metatube.py
 
 # The server will initialize in the <http://localhost:5000>
 ```
+
 You can set the following environment variables:
 Name | Description | Default value
 ---|---|---
@@ -182,6 +200,8 @@ LOG | Whether to keep logs or not | False
 SOCKET_LOG | Whether to log in- and outcoming websocket connections; warning: your console can be spammed with connections | False
 LOG_LEVEL | Numeric value from which MetaTube will keep logs. Info [here](https://docs.python.org/3/howto/logging.html#logging-levels) | 10
 URL_SUBPATH | Set the URL subpath, if you want to run MetaTube on a subpath. Example: `/metatube` will run the server on `host:port/metatube` | /
+INIT_DB | Automatically initialize the database and make all migrations. Set to 'False' if you're having issues with migrations | True
+
 ```bash
 # On Windows 10, you can set an environment variable like this: 
 $ set ENVIRONMENT_VARIABLE = Value
@@ -189,25 +209,28 @@ $ set ENVIRONMENT_VARIABLE = Value
 # On Linux and MacOS, you can set an environment variable like this:
 $ export ENVIRONMENT_VARIABLE = Value
 ```
+
 Additionally you can create a file called `.flaskenv` and set the environment variables in there.
 An example is provided in [example.flaskenv](example.flaskenv). You can use that template and rename the file to `.flaskenv`.
 
 ## Fix the artist values
+
 So I recently discovered I made a mistake in the process of adding artists to files. <br/>
 Some songs have tags multiple artists, and I noticed these tags were misinterpreted by my audio player. <br/>
 Basically, the `TPE1` tag contained was like this: `['artist 1; artist 2']`, while it should've been `['artist 1', 'artist 2']`. <br/>
 Thanks to [#310](https://github.com/quodlibet/mutagen/issues/310) I discovered this, corrected it in `metadata.py` and wrote a small script in [fixartists.py](fixartists.py) to fix the existing audio files that had the tags in the wrong way. <br/>
 Put all the wrong audio files in one directory, run the file and enter the path to the directory containing the incorrect tags, and it should be fixed. <br/>
 My apologies for this (annoying) bug.
+
 ## :memo: License ##
 
 This project is under license from GNUv3. For more details, see the [LICENSE](LICENSE) file.<br/>
 I am not responsible for any legal consequences the user may or may not face by using this project.
 
-
 Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038</a>
 
 ## To-Do
+
 ### Finished
 
 - [X] Add support for the use of proxies to download YouTube videos
@@ -217,12 +240,14 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Add support for Spotify as a metadata provider
 - [X] Add support for Deezer as a metadata provider
 - [X] Add support for Genius as a metadata provider
+- [x] Add support for embedded lyrics (if possible)
 - [X] Add support for subpath (such as `localhost:5000/metatube`)
 - [X] Add a nice progress bar
 - [X] Add a function to allow users to download the song onto their device
 - [X] Add button in settings to download all the downloaded content
 - [X] Add ability to manually set video width & height, if a video type has been selected
 - [X] Add ability to manually set video width & height, if a video type has been selected, AFTER the item has been inserted into the database
+- [x] Add in-built file explorer, making manual paths optional
 - [X] Preview filenames when entering an output template
 - [X] Make the Docker file smaller, because it's huge
 - [X] Build a logger
@@ -241,8 +266,8 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [X] Make sure the search for downloaded song field works
- 
-### Not finished (I'll probably never finish this)
+
+### Not finished (I'll never finish this)
 
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
@@ -251,12 +276,9 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Add support for H.265 / HEVC
 - [ ] Add authentication system with an optional reverse proxy
 - [ ] Add support for TheAudioDB
-- [ ] Add support for YouTube Music 
+- [ ] Add support for YouTube Music
 - [ ] Add support for Last.fm!
-- [ ] Add support for Genius as metadata provider
-- [ ] Add support for embedded lyrics (if possible)
 - [ ] Add translations
-- [ ] Add in-built file explorer, making manual paths optional
 - [ ] Add some nice animations
 - [ ] Add a cancel download button when the video is being downloaded
 - [ ] Add button in settings to download the entire SQlite3 Database
@@ -269,13 +291,14 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
 - [ ] Make sure the progress bar works properly in a Docker container, because it doesn't work properly rn.
+- [ ] Use proper queues and threading during download instead of the weird ping-pong system between the client and the server.
 &#xa0;
 
 ## Disclaimer
+
 I made this project to educate myself about Python, and to learn how metadata works in combination with files.
 Additionally, I want to emphasize I do NOT encourage any pirating, or any other illegal activities.
 This project's purpose isn't to illegally download content from YouTube; its purpose is to educate and enlighten myself (and others viewing the source code) about Python, how Python interacts with metadata in files, and  metadata works, and how yt-dlp works.
 I am not responsible if the user downloads illegal content, or faces any (legal) consequences.
-
 
 <a href="#top">Back to top</a>

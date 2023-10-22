@@ -32,6 +32,7 @@ class Config(db.Model):
 
     def set_spotify(self, spotify):
         self.spotify_api = spotify
+        print(spotify)
         db.session.commit()
         logger.info('Changed the Spotify API settings')
         

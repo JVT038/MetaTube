@@ -19,6 +19,7 @@ $(document).ready(function() {
     }
     function spinner(msg, location) {
         let spinner = '<div class="spinner-border text-success" role="status"><span class="sr-only">'+msg+'</span></div>';
+        $(location).remove('div.spinner-border');
         $(location).prepend(spinner);
     }
     // If the user presses Enter or submits the form in some other way, it'll trigger the 'find' button
@@ -1069,6 +1070,14 @@ $(document).ready(function() {
         $("#metadataview").find('input').val('');
     });
 
+
+    $(document).on('click', '#outputfolderbtn', function() {
+        $("#downloadmodal").modal('hide');
+        let id = '-1'
+        let visible = ['directories'];
+        socket.emit('showfilebrowser', visible, id);
+    })
+
     $(document).on('keyup', '.directory_input', function(e) {
         e.preventDefault();
         let match = '^[^<>:;,?"*|/]+$';
@@ -1120,12 +1129,16 @@ $(document).ready(function() {
     
     $(document).on('click', '.confirmremoval', function() {
         let directory = $(this).parents('.btn-group').attr('filepath');
-        socket.emit('removedirectory', directory, function(response) {
-            $("#filebrowserlog").text(response.msg);
-            if(response.status == 200) {
-                $('tr.directory:contains("'+response.directory+'")').remove();
-            }
-        });
+        if(directory == 'new') {
+            $('tr.directory[filepath="new"]').remove();
+        } else {
+            socket.emit('removedirectory', directory, function(response) {
+                $("#filebrowserlog").text(response.msg);
+                if(response.status == 200) {
+                    $('tr.directory:contains("'+response.directory+'")').remove();
+                }
+            });
+        }
     });
 
     $(document).on('click', '.filebrowserrow', function() {
@@ -1179,6 +1192,23 @@ $(document).ready(function() {
         });
     });
 
+    $("#closefilebrowserbtn").on('click', function() {
+        $("#filebrowsermodal").modal('hide');
+        if($("#filebrowsermodal").attr('item') === '-1') {
+            $("#downloadmodal").modal('show');
+        }
+    })
+
+    $("#selectdirectorybtn").on('click', function() {
+        let directory = $('#filebrowsertitle').children('span').text();
+        $("#output_folder").val(directory);
+        $("#filebrowsermodal").modal('hide');
+        $("#downloadmodal").modal('show');
+    });
+    $('#downloadmodal').on('shown.bs.modal', function() {
+        $("body").addClass("modal-open");  // for some reason it doesn't add this class, making the screen unscrollable, which is why I'm adding this manually
+    });
+
     $(".addfolder").on('click', function() {
         item = {
             'filepath': 'new',
@@ -1207,7 +1237,7 @@ $(document).ready(function() {
             $("#submitfilename").removeClass('disabled');
             $("#submitfilename").removeAttr('disabled');
         }
-    })
+    });
 
     $("#nextbtn").on('click', function() {
         if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
@@ -1302,7 +1332,7 @@ $(document).ready(function() {
         spinner("Loading...", $("#defaultview"));
         // Reset the modal
         $("#progress").attr('aria-valuenow', "0").css('width', '0');
-        $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn, #searchmetadataview").addClass('d-none');
+        $("#searchvideomodalfooter, #metadataview, #progressview, #downloadfilebtn, #searchmetadataview, #geniusbtn").addClass('d-none');
         $(".removeperson").parents('.personrow').remove();
         $("#metadataview").find('input').val('');
         $("#ytcol, #audiocol").empty();
@@ -1361,7 +1391,7 @@ $(document).ready(function() {
             }
             socket.emit('ytdl_download', data, function(ack) {
                 if(ack == "OK") {
-                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview").addClass('d-none');
+                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
                     $("#searchlog").empty();
                 }
@@ -1418,7 +1448,11 @@ $(document).ready(function() {
             $("#searchlog").text('Select a release on the right side before searching for lyrics');
         } else {
             $("#audiocol").addClass('d-none');
-            let args = { "title": $(".audiocol-checkbox:checked").parent().siblings('.media-body').children("h5").text(), "type": "lyrics" }
+            let args = {
+                'title': $("#trackspan").text() != 'Unknown' ? $("#trackspan").text() : $(".media-body").children('h5').text(),
+                'artist': $("#artistspan").text() != 'Unknown' ? $("#artistspan").text() : $("#channelspan").text(),
+                'type': 'lyrics'
+            };
             spinner('Loading Genius data...', $("#defaultview"));
             socket.emit('searchmetadata', args);
             $("#searchmetadataview, #searchvideomodalfooter").addClass('d-none');
@@ -1562,7 +1596,7 @@ $(document).ready(function() {
         } else if(msg.status == 'error') {
             progress_text.text(msg.message);
             progress.attr('aria-valuenow', 100);
-            progress.html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
+            progress.html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');
             progress.css('width', '100%');
             progress_text.text(msg.message);
             if($("#edititemmodal").css('display').toLowerCase() != 'block') {
@@ -1654,7 +1688,7 @@ $(document).ready(function() {
                 $("#searchvideomodalfooter, #editmetadata, #metadataviewbtn").removeClass('d-none');
             }
             $("#geniusbtn").addClass('d-none');
-        } else if($("#404p").hasClass('d-none')) {
+        } else {
             $("#defaultview").children('.spinner-border').remove();
             $("#nextbtn, #otherp, #geniusbtn").addClass('d-none');
             $("#404p, #searchvideomodalfooter, #editmetadata, #resetviewbtn").removeClass('d-none');
@@ -1889,11 +1923,13 @@ $(document).ready(function() {
         } else if(data.msg == 'showfilebrowser') {
             $("#filebrowserup").siblings('tr').remove();
             if(data.visible.indexOf('files') > -1) {
-                $("#filenameform, #submitfilename").addClass('d-none');
+                $("#filenameform, #selectdirectorybtn, #submitfilename").addClass('d-none');
                 $("#selectedfile, #selectfilebtn").removeClass('d-none');
+                $("#browsermodaltitle").text('Select a file');
             } else {
                 $("#filenameform, #submitfilename").removeClass('d-none');
-                $("#selectedfile, #selectfilebtn").addClass('d-none');
+                $("#selectedfile, #selectdirectorybtn, #selectfilebtn").addClass('d-none');
+                $("#browsermodaltitle").text('Select a directory');
             }
             if(data.files.length > 0) {
                 for(let i = 0; i < data.files.length; i++) {
@@ -1904,17 +1940,20 @@ $(document).ready(function() {
                 let td = document.createElement('td');
                 td.setAttribute('colspan', 3);
                 td.classList.add('text-dark', 'text-center');
-                td.innerHTML = 'No files found with any of the following extensions: <br/> AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV, MP4, M4A, FLV, WEBM, OGG, MKV, AVI';
+                td.innerHTML =  data.visible.indexOf('files') > -1 ? 'No files or directories found with any of the following extensions: <br/> AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV, MP4, M4A, FLV, WEBM, OGG, MKV, AVI' : 'No directories found';
                 tr.append(td);
                 $("#filebrowserup").after(tr);
+            }
+            if(data.id === "-1") {
+                $("#filenameform, #selectfilebtn").addClass('d-none');
+                $("#selectdirectorybtn").removeClass('d-none');
             }
             $("#filebrowsertitle").children('span').text(data.directory);
             $("#filebrowsermodal").attr('item', data.id);
             $("#filebrowsermodal").modal('show');
         } else if(data.msg == 'updated_filepath') {
             $("#filebrowsermodal").modal('hide');
-            $("#overviewlog").text('File location succesfully updated to ' + data["filepath"])
-            createdropdownmenu(data.item);
+            $("#overviewlog").text('File location succesfully updated to ' + data["filepath"]);
         } else {
             $("#overviewlog").text(data.msg);
         }

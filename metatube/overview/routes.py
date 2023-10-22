@@ -31,7 +31,7 @@ def index():
     records = Database.getrecords()
     metadata_sources = Config.get_metadata_sources()
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
-    genius = True if len(Config.get_genius()) != 0 else False
+    genius = True if 'genius' in Config.get_metadata_sources().split(';') else False
     return render_template('overview.html', current_page='overview', ffmpeg_path=ffmpeg_path, records=records, metadataview=metadataform, genius=genius)
 
 @socketio.on('searchitem')
@@ -187,7 +187,7 @@ def mergedata(filepath, release_id, metadata, cover, source):
         metadata_user = metadata
         cover_source = cover if cover != '/static/images/empty_cover.png' else os.path.join(env.BASE_DIR, 'metatube', cover)
         extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-        if extension in ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV']:
+        if extension in env.META_EXTENSIONS:
             if source == 'Spotify':
                 cred = Config.get_spotify().split(';')
                 spotify = Spotify(cred[1], cred[0])
@@ -203,7 +203,8 @@ def mergedata(filepath, release_id, metadata, cover, source):
                 token = Config.get_genius()
                 genius = Genius(token)
                 metadata_source = genius.fetchsong(release_id)
-                data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source)
+                lyrics = genius.fetchlyrics(metadata_source["song"]["url"])
+                data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source, lyrics)
             elif source == 'Unavailable':
                 data = MetaData.onlyuserdata(filepath, metadata_user)
             if data is not False:
@@ -359,7 +360,7 @@ def showfilebrowser(visible, id, target_folder=None):
         path = os.path.join(folder, file)
         if os.path.isfile(path):
             extension = path.split('.')[len(path.split('.')) - 1].upper()
-            if extension not in ['AAC', 'FLAC', 'MP3', 'M4A', 'OPUS', 'VORBIS', 'WAV', 'MP4', 'M4A', 'FLV', 'WEBM', 'OGG', 'MKV', 'AVI']:
+            if extension not in env.AUDIO_EXTENSIONS and extension not in env.VIDEO_EXTENSIONS:
                 continue
             if Database.checkfile(path) is not None:
                 continue
