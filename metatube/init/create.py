@@ -67,8 +67,6 @@ class Default():
                 if len(os.listdir(directory)) > 0:
                     shutil.rmtree(directory)
             init(directory)
-            if os.path.exists(self._url) and os.path.isfile(self._url):
-                self.removealembic()
         self.migrations()
         for method in self._methods:
             getattr(self, method)()
@@ -79,6 +77,8 @@ class Default():
         directory = os.path.join(env.BASE_DIR, 'migrations')
         stamp(directory)
         migrate(directory)
+        if os.path.exists(self._url) and os.path.isfile(self._url):
+            self.removealembic()
         upgrade(directory)
         
     def removealembic(self):

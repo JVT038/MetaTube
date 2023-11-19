@@ -1,5 +1,4 @@
 import json
-from importlib_metadata import metadata
 from magic import Magic
 from re import M
 from mutagen.id3 import (
