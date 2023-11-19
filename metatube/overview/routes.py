@@ -18,12 +18,14 @@ from tempfile import mkdtemp
 from zipfile import ZipFile
 import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
+from metatube import threader
 import json
 import os
 import asyncio
 import requests
 import random
 import string
+import _thread
 
 @bp.route('/')
 def index():
@@ -111,27 +113,30 @@ def searchmetadata(data):
         socketio.start_background_task(Genius.searchsong, data, token)
 
 @socketio.on('ytdl_download')
-def download(data):
-    url = data["url"]
-    ext = data["ext"] or 'mp3'
-    output_folder = data["output_folder"] or '/downloads'
-    output_type = data["type"] or 'Audio'
-    output_format = data["output_format"] or f'%(title)s.%(ext)s'
-    bitrate = data["bitrate"] or '192'
-    skipfragments = data["skipfragments"] or {}
-    proxy_data = data["proxy_data"] or {'proxy_type': 'None'}
+def download(downloadData, metadataData):
+    url = downloadData["url"]
+    ext = downloadData["ext"] or 'mp3'
+    output_folder = downloadData["output_folder"] or '/downloads'
+    output_type = downloadData["type"] or 'Audio'
+    output_format = downloadData["output_format"] or f'%(title)s.%(ext)s'
+    bitrate = downloadData["bitrate"] or '192'
+    skipfragments = downloadData["skipfragments"] or {}
+    proxy_data = downloadData["proxy_data"] or {'proxy_type': 'None'}
     
-    width = data["width"] or 1920
-    height = data["height"] or 1080
+    width = downloadData["width"] or 1920
+    height = downloadData["height"] or 1080
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = strtobool(str(env.LOGGER))
-    logger.info('Request to download %s', data["url"])
+    logger.info('Request to download %s', downloadData["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
-        yt_instance = yt()
-        yt_instance.get_video(url, ytdl_options)
+        # yt_instance = yt()
+        # _thread.start_new_thread(yt.get_video, (url, ytdl_options))
+        # logger.info('started new thread')
+        # # yt_instance.get_video(url, ytdl_options)
+        _thread.start_new_thread(threader.start_process(url, ytdl_options, metadataData))
     return 'OK'
 
 @socketio.on('fetchmbprelease')

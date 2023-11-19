@@ -699,6 +699,113 @@ $(document).ready(function() {
         $("tr#" + rowid).find('.finditembtn').remove();
     }
 
+    function getMetadataData() {
+        let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+        let people = {};
+        let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
+        let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
+
+        if(metadata_source == 'Unavailable') {
+            // The priority order is: Spotify -> Deezer -> Musibrainz
+            var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
+            var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
+        } else if(metadata_source == 'Spotify') {
+            var trackid = $("#spotify_trackid").val();
+            var albumid = $("#spotify_albumid").val();   
+        } else if(metadata_source == 'Musicbrainz') {
+            var trackid = $("#mbp_releaseid").val();
+            var albumid = $("#mbp_albumid").val();
+        } else if(metadata_source == 'Deezer') {
+            var trackid = $("#deezer_trackid").val();
+            var albumid = $("#deezer_albumid").val();
+        } else if(metadata_source == 'Genius') { 
+            var trackid = $("#genius_songid").val();
+        }
+
+        $.each($('.artist_relations'), function() {
+            if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
+                return;
+            } else {
+                // Get ID by removing all letters from the ID, so the number remains
+                let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
+                if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
+                    people[id].name = $(this).val();
+                } else {
+                    people[id].type = $(this).val();
+                }
+            }
+        });
+
+        let artists = $("#md_artists").val().split(';');
+        let albumartists = $("#md_album_artists").val().split(';');
+        return {
+            'trackid': trackid,
+            'albumid': albumid,
+            'title': $("#md_title").val(),
+            'artists': JSON.stringify(artists),
+            'album': $("#md_album").val(),
+            'album_artists': JSON.stringify(albumartists),
+            'album_tracknr': $("#md_album_tracknr").val(),
+            'album_releasedate': $("#md_album_releasedate").val(),
+            'cover': $("#md_cover").val(),
+            'people': JSON.stringify(people)
+        };
+    }
+
+    function getDownloadData() {
+        if($(".audiocol-checkbox:checked").length < 1 && $("#audiocol").length > 0 && !$("#extension option:selected").hasAttr('nosupport')) {
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+            $("#searchlog").text('Select a release on the right side before downloading a video');
+        }  else if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
+            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
+            $("#searchlog").text('Enter all segment fields or disable the segments');
+        } else if($("#audiocol").length < 1 && $("#metadataview").find('input[required]').val() == '' && !$("#extension option:selected").hasAttr('nosupport')) {
+            $("#metadatalog").text('Enter all required fields!');
+        } else {
+            let url = $("#thumbnail_yt").attr('url');
+            let ext = $("#extension").val();
+            let output_folder = $("#output_folder").val();
+            let type = $("#type").val();
+            let output_format = $("#outputname").val();
+            let bitrate = $("#bitrate").val();
+            let width = $("#width").val();
+            let height = $("#height").val();
+            var skipfragments = [];
+            if(!$("#segments_check").is(':checked')) {
+                $.each($('.timestamp_input'), function(key, value) {
+                    if(value.id.slice(0, 12) == 'segmentstart') {
+                        let id = value.id.slice(13);
+                        skipfragments[id] = {'start': value.value}
+                    } else if(value.id.slice(0, 10) == 'segmentend') {
+                        let id = value.id.slice(11);
+                        skipfragments[id].end = value.value;
+                    }
+                });
+            }
+            skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
+            let proxy_data = JSON.stringify({
+                'proxy_type': $("#proxy_type").val(),
+                'proxy_address': $("#proxy_type").val() == 'None' ? '' : $("#proxy_address").val(),
+                'proxy_port': $("#proxy_type").val() == 'None' ? '' : $("#proxy_port").val(),
+                'proxy_username': $("#proxy_type").val() == 'None' ? '' : $("#proxy_username").val(),
+                'proxy_password': $("#proxy_type").val() == 'None' ? '' : $("#proxy_password").val(),
+            })
+            $("#progress_status").siblings('p').empty();
+            return {
+                'url': url,
+                'ext': ext,
+                'output_folder': output_folder,
+                'output_format': output_format,
+                'type': type,
+                'bitrate': bitrate,
+                'skipfragments': skipfragments,
+                'proxy_data': proxy_data,
+                'width': width,
+                'height': height
+            }
+        }
+    }
+
     $(window).resize(function() {
         if ($(window).width() < 700) {
             $(".youtuberesult").children('li').removeClass('media');
@@ -1339,64 +1446,15 @@ $(document).ready(function() {
     });
 
     $("#downloadbtn").on('click', function(e) {
-        if($(".audiocol-checkbox:checked").length < 1 && $("#audiocol").length > 0 && !$("#extension option:selected").hasAttr('nosupport')) {
-            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
-            $("#searchlog").text('Select a release on the right side before downloading a video');
-        }  else if($(".timestamp_input").val() == '' && !$("#segments_check").is(':checked')) {
-            $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
-            $("#searchlog").text('Enter all segment fields or disable the segments');
-        } else if($("#audiocol").length < 1 && $("#metadataview").find('input[required]').val() == '' && !$("#extension option:selected").hasAttr('nosupport')) {
-            $("#metadatalog").text('Enter all required fields!');
-        } else {
-            let url = $("#thumbnail_yt").attr('url');
-            let ext = $("#extension").val();
-            let output_folder = $("#output_folder").val();
-            let type = $("#type").val();
-            let output_format = $("#outputname").val();
-            let bitrate = $("#bitrate").val();
-            let width = $("#width").val();
-            let height = $("#height").val();
-            var skipfragments = [];
-            if(!$("#segments_check").is(':checked')) {
-                $.each($('.timestamp_input'), function(key, value) {
-                    if(value.id.slice(0, 12) == 'segmentstart') {
-                        let id = value.id.slice(13);
-                        skipfragments[id] = {'start': value.value}
-                    } else if(value.id.slice(0, 10) == 'segmentend') {
-                        let id = value.id.slice(11);
-                        skipfragments[id].end = value.value;
-                    }
-                });
+        let downloadData = getDownloadData();
+        let metadataData = getMetadataData();
+        socket.emit('ytdl_download', (downloadData, metadataData), function(ack) {
+            if(ack == "OK") {
+                $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
+                $("#progressview").removeClass('d-none');
+                $("#searchlog").empty();
             }
-            skipfragments = JSON.stringify($.grep(skipfragments,function(n){ return n == 0 || n }));
-            let proxy_data = JSON.stringify({
-                'proxy_type': $("#proxy_type").val(),
-                'proxy_address': $("#proxy_type").val() == 'None' ? '' : $("#proxy_address").val(),
-                'proxy_port': $("#proxy_type").val() == 'None' ? '' : $("#proxy_port").val(),
-                'proxy_username': $("#proxy_type").val() == 'None' ? '' : $("#proxy_username").val(),
-                'proxy_password': $("#proxy_type").val() == 'None' ? '' : $("#proxy_password").val(),
-            })
-            $("#progress_status").siblings('p').empty();
-            data = {
-                'url': url,
-                'ext': ext,
-                'output_folder': output_folder,
-                'output_format': output_format,
-                'type': type,
-                'bitrate': bitrate,
-                'skipfragments': skipfragments,
-                'proxy_data': proxy_data,
-                'width': width,
-                'height': height
-            }
-            socket.emit('ytdl_download', data, function(ack) {
-                if(ack == "OK") {
-                    $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
-                    $("#progressview").removeClass('d-none');
-                    $("#searchlog").empty();
-                }
-            });
-        }
+        });
     });
 
     $("#searchitem").on('keyup', function() {
@@ -1502,81 +1560,37 @@ $(document).ready(function() {
         else if(msg.status == 'finished_ytdl') {
             let percentage = 100 / phases;
             setprogress(percentage);
+            console.log('download is done');
             progress_text.text('Extracting audio...');
         } else if(msg.status == 'finished_ffmpeg') {
             if(msg.postprocessor == 'ExtractAudio') {
                 let percentage = (100 / phases) * 2;
                 setprogress(percentage);
+                console.log('Audio extraction is done');
                 progress_text.text('Cutting segments from the video... ');
             } else if(msg.postprocessor == 'ModifyChapters') {
                 let percentage = (100 / phases) * 3;
                 setprogress(percentage);
+                console.log('Cutting segments is done');
                 progress_text.text('Moving the files to its destination... ');
             } else if(msg.postprocessor == 'MoveFiles') {
                 let percentage = (100 / phases) * (phases - 1);
                 setprogress(percentage);
+                console.log('Files have been moved');
                 progress_text.text('Adding metadata...');
-                var filepath = msg.filepath;
-                if($("#edititemmodal").css('display').toLowerCase() == 'none') {
+                // var filepath = msg.filepath;
+                // if($("#edititemmodal").css('display').toLowerCase() == 'none') {
                     
-                    let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-                    let people = {};
-                    let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
-                    let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
-    
-                    if(metadata_source == 'Unavailable') {
-                        // The priority order is: Spotify -> Deezer -> Musibrainz
-                        var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
-                        var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
-                    } else if(metadata_source == 'Spotify') {
-                        var trackid = $("#spotify_trackid").val();
-                        var albumid = $("#spotify_albumid").val();   
-                    } else if(metadata_source == 'Musicbrainz') {
-                        var trackid = $("#mbp_releaseid").val();
-                        var albumid = $("#mbp_albumid").val();
-                    } else if(metadata_source == 'Deezer') {
-                        var trackid = $("#deezer_trackid").val();
-                        var albumid = $("#deezer_albumid").val();
-                    } else if(metadata_source == 'Genius') { 
-                        var trackid = $("#genius_songid").val();
-                    }
-        
-                    $.each($('.artist_relations'), function() {
-                        if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
-                            return;
-                        } else {
-                            // Get ID by removing all letters from the ID, so the number remains
-                            let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
-                            if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
-                                people[id].name = $(this).val();
-                            } else {
-                                people[id].type = $(this).val();
-                            }
-                        }
-                    });
-
-                    let artists = $("#md_artists").val().split(';');
-                    let albumartists = $("#md_album_artists").val().split(';');
-                    let metadata = {
-                        'trackid': trackid,
-                        'albumid': albumid,
-                        'title': $("#md_title").val(),
-                        'artists': JSON.stringify(artists),
-                        'album': $("#md_album").val(),
-                        'album_artists': JSON.stringify(albumartists),
-                        'album_tracknr': $("#md_album_tracknr").val(),
-                        'album_releasedate': $("#md_album_releasedate").val(),
-                        'cover': $("#md_cover").val(),
-                        'people': JSON.stringify(people)
-                    };
-                    socket.emit('mergedata', filepath, release_id, metadata, cover, metadata_source);
-                } else {
-                    let itemid = $("#edititemmodal").attr('itemid');
-                    socket.emit('editfilerequest', filepath, itemid);
-                }
+                    
+                //     socket.emit('mergedata', filepath, release_id, metadata, cover, metadata_source);
+                // } else {
+                //     let itemid = $("#edititemmodal").attr('itemid');
+                //     socket.emit('editfilerequest', filepath, itemid);
+                // }
             }
         } else if(msg.status == 'finished_metadata') {
             setprogress("100");
+            console.log('Metadata has been merged');
             progress_text.text('Finished adding metadata!');
             msg.data["ytid"] = $("#thumbnail_yt").attr('ytid');
             try {
@@ -1588,12 +1602,14 @@ $(document).ready(function() {
             }
         } else if(msg.status == 'metadata_unavailable') {
             msg.data["ytid"] = $("#thumbnail_yt").attr('ytid');
+            console.log('')
             progress_text.text('Metadata has NOT been added, because metadata is not supported for the selected extension');
             setprogress("100");
             $("#downloadfilebtn").removeClass('d-none');
             $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
             socket.emit('insertitem', msg.data);
         } else if(msg.status == 'error') {
+            console.log('')
             progress_text.text(msg.message);
             progress.attr('aria-valuenow', 100);
             progress.html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');

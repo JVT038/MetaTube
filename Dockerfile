@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.12-alpine
 LABEL Author=JVT038 \
     Maintainer=JVT038 \
     Name=MetaTube
@@ -15,5 +15,4 @@ RUN \
     python3 -m pip install --upgrade pip && \
     pip3 install -r /config/requirements.txt && \
     apk del --purge alpine-sdk
-
 ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]

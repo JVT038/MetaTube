@@ -43,7 +43,7 @@ class YouTube:
         result = await search.next()
         sockets.youtubesearch(result)
         
-    def __download(self, url: list, ytdl_options: dict):
+    def download(url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
                 ytdl.download(url)
@@ -195,8 +195,8 @@ class YouTube:
         return ytdl_options
 
     def get_video(self, url, ytdl_options):
-        # Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
-        socketio.start_background_task(self.__download, url, ytdl_options)
+        Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
+        # socketio.start_background_task(self.__download, url, ytdl_options)
         
     def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])

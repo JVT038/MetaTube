@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  metatube:
+    container_name: metatube
+    # image: jvt038/metatube:latest
+    build:
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - LOG=True
+      - LOG_LEVEL=10
+      # - INIT_DB=false
+    volumes:
+      - metatube_downloads:/downloads:rw
+      - metatube_db:/database:rw
+      - metatube_migrations:/config/migrations
+    # Necessary for VAAPI to work
+    # devices:
+    #   - "/dev/dri/card0:/dev/dri/card0"
+    #   - "/dev/dri/renderD128:/dev/dri/renderD128"
+
+volumes:
+  metatube_downloads:
+  metatube_db:
+  metatube_migrations:
