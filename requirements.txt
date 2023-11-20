@@ -8,7 +8,7 @@ Flask-SocketIO==5.3.6
 Flask-Migrate==4.0.4
 Flask-SQLAlchemy==3.1.1
 musicbrainzngs==0.7.1
-sponsorblock.py==0.2.2
+sponsorblock.py==0.2.3
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 python-magic==0.4.27
