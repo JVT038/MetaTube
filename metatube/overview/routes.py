@@ -7,7 +7,7 @@ from metatube.metadata import MetaData
 from metatube.deezer import Deezer
 from metatube.spotify import spotify_metadata as Spotify
 from metatube.genius import Genius
-from metatube import socketio, sockets
+from metatube import socketio, sockets, threader
 from metatube import Config as env
 from flask import render_template
 from datetime import datetime
@@ -136,7 +136,8 @@ def download(downloadData, metadataData):
         # _thread.start_new_thread(yt.get_video, (url, ytdl_options))
         # logger.info('started new thread')
         # # yt_instance.get_video(url, ytdl_options)
-        _thread.start_new_thread(threader.start_process(url, ytdl_options, metadataData))
+        # _thread.start_new_thread(threader.start_process(url, ytdl_options, metadataData))
+        socketio.start_background_task(threader.start_process, (url, ytdl_options)) # type: ignore
     return 'OK'
 
 @socketio.on('fetchmbprelease')
@@ -212,7 +213,9 @@ def mergedata(filepath, release_id, metadata, cover, source):
                 data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source, lyrics)
             elif source == 'Unavailable':
                 data = MetaData.onlyuserdata(filepath, metadata_user)
-            if data is not False:
+            else:
+                data = False
+            if data is not False:   
                 data["goal"] = 'add'
                 data["extension"] = extension
                 data["source"] = source

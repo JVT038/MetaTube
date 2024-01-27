@@ -19,6 +19,7 @@ from datetime import datetime
 import requests, base64, os
 
 class MetaData:
+    @staticmethod
     def getresponse(data):
         return {
             'filepath': os.path.join(Config.BASE_DIR, data["filename"]),
@@ -170,6 +171,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def getdeezerdata(filename, metadata_user, metadata_source):
         album = metadata_source["album"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = str(metadata_source["id"]) if len(metadata_user["trackid"]) < 1 else str(metadata_user["trackid"])
@@ -221,6 +223,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def getgeniusdata(filename, metadata_user, metadata_source, lyrics):
         logger.info('Getting Genius metadata')
         album = metadata_source["song"]["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
@@ -273,6 +276,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def onlyuserdata(filename, metadata_user):
         if metadata_user["cover"] != '':
             try:
@@ -310,7 +314,8 @@ class MetaData:
             'genres': ""
         }
         return data
-        
+    
+    @staticmethod 
     def mergeaudiodata(data):
         '''
         Valid fields for EasyID3:
@@ -390,6 +395,8 @@ class MetaData:
             audio = OggOpus(data["filename"])
         elif data["extension"] == 'OGG':
             audio = OggVorbis(data["filename"])
+        else:
+            return
 
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
@@ -438,10 +445,13 @@ class MetaData:
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
-                
+    
+    @staticmethod
     def mergeid3data(data):
         if data["extension"] == 'WAV':
             audio = WAVE(data["filename"])
+        else:
+            return
         try:
             audio.add_tags()
         except Exception:
@@ -466,9 +476,14 @@ class MetaData:
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
+        
+    @staticmethod
     def mergevideodata(data):
+        video = None
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
+        if video == None:
+            return
         dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d') if len(data["release_date"]) > 0 else datetime.now().date()
         year = dateobj.year
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
@@ -495,9 +510,11 @@ class MetaData:
             logger.info('Finished adding metadata to %s', data["title"])
             sockets.downloadprogress({'status':'finished_metadata', 'data': response})
     
+    @staticmethod
     def readaudiometadata(filename):
         logger.info('Reading metadata of %s', filename)
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
+        audio = None
         if extension == 'MP3':
             audio = EasyID3(filename)
             data = MP3(filename)
@@ -513,6 +530,8 @@ class MetaData:
         elif extension == 'OGG':
             audio = OggVorbis(filename)
             data = OggVorbis(filename)
+        if audio == None:
+            return
         
         response = {
             'title': audio.get('title', [''])[0],
@@ -538,10 +557,13 @@ class MetaData:
         
         return response
     
+    @staticmethod
     def readvideometadata(filename):
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
         if extension in ['M4A', 'MP4']:
             video = MP4(filename)
+        else:
+            return
             
         # Bitrate calculation: https://www.reddit.com/r/headphones/comments/3xju4s/comment/cy5dn8h/?utm_source=share&utm_medium=web2x&context=3
         # Mutagen MP4 stream info: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Info

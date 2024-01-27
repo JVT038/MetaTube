@@ -11,6 +11,8 @@ class spotify_metadata():
             
     def search(self, data):
         searchresults = self.spotify.search(f"track:{data['title']}", data["max"])
+        if searchresults is None:
+            return
         searchresults["query"] = data["title"]
         sockets.spotifysearch(searchresults)
         logger.info('Searched Spotify for track \'%s\' ', data["title"])
@@ -21,6 +23,7 @@ class spotify_metadata():
     def fetch_track(self, id):
         return self.spotify.track(id)
     
+    @staticmethod
     def searchspotify(query, cred):
         spotify = spotify_metadata(cred[1], cred[0])
         spotify.search(query)

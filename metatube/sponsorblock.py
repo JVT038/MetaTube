@@ -1,5 +1,5 @@
 import sponsorblock
-from sponsorblock.errors import *
+from sponsorblock.errors import NotFoundException
 from metatube import logger
 def segments(url):
     # return "404"

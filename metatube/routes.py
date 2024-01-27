@@ -7,6 +7,8 @@ import json
 def fetchtemplate(id):
     if id is not None and len(id) > 0:
         template = Templates.fetchtemplate(id)
+        if template is None:
+            return
         data = {
             "id": template.id,
             "name": template.name,

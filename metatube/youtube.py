@@ -9,6 +9,8 @@ from metatube.sponsorblock import segments as findsegments
 from jinja2 import Environment, PackageLoader, select_autoescape
     
 class YouTube:
+    
+    @staticmethod
     def is_supported(url):
         extractors = yt_dlp.extractor.gen_extractors()
         for e in extractors:
@@ -16,6 +18,7 @@ class YouTube:
                 return True
         return False
 
+    @staticmethod
     def fetch_url(url, verbose):
         if YouTube.is_supported(url):
             ytdl_options = {'logger': logger, 'verbose': verbose}
@@ -27,7 +30,8 @@ class YouTube:
                     return str(e)
         else:
             raise ValueError("Invalid URL!")
-        
+    
+    @staticmethod
     def verifytemplate(template, info_dict, verbose):
         ytdl_options = {'logger': logger, 'verbose': verbose}
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
@@ -36,13 +40,15 @@ class YouTube:
                 return filename
             except Exception as e:
                 return str(e)
-        
+    
+    @staticmethod
     async def search(query):
         logger.info('Searching YouTube for \'%s\'', query)
         search = VideosSearch(query)
         result = await search.next()
         sockets.youtubesearch(result)
         
+    @staticmethod
     def download(url: list, ytdl_options: dict):
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
@@ -69,6 +75,7 @@ class YouTube:
                 logger.exception('Error during downloading video: %s', str(e))
                 sockets.downloadprogress({'status': 'error', 'message': 'Something has gone wrong. Check logs for more info'})
     
+    @staticmethod
     def download_hook(d):
         if d['status'] == 'finished':
             socketio.emit('downloadprogress', {'status': 'finished_ytdl'})
@@ -91,7 +98,8 @@ class YouTube:
                     'status': 'downloading',
                     'total_bytes': 'Unknown'
                 })
-                
+    
+    @staticmethod
     def postprocessor_hook(d):
         if d['status'] == 'finished':
             socketio.emit('downloadprogress', {
@@ -101,7 +109,8 @@ class YouTube:
             })
             logger.info("Finished postprocessor %s", d["postprocessor"])
             # sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
-            
+    
+    @staticmethod
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
@@ -197,7 +206,8 @@ class YouTube:
     def get_video(self, url, ytdl_options):
         Thread(target=self.__download, args=(url, ytdl_options), name="YouTube-DLP download").start()
         # socketio.start_background_task(self.__download, url, ytdl_options)
-        
+     
+    @staticmethod
     def fetch_video(video, templates, metadata_sources, defaulttemplate):
         sb = findsegments(video["webpage_url"])
         segments = sb if type(sb) == list else 'error'

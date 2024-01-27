@@ -1,6 +1,12 @@
 /*
 This is a JavaScript file meant to be used globally, across the entire application, in every single page
 */
+// Import our custom CSS
+import '../css/styles.scss'
+
+// Import all of Bootstrap's JS
+import { Modal } from 'bootstrap'
+
 $(document).ready(function() {
     // Numeric only control handler
     // Force the user to only enter numeric numbers. Returns false when a key code doesn't match a number or any keycode given in extraKeys

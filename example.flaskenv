@@ -8,3 +8,5 @@ LOG=False
 SOCKET_LOG=False
 LOG_LEVEL=30
 URL_SUBPATH=/metatube
+
+NPM_PATH=C:/path/to/npm

@@ -3,6 +3,7 @@ from flask.logging import default_handler
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_socketio import SocketIO
+from flask_vite import Vite
 from distutils.util import strtobool
 from config import Config
 
@@ -10,6 +11,7 @@ import logging
 db = SQLAlchemy()
 migrate = Migrate()
 socketio = SocketIO()
+vite = Vite()
 
 logformat = logging.Formatter(fmt='[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)d]: %(message)s', datefmt='%d-%m-%Y %H:%M')
 
@@ -34,12 +36,13 @@ def create_app(config_class=Config):
     )
     app.register_error_handler(Exception, error)
     app.logger.removeHandler(default_handler)
-    app.logger.addHandler(logger)
+    app.logger.addHandler(console)
     console.setLevel(int(app.config["LOG_LEVEL"]))
     socket_log = logger if strtobool(str(app.config["SOCKET_LOG"])) == 1 else False
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True, ping_interval=60)
     socketio.init_app(app, json=json, engineio_logger=socket_log, logger=socket_log)
+    vite.init_app(app)
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     if app.config.get('INIT_DB') == True:

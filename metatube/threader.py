@@ -1,18 +1,22 @@
 from threading import Thread
 from metatube import youtube, socketio, logger
+from metatube.database import Database, Config
+from metatube.spotify import spotify_metadata as Spotify
+from metatube.genius import Genius
 from metatube.youtube import YouTube as yt
 from metatube.metadata import MetaData
 
 def start_process(url, ytdl_options, metadataData):
     YouTubeThread = Thread(target=yt.download, args=(url, ytdl_options), name="yt-dlp download")
     mergeMetadataThread = createMetadataThread(metadataData)
-    youtubeThread.start()
+    YouTubeThread.start()
     logger.info('YouTube thread has started')
-    youtubeThread.join()
+    YouTubeThread.join()
     logger.info('YouTube thread has finished')
     logger.info('Metadata thread has started')
-    mergeMetadataThread.start()
-    mergeMetadataThread.join()
+    if mergeMetadataThread is not None:
+        mergeMetadataThread.start()
+        mergeMetadataThread.join()
     logger.info('Metadata thread has finished')
     
 def createMetadataThread(metadataData):
@@ -48,11 +52,11 @@ def createMetadataThread(metadataData):
                 data["extension"] = extension
                 data["source"] = source
                 if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-                    Thread(target=MetaData.mergeaudiodata(data), args=(url, ytdl_options), name="Merge metadata")
+                    return Thread(target=MetaData.mergeaudiodata(data), args=(url, ytdl_options), name="Merge metadata")
                 elif extension in ['MP4', 'M4A']:
-                    Thread(target=MetaData.mergevideodata(data), args=(url, ytdl_options), name="Merge metadata")
+                    return Thread(target=MetaData.mergevideodata(data), args=(url, ytdl_options), name="Merge metadata")
                 elif extension in ['WAV']:
-                    Thread(target=MetaData.mergeid3data(data), args=(url, ytdl_options), name="Merge metadata")
+                    return Thread(target=MetaData.mergeid3data(data), args=(url, ytdl_options), name="Merge metadata")
         else:
             # The name will be the filename of the downloaded file without the extension
             filename = os.path.split(filepath)[1]
@@ -69,6 +73,7 @@ def createMetadataThread(metadataData):
             }
             sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
             logger.debug('Metadata unavailable for file %s', data["filepath"])
+            return None
     else:
         sockets.searchvideo(f'{source} item has already been downloaded!')
         try:
