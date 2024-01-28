@@ -1,10 +1,3 @@
-<!-- <div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="metatube" />
-
-  &#xa0;
-
-  <a href="https://metatube.netlify.app">Demo</a>
-</div> -->
 <h1 align="center">MetaTube</h1>
 
 <p align="center">
@@ -265,8 +258,9 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [X] Dark mode support
 - [X] Fix error `Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user’s experience. For more help http://xhr.spec.whatwg.org/` in overview
 - [X] Make sure the search for downloaded song field works
+- [x] Make sure the progress bar works properly in a Docker container, because it doesn't work properly rn
 
-### Not finished (I'll never finish this)
+### Not finished (I'll probably never finish this lol)
 
 - [ ] Add it to the PyPi library
 - [ ] Add support for sites other than YouTube
@@ -289,8 +283,10 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Have a proper versioning system, because it's impossible to keep track of versions rn
 - [ ] Cache and store the segments and other video data, so next time of loading a video will be faster
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
-- [ ] Make sure the progress bar works properly in a Docker container, because it doesn't work properly rn.
-- [ ] Use proper queues and threading during download instead of the weird ping-pong system between the client and the server.
+- [ ] Use proper queues and threading during download instead of the weird ping-pong system between the client and the server.*
+- [ ] Add unit tests for the download, metadata logic, template / database stuff, config detection, automatic migrations
+
+* in progress
 &#xa0;
 
 ## Disclaimer

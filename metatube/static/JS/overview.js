@@ -700,13 +700,72 @@ $(document).ready(function() {
         $("tr#" + rowid).find('.finditembtn').remove();
     }
 
+    function getMetadata() {          
+        let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+        let people = {};
+        let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
+        let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
+
+        if(metadata_source == 'Unavailable') {
+            // The priority order is: Spotify -> Deezer -> Musibrainz
+            var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
+            var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
+        } else if(metadata_source == 'Spotify') {
+            var trackid = $("#spotify_trackid").val();
+            var albumid = $("#spotify_albumid").val();   
+        } else if(metadata_source == 'Musicbrainz') {
+            var trackid = $("#mbp_releaseid").val();
+            var albumid = $("#mbp_albumid").val();
+        } else if(metadata_source == 'Deezer') {
+            var trackid = $("#deezer_trackid").val();
+            var albumid = $("#deezer_albumid").val();
+        } else if(metadata_source == 'Genius') { 
+            var trackid = $("#genius_songid").val();
+        }
+
+        $.each($('.artist_relations'), function() {
+            if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
+                return;
+            } else {
+                // Get ID by removing all letters from the ID, so the number remains
+                let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
+                if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
+                    people[id].name = $(this).val();
+                } else {
+                    people[id].type = $(this).val();
+                }
+            }
+        });
+
+        let artists = $("#md_artists").val().split(';');
+        let albumartists = $("#md_album_artists").val().split(';');
+        return {
+            'trackid': trackid,
+            'albumid': albumid,
+            'title': $("#md_title").val(),
+            'artists': JSON.stringify(artists),
+            'album': $("#md_album").val(),
+            'album_artists': JSON.stringify(albumartists),
+            'album_tracknr': $("#md_album_tracknr").val(),
+            'album_releasedate': $("#md_album_releasedate").val(),
+            'cover': $("#md_cover").val(),
+            'people': JSON.stringify(people),
+            'cover': cover,
+            'release_id': release_id,
+            'metadata_source': metadata_source
+        };
+    }
+
     function getPhases() {
         return $("#segments_check").is(':checked') ? 4 : 5;
     }
 
+    function getProgress() {
+        return $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progressedit") : $("#progress");
+    }
+
     function setProgress(percentage) { 
-        let progress = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progressedit") : $("#progress");
-        progress.attr({
+        getProgress().attr({
             'aria-valuenow': percentage + "%",
             'style': 'width: ' + parseInt(percentage) + '%'
         }).text(percentage + "%");
@@ -1402,7 +1461,7 @@ $(document).ready(function() {
                 'width': width,
                 'height': height
             }
-            socket.emit('ytdl_download', data, function(ack) {
+            socket.emit('ytdl_download', data, getMetadata(), function(ack) {
                 if(ack == "OK") {
                     $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
@@ -1529,58 +1588,7 @@ $(document).ready(function() {
             progress_text.text('Adding metadata...');
             var filepath = msg.filepath;
             if($("#edititemmodal").css('display').toLowerCase() == 'none') {
-                
-                let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-                let people = {};
-                let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
-                let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
-
-                if(metadata_source == 'Unavailable') {
-                    // The priority order is: Spotify -> Deezer -> Musibrainz
-                    var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
-                    var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
-                } else if(metadata_source == 'Spotify') {
-                    var trackid = $("#spotify_trackid").val();
-                    var albumid = $("#spotify_albumid").val();   
-                } else if(metadata_source == 'Musicbrainz') {
-                    var trackid = $("#mbp_releaseid").val();
-                    var albumid = $("#mbp_albumid").val();
-                } else if(metadata_source == 'Deezer') {
-                    var trackid = $("#deezer_trackid").val();
-                    var albumid = $("#deezer_albumid").val();
-                } else if(metadata_source == 'Genius') { 
-                    var trackid = $("#genius_songid").val();
-                }
-    
-                $.each($('.artist_relations'), function() {
-                    if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
-                        return;
-                    } else {
-                        // Get ID by removing all letters from the ID, so the number remains
-                        let id = $(this).parents('.personrow').attr('id').replace(/[a-zA-Z]/g, '');
-                        if(this.id.replace(/[0-9]/g, '') == 'artist_relations_name') {
-                            people[id].name = $(this).val();
-                        } else {
-                            people[id].type = $(this).val();
-                        }
-                    }
-                });
-
-                let artists = $("#md_artists").val().split(';');
-                let albumartists = $("#md_album_artists").val().split(';');
-                let metadata = {
-                    'trackid': trackid,
-                    'albumid': albumid,
-                    'title': $("#md_title").val(),
-                    'artists': JSON.stringify(artists),
-                    'album': $("#md_album").val(),
-                    'album_artists': JSON.stringify(albumartists),
-                    'album_tracknr': $("#md_album_tracknr").val(),
-                    'album_releasedate': $("#md_album_releasedate").val(),
-                    'cover': $("#md_cover").val(),
-                    'people': JSON.stringify(people)
-                };
-                socket.emit('mergedata', filepath, release_id, metadata, cover, metadata_source);
+                socket.emit('mergedata', getMetadata(), filepath);
             } else {
                 let itemid = $("#edititemmodal").attr('itemid');
                 socket.emit('editfilerequest', filepath, itemid);
@@ -1612,9 +1620,9 @@ $(document).ready(function() {
 
     socket.on('downloaderror', function(msg) {
         progress_text.text(msg.message);
-        progress.attr('aria-valuenow', 100);
-        progress.html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');
-        progress.css('width', '100%');
+        getProgress().attr('aria-valuenow', 100);
+        getProgress().html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');
+        getProgress().css('width', '100%');
         progress_text.text(msg.message);
         if($("#edititemmodal").css('display').toLowerCase() != 'block') {
             $("#resetviewbtn").removeClass('d-none');

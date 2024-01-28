@@ -1,10 +1,11 @@
 import yt_dlp, json, os
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
+from yt_dlp.postprocessor.metadataparser import MetadataParserPP
 from youtubesearchpython import VideosSearch
 from threading import Thread
 from urllib.error import URLError
 from yt_dlp.utils import ExtractorError, DownloadError, PostProcessingError
-from metatube import sockets, logger, socketio
+from metatube import sockets, logger
 from metatube.sponsorblock import segments as findsegments
 from jinja2 import Environment, PackageLoader, select_autoescape
 import asyncio
@@ -101,7 +102,7 @@ class YouTube:
             sockets.finished_postprocessor(d['postprocessor'], d['info_dict']['filepath'])
     
     @staticmethod
-    def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
+    def get_options(ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose, metadata):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)
@@ -168,6 +169,21 @@ class YouTube:
                 'key': 'ModifyChapters',
                 'remove_ranges': ranges
             })
+        
+        '''
+        --parse-metadata example in CLI:
+        yt-dlp orJSJGHjBLI -x --audio-format mp3 --add-metadata -o "%(track,title)s - %(artist)s.%(ext)s" --parse-metadata " Bad Habits: %(title)s" --parse-metadata "Ed Sheeran:%(artist)s"
+        '''
+        # postprocessors.append({
+        #     'actions': [
+        #         (MetadataParserPP.interpretter, " " + metadata['title'], ' %(title)s'),
+        #         (MetadataParserPP.interpretter, metadata['album'], '%(album)s'),
+        #         (MetadataParserPP.interpretter, ';'.join(json.loads(metadata['album_artists'])), '%(album_artist)s'),
+        #         (MetadataParserPP.interpretter, metadata['album_tracknr'], '%(track_number)s'),
+        #     ],
+        #     'key': 'MetadataParser',
+        #     'when': 'pre_process'
+        # })
             
         ytdl_options = {
             'format': format,

@@ -1,3 +1,4 @@
+from platform import release
 import shutil
 from magic import Magic
 from metatube.overview import bp
@@ -112,24 +113,24 @@ def searchmetadata(data):
         socketio.start_background_task(Genius.searchsong, data, token)
 
 @socketio.on('ytdl_download')
-def download(data):
-    url = data["url"]
-    ext = data["ext"] or 'mp3'
-    output_folder = data["output_folder"] or '/downloads'
-    output_type = data["type"] or 'Audio'
-    output_format = data["output_format"] or f'%(title)s.%(ext)s'
-    bitrate = data["bitrate"] or '192'
-    skipfragments = data["skipfragments"] or {}
-    proxy_data = data["proxy_data"] or {'proxy_type': 'None'}
+def download(fileData, metadata):
+    url = fileData["url"]
+    ext = fileData["ext"] or 'mp3'
+    output_folder = fileData["output_folder"] or '/downloads'
+    output_type = fileData["type"] or 'Audio'
+    output_format = fileData["output_format"] or f'%(title)s.%(ext)s'
+    bitrate = fileData["bitrate"] or '192'
+    skipfragments = fileData["skipfragments"] or {}
+    proxy_data = fileData["proxy_data"] or {'proxy_type': 'None'}
     
-    width = data["width"] or 1920
-    height = data["height"] or 1080
+    width = fileData["width"] or 1920
+    height = fileData["height"] or 1080
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = strtobool(str(env.LOGGER))
-    logger.info('Request to download %s', data["url"])
-    ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
+    logger.info('Request to download %s', fileData["url"])
+    ytdl_options = yt.get_options(ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose, metadata)
     if ytdl_options is not False:
         socketio.start_background_task(yt.start_download, url, ytdl_options)
         # socketio.start_background_task(yt.download, url, ytdl_options)
@@ -182,7 +183,11 @@ def fetchgeniusalbum(input_id):
     genius.fetchalbum(input_id)    
 
 @socketio.on('mergedata')
-def mergedata(filepath, release_id, metadata, cover, source):
+def mergedata(metadata, filepath):
+    release_id = metadata["release_id"]
+    cover = metadata["cover"]
+    source = metadata["metadata_source"]
+    
     if Database.checktrackid(release_id) is None and Database.checktrackid(metadata.get('trackid', '')) is None:
         
         metadata_user = metadata
