@@ -1,3 +1,5 @@
+from gevent import monkey
+monkey.patch_all()
 from flask import Flask, json
 from flask.logging import default_handler
 from flask_sqlalchemy import SQLAlchemy
@@ -34,12 +36,12 @@ def create_app(config_class=Config):
     )
     app.register_error_handler(Exception, error)
     app.logger.removeHandler(default_handler)
-    app.logger.addHandler(logger)
+    app.logger.addHandler(console)
     console.setLevel(int(app.config["LOG_LEVEL"]))
     socket_log = logger if strtobool(str(app.config["SOCKET_LOG"])) == 1 else False
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True, ping_interval=60)
-    socketio.init_app(app, json=json, engineio_logger=socket_log, logger=socket_log)
+    socketio.init_app(app, json=json, engineio_logger=socket_log, logger=socket_log, async_mode='gevent')
     app.register_blueprint(bp_overview)
     app.register_blueprint(bp_settings)
     if app.config.get('INIT_DB') == True:

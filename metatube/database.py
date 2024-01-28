@@ -19,9 +19,11 @@ class Config(db.Model):
         db.session.commit()
         logger.info('Set FFmpeg path to %s', ffmpeg_path)
     
+    @staticmethod
     def get_ffmpeg():
         return Config.query.get(1).ffmpeg_directory
     
+    @staticmethod
     def get_hwt():
         return Config.query.get(1).hardware_transcoding
     
@@ -32,7 +34,6 @@ class Config(db.Model):
 
     def set_spotify(self, spotify):
         self.spotify_api = spotify
-        print(spotify)
         db.session.commit()
         logger.info('Changed the Spotify API settings')
         
@@ -51,15 +52,19 @@ class Config(db.Model):
         db.session.commit()
         logger.info('Set hardware transcoding to %s', hw_transcoding)
     
+    @staticmethod
     def get_metadata_sources():
         return Config.query.get(1).metadata_sources
     
+    @staticmethod
     def get_spotify():
         return Config.query.get(1).spotify_api
     
+    @staticmethod
     def get_genius():
         return Config.query.get(1).genius_api
     
+    @staticmethod
     def get_max():
         return Config.query.get(1).amount
 
@@ -80,12 +85,15 @@ class Templates(db.Model):
     proxy_address = db.Column(db.String(128))
     proxy_port = db.Column(db.Integer)
     
+    @staticmethod
     def check_existing(value):
         return True if Templates.query.filter_by(name = value).count() > 0 else False
     
+    @staticmethod
     def counttemplates():
         return Templates.query.count()
     
+    @staticmethod
     def add(data):
         row = Templates(
             name = data["name"],
@@ -101,15 +109,17 @@ class Templates(db.Model):
             proxy_password = data["proxy"]["password"],
             proxy_address = data["proxy"]["address"],
             proxy_port = data["proxy"]["port"]
-        )
+        ) # type: ignore
         db.session.add(row)
         db.session.commit()
         logger.info('Added template %s', data["name"])
         return row.id
     
+    @staticmethod
     def fetchtemplate(input_id):
         return Templates.query.filter_by(id = input_id).first()
     
+    @staticmethod
     def fetchalltemplates():
         return Templates.query.all()
     
@@ -117,7 +127,8 @@ class Templates(db.Model):
         logger.info('Deleting template %s', self.name)
         db.session.delete(self)
         db.session.commit()
-        
+    
+    @staticmethod
     def searchdefault():
         return Templates.query.filter_by(default = True).first()
         
@@ -159,30 +170,38 @@ class Database(db.Model):
     audio_id = db.Column(db.String(128))
     youtube_id = db.Column(db.String(16), unique=True)
     
+    @staticmethod
     def searchrecords(query):
         return Database.query.filter(Database.name.like(query + "%")).all()
     
+    @staticmethod
     def itemtodict(item):
         dict = {}
         for column in item.__table__.columns:
                 dict[column.name] = str(getattr(item, column.name))
         return dict
     
+    @staticmethod
     def getrecords():
         return Database.query.all()
     
+    @staticmethod
     def fetchitem(input_id):
         return Database.query.filter_by(id = input_id).first()
     
+    @staticmethod
     def checkfile(filepath_input):
         return Database.query.filter_by(filepath = filepath_input).first()
     
+    @staticmethod
     def checkyt(youtube_id_input):
         return Database.query.filter_by(youtube_id = youtube_id_input).first()
     
+    @staticmethod
     def checktrackid(release_id_input):
         return Database.query.filter_by(audio_id = release_id_input).first()
     
+    @staticmethod
     def insert(data):
         row = Database(
             filepath = data["filepath"],
@@ -193,7 +212,7 @@ class Database(db.Model):
             cover = data["image"],
             audio_id = data["track_id"],
             youtube_id = data["ytid"]
-        )
+        ) # type: ignore
         db.session.add(row)
         db.session.commit()
         logger.info('Inserted item %s into database', data["name"])
@@ -213,7 +232,7 @@ class Database(db.Model):
         logger.info('Updated item %s', data["name"])
         data["date"] = data["date"].strftime('%d-%m-%Y')
         sockets.overview({'msg': 'changed_metadata_db', 'data': data})
-        
+    
     def updatefilepath(self, filepath):
         self.filepath = filepath
         db.session.commit()
