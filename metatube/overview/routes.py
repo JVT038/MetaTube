@@ -24,6 +24,7 @@ import asyncio
 import requests
 import random
 import string
+import time
 
 @bp.route('/')
 def index():
@@ -84,7 +85,8 @@ def search(query):
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
-            asyncio.run(yt.search(query))
+            # asyncio.run(yt.search(query))
+            socketio.start_background_task(yt.search, query)
     else:
         sockets.searchvideo('Enter an URL!')
         
@@ -130,8 +132,8 @@ def download(data):
     logger.info('Request to download %s', data["url"])
     ytdl_options = yt.get_options(url, ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
-        yt_instance = yt()
-        yt_instance.get_video(url, ytdl_options)
+        socketio.start_background_task(yt.start_download, url, ytdl_options)
+        # socketio.start_background_task(yt.download, url, ytdl_options)
     return 'OK'
 
 @socketio.on('fetchmbprelease')
@@ -174,7 +176,7 @@ def fetchgeniussong(input_id):
     sockets.foundgeniussong(song)
 
 @socketio.on('fetchgeniusalbum')
-def fetchgeniussong(input_id):
+def fetchgeniusalbum(input_id):
     logger.info('Request for Genius album with id %s', input_id)
     token = Config.get_genius()
     genius = Genius(token)
@@ -207,6 +209,8 @@ def mergedata(filepath, release_id, metadata, cover, source):
                 data = MetaData.getgeniusdata(filepath, metadata_user, metadata_source, lyrics)
             elif source == 'Unavailable':
                 data = MetaData.onlyuserdata(filepath, metadata_user)
+            else:
+                return
             if data is not False:
                 data["goal"] = 'add'
                 data["extension"] = extension
@@ -231,7 +235,7 @@ def mergedata(filepath, release_id, metadata, cover, source):
                 'image': cover_source,
                 'track_id': release_id
             }
-            sockets.downloadprogress({'status': 'metadata_unavailable', 'data': data})
+            sockets.metadata_error(data)
             logger.debug('Metadata unavailable for file %s', data["filepath"])
     else:
         sockets.searchvideo(f'{source} item has already been downloaded!')

@@ -113,6 +113,8 @@ def defaulttemplate(id):
 @socketio.on('updatesettings')
 def updatesettings(ffmpeg_path, amount, hardware_transcoding, metadata_sources, extradata):
     db_config = Config.query.get(1)
+    if db_config is None:
+        return
     response = ""
     
     if db_config.ffmpeg_directory != ffmpeg_path:

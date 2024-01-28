@@ -17,7 +17,8 @@ from metatube import sockets, Config, logger
 from datetime import datetime
 import requests, base64, os
 
-class MetaData:
+class MetaData:   
+    @staticmethod
     def getresponse(data):
         return {
             'filepath': os.path.join(Config.BASE_DIR, data["filename"]),
@@ -30,6 +31,7 @@ class MetaData:
             'track_id': data["track_id"]
         }
     
+    @staticmethod
     def getmusicbrainzdata(filename, metadata_user, metadata_source, cover_source):
         logger.info('Getting Musicbrainz metadata')
         album = metadata_source["release"]["release-group"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
@@ -62,7 +64,7 @@ class MetaData:
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                sockets.metadata_error('Cover URL is invalid!')
                 return False
         else:
             cover_mime_type = "image/png"
@@ -117,6 +119,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def getspotifydata(filename, metadata_user, metadata_source):
         logger.info('Getting Spotify metadata')
         album = metadata_source["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
@@ -142,7 +145,7 @@ class MetaData:
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                sockets.metadata_error('Cover URL is invalid!')
                 return False
         else:
             cover_mime_type = "image/png"
@@ -169,6 +172,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def getdeezerdata(filename, metadata_user, metadata_source):
         album = metadata_source["album"]["title"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
         trackid = str(metadata_source["id"]) if len(metadata_user["trackid"]) < 1 else str(metadata_user["trackid"])
@@ -193,7 +197,7 @@ class MetaData:
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                sockets.metadata_error('Cover URL is invalid!')
                 return False
         else:
             file = open(cover_path, 'rb')
@@ -220,6 +224,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def getgeniusdata(filename, metadata_user, metadata_source, lyrics):
         logger.info('Getting Genius metadata')
         album = metadata_source["song"]["album"]["name"] if len(metadata_user["album"]) < 1 else metadata_user["album"]
@@ -243,7 +248,7 @@ class MetaData:
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                sockets.metadata_error('Cover URL is invalid!')
                 return False
         else:
             cover_mime_type = "image/png"
@@ -272,6 +277,7 @@ class MetaData:
         }
         return data
     
+    @staticmethod
     def onlyuserdata(filename, metadata_user):
         if metadata_user["cover"] != '':
             try:
@@ -281,7 +287,7 @@ class MetaData:
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:
-                sockets.downloadprogress({'status': 'error', 'message': 'Cover URL is invalid!'})
+                sockets.metadata_error('Cover URL is invalid!')
                 return False
         else:
             cover_path = os.path.join(Config.BASE_DIR, 'metatube/static/images/empty_cover.png')
@@ -309,7 +315,8 @@ class MetaData:
             'genres': ""
         }
         return data
-        
+    
+    @staticmethod
     def mergeaudiodata(data):
         '''
         Valid fields for EasyID3:
@@ -377,10 +384,8 @@ class MetaData:
             elif data.get('source', '') == 'Deezer':
                 audio.RegisterTXXXKey('deezer_trackid', data["track_id"])
                 audio.RegisterTXXXKey('deezer_albumid', data["album_id"])
-                
             if 'lyrics' in data:
-                audio.RegisterTextKey('lyrics', "USLT")
-            
+                audio.RegisterTextKey('lyrics', "USLT")            
         elif data["extension"] == 'FLAC':
             audio = FLAC(data["filename"])
         elif data["extension"] == 'AAC':
@@ -389,6 +394,8 @@ class MetaData:
             audio = OggOpus(data["filename"])
         elif data["extension"] == 'OGG':
             audio = OggVorbis(data["filename"])
+        else:
+            return
 
         audio["album"] = data["album"]
         audio["artist"] = data["artists"]
@@ -436,11 +443,14 @@ class MetaData:
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
-            sockets.downloadprogress({'status':'finished_metadata', 'data': response})
-                
+            sockets.finished_metadata(response)
+    
+    @staticmethod
     def mergeid3data(data):
         if data["extension"] == 'WAV':
             audio = WAVE(data["filename"])
+        else:
+            return
         try:
             audio.add_tags()
         except Exception:
@@ -464,10 +474,14 @@ class MetaData:
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
-            sockets.downloadprogress({'status':'finished_metadata', 'data': response})
+            sockets.finished_metadata(response)
+    
+    @staticmethod
     def mergevideodata(data):
         if data["extension"] in ['M4A', 'MP4']:
             video = MP4(data["filename"])
+        else:
+            return
         dateobj = datetime.strptime(data["release_date"], '%Y-%m-%d') if len(data["release_date"]) > 0 else datetime.now().date()
         year = dateobj.year
         # iTunes metadata list / key values: https://mutagen.readthedocs.io/en/latest/api/mp4.html?highlight=M4A#mutagen.mp4.MP4Tags
@@ -492,8 +506,9 @@ class MetaData:
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif data["goal"] == 'add':
             logger.info('Finished adding metadata to %s', data["title"])
-            sockets.downloadprogress({'status':'finished_metadata', 'data': response})
+            sockets.finished_metadata(response)
     
+    @staticmethod
     def readaudiometadata(filename):
         logger.info('Reading metadata of %s', filename)
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
@@ -512,6 +527,8 @@ class MetaData:
         elif extension == 'OGG':
             audio = OggVorbis(filename)
             data = OggVorbis(filename)
+        else:
+            return
         
         response = {
             'title': audio.get('title', [''])[0],
@@ -537,10 +554,13 @@ class MetaData:
         
         return response
     
+    @staticmethod
     def readvideometadata(filename):
         extension = filename.split('.')[len(filename.split('.')) - 1].upper()
         if extension in ['M4A', 'MP4']:
             video = MP4(filename)
+        else:
+            return
             
         # Bitrate calculation: https://www.reddit.com/r/headphones/comments/3xju4s/comment/cy5dn8h/?utm_source=share&utm_medium=web2x&context=3
         # Mutagen MP4 stream info: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Info
@@ -559,14 +579,18 @@ class MetaData:
         }
         return response
     
+    @staticmethod
     def FLV(filename):
         pass
     
+    @staticmethod
     def WEBM(filename):
         pass
     
+    @staticmethod
     def MKV(filename):
         pass
     
+    @staticmethod
     def AVI(filename):
         pass

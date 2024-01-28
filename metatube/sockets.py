@@ -1,8 +1,5 @@
 from metatube import socketio
 
-def downloadprogress(message):
-    socketio.emit('downloadprogress', message)
-
 def downloadsettings(message):
     socketio.emit('downloadsettings', message)
     
@@ -62,3 +59,31 @@ def deezersearch(data):
     
 def deezertrack(data):
     socketio.emit('deezer_track', data)
+    
+def downloadprogress(downloaded_bytes, total_bytes):
+    socketio.emit('downloadprogress', {
+        'status': 'downloading',
+        'downloaded_bytes': downloaded_bytes,
+        'total_bytes': total_bytes
+    })
+    
+def postprocessing(postprocessor):
+    socketio.emit('postprocessing', {'postprocessor': postprocessor})
+    
+def finished_postprocessor(postprocessor, filepath):
+    socketio.emit('finished_postprocessor', {
+        'postprocessor': postprocessor,
+        'filepath': filepath
+    })
+    
+def finished_download():
+    socketio.emit('finished_download')
+    
+def finished_metadata(response):
+    socketio.emit('finished_metadata', {'status':'finished_metadata', 'data': response})
+    
+def metadata_error(error):
+    socketio.emit('downloaderror', {'status': 'error', 'message':  error})
+    
+def downloaderrors(message):
+    socketio.emit('downloaderror', message)
