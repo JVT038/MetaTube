@@ -113,7 +113,7 @@ def searchmetadata(data):
         socketio.start_background_task(Genius.searchsong, data, token)
 
 @socketio.on('ytdl_download')
-def download(fileData, metadata):
+def download(fileData):
     url = fileData["url"]
     ext = fileData["ext"] or 'mp3'
     output_folder = fileData["output_folder"] or '/downloads'
@@ -130,7 +130,7 @@ def download(fileData, metadata):
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = strtobool(str(env.LOGGER))
     logger.info('Request to download %s', fileData["url"])
-    ytdl_options = yt.get_options(ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose, metadata)
+    ytdl_options = yt.get_options(ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
     if ytdl_options is not False:
         socketio.start_background_task(yt.start_download, url, ytdl_options)
         # socketio.start_background_task(yt.download, url, ytdl_options)

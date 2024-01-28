@@ -102,7 +102,7 @@ class YouTube:
             sockets.finished_postprocessor(d['postprocessor'], d['info_dict']['filepath'])
     
     @staticmethod
-    def get_options(ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose, metadata):
+    def get_options(ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
         proxy = json.loads(proxy_data)
         filepath = os.path.join(output_folder, output_format)
         segments = json.loads(skipfragments)

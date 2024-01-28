@@ -1461,7 +1461,7 @@ $(document).ready(function() {
                 'width': width,
                 'height': height
             }
-            socket.emit('ytdl_download', data, getMetadata(), function(ack) {
+            socket.emit('ytdl_download', data, function(ack) {
                 if(ack == "OK") {
                     $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
