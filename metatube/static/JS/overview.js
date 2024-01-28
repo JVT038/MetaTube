@@ -1523,15 +1523,6 @@ $(document).ready(function() {
     });
 
     socket.on('finished_postprocessor', function(msg) {
-        // if(msg.postprocessor == 'ExtractAudio') {
-        //     let percentage = (100 / getPhases()) * 2;
-        //     setProgress(percentage);
-        //     progress_text.text('Cutting segments from the video... ');
-        // } else if(msg.postprocessor == 'ModifyChapters') {
-        //     let percentage = (100 / getPhases()) * 3;
-        //     setProgress(percentage);
-        //     progress_text.text('Moving the files to its destination... ');
-        // } 
         if(msg.postprocessor == 'MoveFiles') {
             let percentage = (100 / getPhases()) * (getPhases() - 1);
             setProgress(percentage);
@@ -1628,18 +1619,6 @@ $(document).ready(function() {
         if($("#edititemmodal").css('display').toLowerCase() != 'block') {
             $("#resetviewbtn").removeClass('d-none');
         }
-        // if($("#edititemmodal").css('display').toLowerCase() == 'block') {
-        //     $("#progresstextedit").text(msg.message);
-        //     $("#progressedit").attr('aria-valuenow', 100);
-        //     $("#progressedit").html('ERROR <i class="bi bi-emoji-frown"></i>');
-        //     $("#progressedit").css('width', '100%');
-        // } else {
-        //     progress_text.text(msg.message);
-        //     $("#progress").attr('aria-valuenow', 100);
-        //     $("#progress").html('ERROR <i class="fi-cwluxl-smiley-sad-wide"></i>');
-        //     $("#progress").css('width', '100%');
-        //     $("#resetviewbtn").removeClass('d-none');
-        // }
     })
 
     socket.on('ytdl_response', (video, downloadform, metadataform) => {

@@ -85,7 +85,6 @@ def search(query):
             else:
                 sockets.searchvideo('This video has already been downloaded!')
         else:
-            # asyncio.run(yt.search(query))
             socketio.start_background_task(yt.search, query)
     else:
         sockets.searchvideo('Enter an URL!')

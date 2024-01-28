@@ -55,10 +55,7 @@ class YouTube:
     @staticmethod
     async def download(url: list, queue: LifoQueue, ytdl_options: dict):
         download_hook_partial = partial(YouTube.download_hook, queue)
-        # postprocess_hook_partial = partial(YouTube.postprocessor_hook, queue)
         ytdl_options['progress_hooks'] = [download_hook_partial]
-        # ytdl_options['postprocessor_hooks'] = [postprocess_hook_partial]
-        # ytdl_options['progress_hooks'] = [YouTube.download_hook]
         ytdl_options['postprocessor_hooks'] = [YouTube.postprocessor_hook]
         with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
             try:
@@ -95,43 +92,13 @@ class YouTube:
     @staticmethod
     def download_hook(queue: LifoQueue, d):
         queue.put(d)
-        # if d['status'] == 'finished':
-        #     socketio.emit('downloadprogress', {'status': 'finished_ytdl'})
-        #     # sockets.downloadprogress({'status': 'finished_ytdl'})
-        # elif d['status'] == 'downloading':
-        #     if "total_bytes_estimate" in d:
-        #         socketio.emit('downloadprogress', {
-        #             'status': 'downloading', 
-        #             'downloaded_bytes': d['downloaded_bytes'], 
-        #             'total_bytes': d['total_bytes_estimate']
-        #         })
-        #     elif 'total_bytes' in d:
-        #         socketio.emit('downloadprogress', {
-        #             'status': 'downloading', 
-        #             'downloaded_bytes': d['downloaded_bytes'], 
-        #             'total_bytes': d['total_bytes']
-        #         })
-        #     else:
-        #         socketio.emit('downloadprogress', {
-        #             'status': 'downloading',
-        #             'total_bytes': 'Unknown'
-        #         })
 
     @staticmethod
-    # def postprocessor_hook(queue: LifoQueue, d):
     def postprocessor_hook(d):
-        # queue.put(d)
         if d['status'] == 'processing':
             sockets.postprocessing(d['postprocessor'])
         elif d['status'] == 'finished':
             sockets.finished_postprocessor(d['postprocessor'], d['info_dict']['filepath'])
-            # socketio.emit('downloadprogress', {
-            #     'status': 'finished_ffmpeg', 
-            #     'filepath': d['info_dict']['filepath'], 
-            #     'postprocessor': d["postprocessor"]
-            # })
-            # logger.info("Finished postprocessor %s", d["postprocessor"])
-            # sockets.downloadprogress({'status': 'finished_ffmpeg', 'filepath': d['info_dict']['filepath'], 'postprocessor': d["postprocessor"]})
     
     @staticmethod
     def get_options(url, ext, output_folder, type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose):
