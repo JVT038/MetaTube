@@ -412,7 +412,7 @@ $(document).ready(function() {
         let namespan = document.createElement('span');
         let namerow = document.createElement('div');
         
-        td_artist.innerText = itemdata["artist"].join('; ');
+        td_artist.innerText = itemdata["artist"]
         td_album.innerText = itemdata["album"];
         td_date.innerText = date;
         td_ext.innerText = itemdata["filepath"].split('.')[itemdata["filepath"].split('.').length - 1].toUpperCase();
