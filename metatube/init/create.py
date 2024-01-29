@@ -10,7 +10,8 @@ import sqlite3, os, shutil
 class Default():
     def __init__(self, app, url):
         self._app = app
-        app.app_context().push()
+        if app.config['TESTING'] is False:
+            app.app_context().push()
         self._url = url
         self._methods = ['config', 'templates']
         self._ffmpeg = app.config["FFMPEG"]
@@ -25,10 +26,12 @@ class Default():
             amount = 5,
             hardware_transcoding = "None",
             metadata_sources='deezer',
+            spotify_api = 'None',
+            genius_api = 'None',
             auth = False,
             auth_username = "",
             auth_password = ""
-        )
+        ) # type: ignore
         db.session.add(config)
         db.session.commit()
         logger.info('Created default rows for the configuration table')
@@ -54,7 +57,7 @@ class Default():
             proxy_password = "",
             proxy_address = "",
             proxy_port = ""
-        )
+        ) # type: ignore
         db.session.add(template)
         db.session.commit()
         logger.info('Created default rows for the Templates table')
