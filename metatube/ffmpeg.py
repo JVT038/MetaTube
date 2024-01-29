@@ -7,7 +7,7 @@ import ffmpeg as ffmpeg_python
 
 class ffmpeg():
     def __init__(self):
-        ffmpeg_path = Config.query.get(1).ffmpeg_directory
+        ffmpeg_path = Config.get_ffmpeg()
         if len(ffmpeg_path) > 0:
             if (ffmpeg_path.startswith('/') or (ffmpeg_path[0].isalpha() and ffmpeg_path[1].startswith(':\\'))) and len(ffmpeg_path) > 0:
                 self.ffmpeg_path = ffmpeg_path

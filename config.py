@@ -26,3 +26,4 @@ class Config(object):
     VIDEO_EXTENSIONS = ['MP4', 'M4A', 'FLV', 'WEBM', 'OGG', 'MKV', 'AVI']
     AUDIO_EXTENSIONS = ['AAC', 'FLAC', 'MP3', 'M4A', 'OPUS', 'VORBIS', 'WAV']
     INIT_DB = os.environ.get('INIT_DB', True)
+    TESTING = False

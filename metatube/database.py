@@ -21,11 +21,12 @@ class Config(db.Model):
     
     @staticmethod
     def get_ffmpeg():
-        return Config.query.get(1).ffmpeg_directory
+        # return db.session.get(Config, 1).ffmpeg_directory
+        return db.session.get(Config, 1).ffmpeg_directory# type: ignore
     
     @staticmethod
     def get_hwt():
-        return Config.query.get(1).hardware_transcoding
+        return db.session.get(Config, 1).hardware_transcoding # type: ignore
     
     def set_amount(self, amount):
         self.amount = int(amount)
@@ -54,19 +55,19 @@ class Config(db.Model):
     
     @staticmethod
     def get_metadata_sources():
-        return Config.query.get(1).metadata_sources
+        return db.session.get(Config, 1).metadata_sources # type: ignore
     
     @staticmethod
     def get_spotify():
-        return Config.query.get(1).spotify_api
+        return db.session.get(Config, 1).spotify_api # type: ignore
     
     @staticmethod
     def get_genius():
-        return Config.query.get(1).genius_api
+        return db.session.get(Config, 1).genius_api # type: ignore
     
     @staticmethod
     def get_max():
-        return Config.query.get(1).amount
+        return db.session.get(Config, 1).amount # type: ignore
 
 class Templates(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=True)
@@ -132,7 +133,7 @@ class Templates(db.Model):
     def searchdefault():
         return Templates.query.filter_by(default = True).first()
         
-    def setdefault(self, defaulttemplate):
+    def setdefault(self, defaulttemplate = None):
         self.default = True
         if defaulttemplate is not None:
             defaulttemplate.default = False
@@ -242,3 +243,4 @@ class Database(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+        logger.info('Deleted item %s', self.name)
