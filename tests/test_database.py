@@ -23,7 +23,7 @@ class TestConfig(Config):
     # SQLALCHEMY_DATABASE_URI = os.path.join('sqlite:///', basedir, 'metatube/test.db')
     # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     
-class TestAutoMigration(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
         self.app_context = self.app.app_context()
