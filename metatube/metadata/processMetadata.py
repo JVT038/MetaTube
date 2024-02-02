@@ -8,6 +8,7 @@ from metatube import musicbrainz
 from metatube.deezer import Deezer
 from metatube.database import Config
 from .metadataObject import MetadataObject
+from .readMetadata import readMetadata
 from .MetadataExceptions import (
     InvalidCoverURL,
     NoMetadataAPIResult,
@@ -17,20 +18,10 @@ from .MetadataExceptions import (
     NoGeniusToken,
     InvalidGeniusToken
 )    
-import requests, os
 
 class processMetadata(object):  
     def __init__(self, usermetadata, extension):
         self.usermetadata = usermetadata
-        # self.title = usermetadata['title'] or None
-        # self.artists = usermetadata['artists'] or None
-        # self.album = usermetadata['album'] or None
-        # self.date = usermetadata['release_date'] or None
-        # self.albumid = usermetadata['albumid'] or None
-        # self.album_artists = usermetadata['album_artists'] or None
-        # self.tracknr = usermetadata['tracknr'] or None
-        # self.album_releasedate = usermetadata['album_releasedate'] or None
-        # self.cover = usermetadata['cover'] or None
         self.songid = usermetadata['songid'] or None
         self.source = usermetadata['metadata_source'] or None
         self.cover = usermetadata['cover_source']
@@ -104,19 +95,10 @@ class processMetadata(object):
         length = ""
         genres = ""
         cover_path = self.cover if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
-        magic = Magic(mime=True)
-        if cover_path != os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png'):
-            try:
-                response = requests.get(cover_path)
-                image = response.content
-                magic = Magic(mime=True)
-                cover_mime_type = magic.from_buffer(image)
-            except Exception:               
-                raise InvalidCoverURL("Cover URL is invalid!")
-        else:
-            cover_mime_type = "image/png"
-            file = open(cover_path, 'rb')
-            image = file.read()
+        try:
+            imagedata = readMetadata.getImage(cover_path)
+        except InvalidCoverURL as e:
+            raise e from e
         
         total_tracks = len(metadata_source["release"]["medium-list"][0]["track-list"])
         
@@ -156,9 +138,9 @@ class processMetadata(object):
             mbp_albumid,
             int(tracknr),
             int(total_tracks),
-            image,
+            imagedata['image'],
             cover_path,
-            cover_mime_type,
+            imagedata['mime_type'],
             isrc,
             '',
             self.extension,
@@ -176,7 +158,6 @@ class processMetadata(object):
         length = str(int(int(metadata_source["duration_ms"]) / 1000))
         tracknr = metadata_source["track_number"] if len(self.usermetadata["album_tracknr"]) < 1 else self.usermetadata["album_tracknr"]
         total_tracks = metadata_source["total_tracks"] if 'total_tracks' in metadata_source else '1'
-        default_cover = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png')
         cover_path = metadata_source["album"]["images"][0]["url"] if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["name"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
         genres = "" # Spotify API doesn't provide genres with tracks
@@ -184,18 +165,10 @@ class processMetadata(object):
         for artist in metadata_source["artists"]:
             spotify_artists.append(artist["name"])
         artists = spotify_artists if json.loads(self.usermetadata["artists"]) == [""] else json.loads(self.usermetadata["artists"])
-        if cover_path != default_cover:
-            try:
-                response = requests.get(cover_path)
-                image = response.content
-                magic = Magic(mime=True)
-                cover_mime_type = magic.from_buffer(image)
-            except Exception:               
-                raise InvalidCoverURL("Cover URL is invalid!")
-        else:
-            cover_mime_type = "image/png"
-            file = open(cover_path, 'rb')
-            image = file.read()
+        try:
+            imagedata = readMetadata.getImage(cover_path)
+        except InvalidCoverURL as e:
+            raise e from e
             
         return MetadataObject(
             title,
@@ -208,9 +181,9 @@ class processMetadata(object):
             albumid,
             int(tracknr),
             int(total_tracks),
-            image,
+            imagedata['image'],
             cover_path,
-            cover_mime_type,
+            imagedata['mime_type'],
             isrc,
             '',
             self.extension,
@@ -227,7 +200,7 @@ class processMetadata(object):
         length = str(metadata_source.get('duration', '0'))
         tracknr = str(metadata_source.get('track_position', 1)) if len(self.usermetadata["album_tracknr"]) < 1 else self.usermetadata["album_tracknr"]
         total_tracks = 1
-        default_cover = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png')
+        default_cover = env.DEFAULT_COVER_PATH
         cover_path = metadata_source["album"].get('cover_xl', default_cover) if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["title"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
         deezer_artists = []
@@ -235,18 +208,10 @@ class processMetadata(object):
             if contributor["type"].lower() == 'artist':
                 deezer_artists.append(contributor["name"])
         artists = deezer_artists if json.loads(self.usermetadata["artists"]) == [""] else json.loads(self.usermetadata["artists"])
-        if cover_path != default_cover:
-            try:
-                response = requests.get(cover_path)
-                image = response.content
-                magic = Magic(mime=True)
-                cover_mime_type = magic.from_buffer(image)
-            except Exception:               
-                raise InvalidCoverURL("Cover URL is invalid!")
-        else:
-            file = open(cover_path, 'rb')
-            image = file.read()
-            cover_mime_type = "image/png"
+        try:
+            imagedata = readMetadata.getImage(cover_path)
+        except InvalidCoverURL as e:
+            raise e from e
             
         return MetadataObject(
             title,
@@ -259,9 +224,9 @@ class processMetadata(object):
             albumid,
             int(tracknr),
             int(total_tracks),
-            image,
+            imagedata['image'],
             cover_path,
-            cover_mime_type,
+            imagedata['mime_type'],
             isrc,
             '',
             self.extension,
@@ -279,25 +244,16 @@ class processMetadata(object):
         language = 'Unknown'
         tracknr = self.usermetadata["album_tracknr"]
         total_tracks = 1
-        default_cover = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png')
         cover_path = metadata_source["song"]["song_art_image_thumbnail_url"] if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["song"]["title"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
         geniusartists = metadata_source["song"]["primary_artist"]["name"] + "; "
         for artist in metadata_source["song"]["featured_artists"]:
             geniusartists += artist["name"] + "; "
         artists = geniusartists[0:len(geniusartists) - 2] if len(self.usermetadata["artists"]) < 1 else self.usermetadata["artists"]
-        if cover_path != default_cover:
-            try:
-                response = requests.get(cover_path)
-                image = response.content
-                magic = Magic(mime=True)
-                cover_mime_type = magic.from_buffer(image)
-            except Exception:               
-                raise InvalidCoverURL("Cover URL is invalid!")
-        else:
-            cover_mime_type = "image/png"
-            file = open(cover_path, 'rb')
-            image = file.read()
+        try:
+            imagedata = readMetadata.getImage(cover_path)
+        except InvalidCoverURL as e:
+            raise e from e
             
         return MetadataObject(
             title,
@@ -310,9 +266,9 @@ class processMetadata(object):
             albumid,
             int(tracknr),
             int(total_tracks),
-            image,
+            imagedata['image'],
             cover_path,
-            cover_mime_type,
+            imagedata['mime_type'],
             '',
             lyrics,
             self.extension,
@@ -321,20 +277,10 @@ class processMetadata(object):
         )
     
     def onlyuserdata(self) -> MetadataObject | None:
-        if self.usermetadata["cover"] != '':
-            try:
-                cover_path = self.usermetadata["cover"]
-                response = requests.get(self.usermetadata["cover"])
-                image = response.content
-                magic = Magic(mime=True)
-                cover_mime_type = magic.from_buffer(image)
-            except Exception:
-                raise InvalidCoverURL("Cover URL is invalid!")
-        else:
-            cover_path = os.path.join(env.BASE_DIR, 'metatube/static/images/empty_cover.png')
-            file = open(cover_path, 'rb')
-            image = file.read()
-            cover_mime_type = "image/png"
+        try:
+            imagedata = readMetadata.getImage(self.usermetadata["cover"])
+        except InvalidCoverURL as e:
+            raise e from e
             
         return MetadataObject(
             self.usermetadata.get('title', ''),
@@ -347,9 +293,9 @@ class processMetadata(object):
             self.usermetadata.get('albumid', ''),
             self.usermetadata.get('album_tracknr', '1'),
             self.usermetadata.get('album_tracknr', '1'),
-            image,
-            cover_path,
-            cover_mime_type,
+            imagedata['image'],
+            self.usermetadata["cover"],
+            imagedata['mime_type'],
             '',
             '',
             self.extension,

@@ -1,6 +1,6 @@
 from mutagen.id3._frames import (
     # Meaning of the various frames: https://mutagen.readthedocs.io/en/latest/api/id3_frames.html
-    APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1
+    APIC, TIT2, TALB, TCON, TLAN, TRCK, TSRC, TXXX, TPE1, USLT
 )
 from mutagen.id3 import ID3
 from mutagen.flac import FLAC, Picture
@@ -8,6 +8,7 @@ from mutagen.aac import AAC
 from mutagen.wave import WAVE
 from mutagen.oggopus import OggOpus
 from mutagen.easyid3 import EasyID3
+from mutagen.easymp4 import EasyMP4
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 from mutagen.mp4 import MP4, MP4Cover
@@ -20,11 +21,12 @@ import base64, os
 
 class mergeMetadata():  
     
-    def __init__(self, filename: str, goal: str, metadata: MetadataObject, itemId = None):
+    def __init__(self, filename: str, goal: str, metadata: MetadataObject, youtube_id: str, itemId = None):
         self.filename = filename
         self.goal = goal
         self.itemId = itemId
         self.metadata = metadata
+        self.youtube_id = youtube_id
         
     def mergeaudiodata(self):
         '''
@@ -87,14 +89,11 @@ class mergeMetadata():
         '''
         if self.metadata.extension == 'MP3':
             audio = EasyID3(self.filename)
-            if self.metadata.source == 'Spotify':
-                audio.RegisterTXXXKey('spotify_songid', self.metadata.songid)
-                audio.RegisterTXXXKey('spotify_albumid', self.metadata.albumid)
-            elif self.metadata.source == 'Deezer':
-                audio.RegisterTXXXKey('deezer_songid', self.metadata.songid)
-                audio.RegisterTXXXKey('deezer_albumid', self.metadata.albumid)
-            if self.metadata.lyrics is not None:
-                audio.RegisterTextKey('lyrics', "USLT")            
+            if self.metadata.source in ['spotify', 'deezer']:
+                audio.RegisterTXXXKey('songid', f'{self.metadata.source.upper()}_SONGID')
+                audio.RegisterTXXXKey('albumid', f'{self.metadata.source.upper()}_ALBUMID')
+                audio['songid'] = self.metadata.songid
+                audio['albumid'] = self.metadata.albumid
         elif self.metadata.extension == 'FLAC':
             audio = FLAC(self.filename)
         elif self.metadata.extension == 'AAC':
@@ -113,14 +112,19 @@ class mergeMetadata():
         audio["title"] = self.metadata.title
         audio["date"] = self.metadata.release_date
         audio["genre"] = self.metadata.genres
-        if self.metadata.lyrics is not None and self.metadata.extension != 'MP3':
-            audio['lyrics'] = self.metadata.lyrics
+        audio['isrc'] = self.metadata.isrc
+            
         if self.metadata.source == 'Musicbrainz':
             audio["musicbrainz_releasesongid"] = self.metadata.songid
             audio["musicbrainz_releasegroupid"] = self.metadata.albumid
             audio["musicbrainz_albumid"] = self.metadata.albumid
         
         audio.save()
+        
+        if self.metadata.lyrics != '':
+            lyrics = ID3(self.filename)
+            lyrics.add(USLT(encoding=3, language=self.metadata.language, desc=f'Lyrics of {self.metadata.title}', text=self.metadata.lyrics))
+            lyrics.save()
         
         if self.metadata.extension == 'MP3':
             cover = ID3(self.filename)
@@ -148,10 +152,9 @@ class mergeMetadata():
         if self.goal == 'edit':
             response["itemid"] = self.itemId
             logger.info('Finished changing metadata of %s', self.metadata.title)
-            sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            return response
+        return response
     
     def mergeid3data(self):
         if self.metadata.extension == 'WAV':
@@ -165,25 +168,30 @@ class mergeMetadata():
         if audio.tags is None:
             raise NoAudioTags("There are no metadata tags for this file.")
         audio.tags.add(TIT2(encoding=3, text=self.metadata.title))
-        audio.tags.add(TALB(encoding=3, text=self.metadata.album)) # type: ignore
-        audio.tags.add(TCON(encoding=3, text=self.metadata.genres)) # type: ignore
-        audio.tags.add(TLAN(encoding=3, text=self.metadata.language)) # type: ignore
-        audio.tags.add(TRCK(encoding=3, text=self.metadata.tracknr)) # type: ignore
-        audio.tags.add(TSRC(encoding=3, text=data["isrc"])) # type: ignore
-        audio.tags.add(TPE1(encoding=3, text=self.metadata.artists)) # type: ignore
-        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_releasesongid', text=data["mbp_songid"])) # type: ignore
-        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_releasegroupid', text=data['mbp_albumid'])) # type: ignore
-        audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_albumid', text=data["mbp_albumid"])) # type: ignore
-        audio.tags.add(APIC(encoding=3, mime=self.metadata.cover_mime_type, type=3, desc=u'Cover', data=self.metadata.cover)) # type: ignore
+        audio.tags.add(TALB(encoding=3, text=self.metadata.album))
+        audio.tags.add(TCON(encoding=3, text=self.metadata.genres))
+        audio.tags.add(TLAN(encoding=3, text=self.metadata.language))
+        audio.tags.add(TRCK(encoding=3, text=self.metadata.tracknr))
+        audio.tags.add(TSRC(encoding=3, text=self.metadata.isrc))
+        audio.tags.add(TPE1(encoding=3, text=self.metadata.artists))
+        if self.metadata.source == 'musicbrainz':
+            audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_releasesongid', text=self.metadata.songid))
+            audio.tags.add(TXXX(encoding=3, desc=u'musicbrainz_albumid', text=self.metadata.albumid))
+        elif self.metadata.source == 'spotify':
+            audio.tags.add(TXXX(encoding=3, desc=u'spotify_songid', text=self.metadata.songid))
+            audio.tags.add(TXXX(encoding=3, desc=u'spotify_albumid', text=self.metadata.albumid))
+        elif self.metadata.source == 'deezer':
+            audio.tags.add(TXXX(encoding=3, desc=u'deezer_songid', text=self.metadata.songid))
+            audio.tags.add(TXXX(encoding=3, desc=u'deezer_albumid', text=self.metadata.albumid))
+        audio.tags.add(APIC(encoding=3, mime=self.metadata.cover_mime_type, type=3, desc=u'Cover', data=self.metadata.cover))
         
         response = self.metadataResponseMapper(self.metadata.length)
         if self.goal == 'edit':
             response["itemid"] = self.itemId
             logger.info('Finished changing metadata of %s', self.metadata.title)
-            sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            return response
+        return response
     
     def mergevideodata(self):
         if self.metadata.extension in ['M4A', 'MP4']:
@@ -198,6 +206,7 @@ class mergeMetadata():
         video["\xa9ART"] = self.metadata.artists
         video["\xa9gen"] = self.metadata.genres
         video["\xa9day"] = str(year)
+        
         try:
             video["trkn"] = [(int(self.metadata.tracknr), int(self.metadata.total_tracks))]
         except Exception:
@@ -206,85 +215,14 @@ class mergeMetadata():
         video["covr"] = [MP4Cover(self.metadata.cover, imageformat)]
         
         video.save()
+        customTags = EasyMP4(self.filename)
         response = self.metadataResponseMapper(self.metadata.length)
         
         if self.goal == 'edit':
             response["itemid"] = self.itemId
             logger.info('Finished changing metadata of %s', self.metadata.title)
-            sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            return response
-    
-    @staticmethod
-    def readaudiometadata(filename):
-        logger.info('Reading metadata of %s', filename)
-        extension = filename.split('.')[len(filename.split('.')) - 1].upper()
-        if extension == 'MP3':
-            audio = EasyID3(filename)
-            data = MP3(filename)
-        elif extension == 'FLAC':
-            audio = FLAC(filename)
-            data = FLAC(filename)
-        elif extension == 'AAC':
-            audio = AAC(filename)
-            data = FLAC(filename)
-        elif extension == 'OPUS':
-            audio = OggOpus(filename)
-            data = OggOpus(filename)
-        elif extension == 'OGG':
-            audio = OggVorbis(filename)
-            data = OggVorbis(filename)
-        else:
-            raise InvalidAudioFile("The selected audio file has an invalid extension.")
-        
-        response = {
-            'title': (audio['title'] or [''])[0],
-            'artists': (audio['artist'] or [''])[0],
-            'album': (audio['album'] or [''])[0],
-            'barcode': (audio['barcode'] or [''])[0],
-            'genres': (audio['genre'] or [''])[0],
-            'language': (audio['language'] or [''])[0],
-            'release_date': (audio['date'] or [''])[0],
-            'album_id': "",
-            'total_tracks': "",
-            'mbp_songid': (audio['musicbrainz_releasesongid'] or [''])[0],
-            'mbp_releasegroupid': (audio['musicbrainz_releasegroupid'] or [''])[0],
-            'isrc': (audio['isrc'] or [''])[0],
-            'tracknr': (audio['tracknumber'] or [''])[0],
-            'date': (audio['date'] or [''])[0],
-            'length': data.info.length, # type: ignore
-            'bitrate': data.info.bitrate, # type: ignore
-            'output_folder': os.path.dirname(filename),
-            'filename': filename,
-            "goal": "edit",
-        }
-        
-        return response
-    
-    @staticmethod
-    def readvideometadata(filename) -> dict | None:
-        extension = filename.split('.')[len(filename.split('.')) - 1].upper()
-        if extension in ['M4A', 'MP4']:
-            video = MP4(filename)
-        else:
-            raise InvalidAudioFile("The selected video file has an invalid extension")
-            
-        # Bitrate calculation: https://www.reddit.com/r/headphones/comments/3xju4s/comment/cy5dn8h/?utm_source=share&utm_medium=web2x&context=3
-        # Mutagen MP4 stream info: https://mutagen.readthedocs.io/en/latest/api/mp4.html#mutagen.mp4.MP4Info
-        bitrate = int(video.info.bits_per_sample * video.info.sample_rate * video.info.channels)
-        response = {
-            'title': (video['\xa9nam'] or [''])[0],
-            'album': (video["\xa9alb"] or [''])[0],
-            'artists': (video["\xa9ART"] or [''])[0],
-            'genres': (video["\xa9gen"] or [''])[0],
-            'release_date': (video["\xa9day"] or [''])[0],
-            'bitrate': bitrate,
-            'output_folder': os.path.dirname(filename),
-            'filename': filename,
-            'length': video.info.length,
-            'tracknr': video.get('trkn', [[1]])[0][0] # type: ignore
-        }
         return response
     
     def metadataResponseMapper(self, length) -> dict:

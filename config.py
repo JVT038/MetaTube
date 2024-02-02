@@ -27,3 +27,4 @@ class Config(object):
     AUDIO_EXTENSIONS = ['AAC', 'FLAC', 'MP3', 'M4A', 'OPUS', 'VORBIS', 'WAV']
     INIT_DB = os.environ.get('INIT_DB', True)
     TESTING = False
+    DEFAULT_COVER_PATH = os.path.join(BASE_DIR, 'metatube/static/images/empty_cover.png')

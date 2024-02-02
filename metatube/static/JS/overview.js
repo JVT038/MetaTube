@@ -701,7 +701,7 @@ $(document).ready(function() {
 
     function getMetadata() {          
         let songid = $(".audiocol-checkbox:checked").parent().parent().attr('id');
-        let albumid;
+        let albumid = '';
         let people = {};
         let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
         let cover_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
@@ -710,16 +710,11 @@ $(document).ready(function() {
             songid = $("#spotify_songid").length > 0 ? $("#spotify_songid").val() : ($("#deezer_songid").val().length > 0 ? $("#deezer_songid").val() : $("#mbp_songid").val());
             albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
         } else if(metadata_source == 'Spotify') {
-            
             albumid = $("#spotify_albumid").val();   
         } else if(metadata_source == 'Musicbrainz') {
-            
             albumid = $("#mbp_albumid").val();
-        } else if(metadata_source == 'Deezer') {
-            
+        } else if(metadata_source == 'Deezer') {  
             albumid = $("#deezer_albumid").val();
-        } else if(metadata_source == 'Genius') { 
-            
         }
 
         $.each($('.artist_relations'), function() {
@@ -1105,8 +1100,7 @@ $(document).ready(function() {
                 'proxy_password': $("#proxy_type").val() == 'None' ? '' : $("#proxy_password").val(),
             })
             $("#progress_status").siblings('p').empty();
-            data = {
-                'url': url,
+            filedata = {
                 'ext': ext,
                 'output_folder': output_folder,
                 'output_format': output_format,
@@ -1115,9 +1109,12 @@ $(document).ready(function() {
                 'skipfragments': skipfragments,
                 'proxy_data': proxy_data,
                 'width': width,
-                'height': height
+                'height': height,
+                'goal': 'edit',
+                'itemid': document.getElementById('edititemmodal').dataset.itemid,
+                'youtube_id': document.getElementById('edititemmodal').dataset.youtube_id,
             }
-            socket.emit('ytdl_download', data, function(ack) {
+            socket.emit('ytdl_download', filedata, function(ack) {
                 if(ack == "OK") {
                     $("#metadatasection, #downloadsection, #editfilebtnmodal").addClass('d-none');
                     $("#progressection").removeClass('d-none');
@@ -1459,6 +1456,7 @@ $(document).ready(function() {
                 'proxy_data': proxy_data,
                 'width': width,
                 'height': height,
+                'goal': 'add',
                 'userMetadata': getMetadata(),
             }
             socket.emit('ytdl_download', filedata, function(ack) {
@@ -1467,9 +1465,6 @@ $(document).ready(function() {
                     $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
                     $("#searchlog").empty();
-                    
-                } else if (ack == 'duplicate') {
-                    
                 }
             });
         }
@@ -1608,6 +1603,18 @@ $(document).ready(function() {
         } catch (error) {
             console.error(error);
         }
+    });
+
+    socket.on('changed_metadata', function(data) {
+        let tr = $("tr#"+data.itemid);
+        tr.find('img').attr('src', data.image);
+        tr.find('img').siblings('span').text(data.name);
+        tr.find('.td_artist').text(data.artist);
+        tr.find('.td_album').text(data.album);
+        tr.find('.td_date').text(data.date);
+        tr.find('.td_filepath').text(data.filepath.split('.')[data.filepath.split('.').length - 1]);
+        $("#overviewlog").text("Item metadata has been changed!");
+        $("#edititemmodal").modal('hide');
     });
 
     socket.on('inserted_song', function(data) {
@@ -1920,18 +1927,6 @@ $(document).ready(function() {
             ap.play();
             $("#recordstable").parent().css('height', '65vh');
             $("#audioplayer").removeClass('d-none')
-        } else if(data.msg == 'changed_metadata') {
-            socket.emit('updateitem', data.data);
-        } else if(data.msg == 'changed_metadata_db') {
-            let tr = $("tr#"+data.data.itemid);
-            tr.find('img').attr('src', data.data.image);
-            tr.find('img').siblings('span').text(data.data.name);
-            tr.find('.td_artist').text(data.data.artist);
-            tr.find('.td_album').text(data.data.album);
-            tr.find('.td_date').text(data.data.date);
-            tr.find('.td_filepath').text(data.data.filepath.split('.')[data.data.filepath.split('.').length - 1]);
-            $("#overviewlog").text("Item metadata has been changed!");
-            $("#edititemmodal").modal('hide');
         } else if(data.msg == 'deleteitems') {
             $(".selectitem:checked").parents('tr').remove();
             $("#bulkactionsrow").css('visibility', 'hidden');
@@ -2022,7 +2017,7 @@ $(document).ready(function() {
         $("#editmetadatabtnmodal").attr('id', 'editfilebtnmodal');
         $("#downloadsection, #editfilebtnmodal").removeClass('d-none');
         $("#downloadsection").find('hr').remove();
-        $("#edititemmodal").attr({'itemid': data.filedata.itemid, 'youtube_id': data.filedata.youtube_id});
+        $("#edititemmodal").attr({'data-itemid': data.data.itemid, 'data-youtube_id': data.data.youtube_id});
         $("hr").addClass('d-none');
         
         $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);

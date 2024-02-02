@@ -85,5 +85,8 @@ def finished_download():
 def finished_metadata(data):
     socketio.emit('finished_metadata', data)
     
+def changed_metadata(data):
+    socketio.emit('changed_metadata', data)
+    
 def inserted_song(data):
     socketio.emit('inserted_song', data)

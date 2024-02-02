@@ -131,7 +131,10 @@ class Templates(db.Model):
     
     @staticmethod
     def searchdefault():
-        return Templates.query.filter_by(default = True).first()
+        default = Templates.query.filter_by(default = True).first()
+        if default is None:
+            raise NoDefaultTemplate("There is no template marked as 'default'!")
+        return default
         
     def setdefault(self, defaulttemplate = None):
         self.default = True
@@ -237,7 +240,7 @@ class Database(db.Model):
         db.session.commit()
         logger.info('Updated item %s', data["name"])
         data["date"] = data["date"].strftime('%d-%m-%Y')
-        sockets.overview({'msg': 'changed_metadata_db', 'data': data})
+        sockets.changed_metadata(data)
     
     def updatefilepath(self, filepath):
         self.filepath = filepath
