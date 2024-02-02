@@ -1,4 +1,3 @@
-from email.policy import default
 from config import Config
 from metatube.init import Default
 from metatube import create_app, db
@@ -23,7 +22,7 @@ class TestConfig(Config):
     # SQLALCHEMY_DATABASE_URI = os.path.join('sqlite:///', basedir, 'metatube/test.db')
     # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     
-class TestAutoMigration(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
         self.app_context = self.app.app_context()
@@ -39,6 +38,11 @@ class TestAutoMigration(unittest.TestCase):
         db.drop_all()
         relative_url = 'sqlite:///' + os.path.join('metatube', Config.SQLALCHEMY_DATABASE_URI.replace('sqlite:///', ''))
         default = Default(self.app, relative_url)
+        migrationsPath = os.path.join(Config.BASE_DIR, 'migrations')
+        if os.path.exists(migrationsPath) and os.path.isdir(migrationsPath) and (os.path.exists(os.path.join(migrationsPath, 'env.py')) and os.path.exists(os.path.join(migrationsPath, 'versions'))):
+            default.init_db()
+        else:
+            default.init_db(False)
         self.assertTrue(default.init_db())
         
     def testConfigTable(self):
