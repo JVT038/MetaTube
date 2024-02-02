@@ -11,14 +11,12 @@ class MetadataObject(object):
         songid: str | None,
         albumid: str | None,
         tracknr: int | None,
-        total_tracks: int | None,
         cover: bytes,
         cover_path: str | None,
         cover_mime_type: str | None,
         isrc: str | None,
         lyrics: str | None,
         extension: str | None,
-        length: str | None,
         source: str | None,
     ):
         self.title = title or ''
@@ -30,12 +28,30 @@ class MetadataObject(object):
         self.albumid = albumid or ''
         self.songid = songid or ''
         self.tracknr = tracknr or 1
-        self.total_tracks = total_tracks or 1
         self.cover = cover
         self.cover_path = cover_path or ''
         self.cover_mime_type = cover_mime_type or ''
         self.isrc = isrc or ''
         self.lyrics = lyrics or ''
         self.extension = extension or ''
-        self.length = length or ''
         self.source = source or ''
+        
+    def metadataMapper(self):
+        return {
+            'title': self.title,
+            'artists': self.artists,
+            'album': self.album,
+            'genres': self.genres,
+            'language': self.language,
+            'release_date': self.release_date,
+            'songid': self.songid,
+            'albumid': self.albumid,
+            'tracknr': self.tracknr,
+            'cover': self.cover,
+            'cover_path': self.cover_path,
+            'cover_mime_type': self.cover_mime_type,
+            'isrc': self.isrc,
+            'lyrics': self.lyrics,
+            'extension': self.extension,
+            'source': self.source
+        }

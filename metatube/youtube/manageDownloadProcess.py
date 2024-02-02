@@ -3,7 +3,7 @@ from .download import download
 from metatube.metadata.processMetadata import processMetadata
 from metatube.metadata.mergeMetadata import mergeMetadata
 from metatube.metadata.readMetadata import readMetadata
-from metatube.sockets import downloadprocesserror, inserted_song, finished_metadata, changed_metadata
+from metatube.sockets import downloadprocesserror, inserted_song, finished_metadata, changed_filedata
 from metatube.Exception import MetaTubeException
 from metatube.database import Database
 from threading import Thread
@@ -11,6 +11,7 @@ from queue import Empty, LifoQueue
 from time import sleep
 import os
 from dateutil import parser
+from shutil import move
 from datetime import datetime
 
 class manageDownloadProcess(object):
@@ -74,11 +75,19 @@ class manageDownloadProcess(object):
                     data["id"] = id
                     inserted_song(data)
                 elif self.goal == 'edit':
-                    changed_metadata(data)
+                    if self.item is None:
+                        return
+                    try:
+                        os.unlink(self.item.filepath)
+                    except Exception:
+                        pass
+                    changed_filedata(data)
                     id = data["itemid"]
                     head, tail = os.path.split(data["filepath"])
                     if tail.startswith('tmp_'):
-                        data["filepath"] = os.path.join(head, tail[4:len(tail)])
+                        actualFilepath = os.path.join(head, tail[4:len(tail)])
+                        move(data['filepath'], actualFilepath)
+                        data["filepath"] = actualFilepath
                     try:
                         data["date"] = parser.parse(data["date"])
                     except Exception:

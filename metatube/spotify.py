@@ -12,7 +12,7 @@ class spotify_metadata():
             raise InvalidSpotifyCredentials('Spotify authentication has failed. Error: %s', str(e))
             
     def search(self, data):
-        searchresults = self.spotify.search(f"track:{data['title']}", data["max"])
+        searchresults = self.spotify.search(f"{data['title']}", data["max"])
         searchresults["query"] = data["title"] # type: ignore
         sockets.spotifysearch(searchresults)
         logger.info('Searched Spotify for track \'%s\' ', data["title"])

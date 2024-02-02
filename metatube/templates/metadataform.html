@@ -7,9 +7,9 @@
 {% if 'musicbrainz' in metadata_sources %}
 <div class="form-row">
     <div class="col">
-        <label for="#mbp_songid">Musicbrainz release id*</label>
+        <label for="#songid">Musicbrainz release id*</label>
         <div class="input-group">
-            <input type="text" class="form-control" id="mbp_songid" />
+            <input type="text" class="form-control" id="songid" />
             <div class="input_group_append">
                 <button type="button" id="fetchmbpreleasebtn" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Fetch release data"><i class="bi bi-download" style="color: white;" aria-label="Musicbrainz fetch release data"></i></button>
             </div>
@@ -102,6 +102,12 @@
 </div>
 <div class="form-row">
     <div class="col">
+        <label for="#md_genres">Genre(s) of the song. Use a semicolon (;) to separate multiple genres</label>
+        <input type="text" class="form-control" id="md_genres" required aria-required/>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
         <label for="#md_artists">Artist(s) of the song. Use a semicolon (;) to separate multiple artists</label>
         <input type="text" class="form-control" id="md_artists" required aria-required/>
     </div>
@@ -114,26 +120,32 @@
 </div>
 <div class="form-row">
     <div class="col">
-        <label for="#md_album_artists">Artist(s) of the album. Use a semicolon (;) to separate multiple artists*</label>
-        <input type="text" class="form-control" id="md_album_artists" />
-    </div>
-</div>
-<div class="form-row">
-    <div class="col">
         <label for="#md_album_tracknr">Number of track in album*</label>
         <input type="text" class="form-control" id="md_album_tracknr" />
     </div>
 </div>
 <div class="form-row">
     <div class="col">
-        <label for="#md_album_releasedate">Release date of album*</label>
-        <input type="text" class="form-control" id="md_album_releasedate" />
+        <label for="#md_release_date">Release date*</label>
+        <input type="text" class="form-control" id="md_release_date" />
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#md_language">Language of the song*</label>
+        <input type="text" class="form-control" id="md_language" />
     </div>
 </div>
 <div class="form-row">
     <div class="col">
         <label for="#md_cover">Cover image for the song*</label>
         <input type="text" class="form-control" id="md_cover" />
+    </div>
+</div>
+<div class="form-row">
+    <div class="col">
+        <label for="#md_isrc">ISRC <a href="https://en.wikipedia.org/wiki/International_Standard_Recording_Code">(International Stanard Recording Code)</a>*</label>
+        <input type="text" class="form-control" id="md_isrc" />
     </div>
 </div>
 <div class="form-row">

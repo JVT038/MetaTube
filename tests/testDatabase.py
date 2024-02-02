@@ -180,7 +180,7 @@ class TestAutoMigration(unittest.TestCase):
         itemId = Database.insert({
             'filepath': os.path.join(self.app.config['DOWNLOADS'], '/file.mp3'),
             'name': 'Never Gonna Give You Up',
-            'artist': ['Rick Astley'],
+            'artist': 'Rick Astley',
             'album': 'Whenever You Need Somebody',
             'date': '12-11-1987',
             'image': 'https://i.scdn.co/image/ab67616d0000b273baf89eb11ec7c657805d2da0',

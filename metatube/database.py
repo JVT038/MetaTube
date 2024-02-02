@@ -169,7 +169,6 @@ class Database(db.Model):
     artist = db.Column(db.String(64))
     album = db.Column(db.String(64))
     date = db.Column(db.DateTime)
-    length = db.Column(db.Integer)
     cover = db.Column(db.String(256))
     songid = db.Column(db.String(128))
     youtube_id = db.Column(db.String(16), unique=True)
@@ -233,14 +232,12 @@ class Database(db.Model):
         self.artist = data["artist"]
         self.album = data["album"]
         self.date = data["date"]
-        self.length = data["length"]
         self.cover = data["image"]
         self.songid = data["songid"]
         self.youtube_id = data["youtube_id"]
         db.session.commit()
         logger.info('Updated item %s', data["name"])
         data["date"] = data["date"].strftime('%d-%m-%Y')
-        sockets.changed_metadata(data)
     
     def updatefilepath(self, filepath):
         self.filepath = filepath

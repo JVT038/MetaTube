@@ -1,0 +1,56 @@
+<!-- Filebrowser Modal -->
+<div class="modal fade" id="filebrowsermodal" tabindex="-1" role="dialog" aria-labelledby="filebrowsermodallabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg mw-100 w-75" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="browsermodaltitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <span id="filebrowserlog" class="text-center text-dark"></span>
+                <h6 id="filebrowsertitle">Browsing <span></span></h6>
+                <div class="table-responsive-md">
+                    <table class="table table-hover" id="filebrowsertable">
+                        <thead>
+                            <tr>
+                                <th class="text-dark" scope="col">Filename</th>
+                                <th class="text-dark" scope="col">File size</th>
+                                <th class="text-dark" scope="col">
+                                    <span class="text-left">Last modified</span>
+                                    <a href="javascript:void(0)" class="text-dark addfolder" style="text-decoration: none; float: right;"><i class="bi bi-folder-plus"></i></a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="filebrowserup">
+                                <td colspan="3" class="text-dark" scope="row">...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <a href="#invisiblefilesexplanation" data-toggle="collapse" role="button">Why are some files invisible?</a>
+                <div class="collapse" id="invisiblefilesexplanation">
+                    <div class="card card-body text-dark">
+                        Only files with the following supported extensions are shown: AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV, MP4, M4A, FLV, WEBM, OGG, MKV & AVI. <br/>
+                        Additionally, files that are already linked with an item in the database, will be hidden as well, to prevent a file being linked to multiple items.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form class="form-inline d-none justify-content-end" id="filenameform" style="width: 80%;">
+                    <label class="sr-only" for="filename">Filename excluding extension</label>
+                    <input type="text" class="form-control w-50 mr-2" placeholder="Filename excluding extension" id="filename" />
+                    <button type="submit" class="btn btn-primary d-none disabled" id="submitfilename" disabled>Submit filename</button>
+                    <input type="checkbox" class="form-check-input ml-2" id="overwritecheck" />
+                    <label class="form-check-label" for="overwritecheck">Overwrite existing files</label>
+                </form>
+                <button class="btn btn-primary d-none" id="selectdirectorybtn">Select current directory</button>
+                <p id="selectedfile"></p>
+                <button type="button" class="btn btn-primary d-none disabled" id="selectfilebtn" disabled>Select</button>
+                <button type="button" class="btn btn-secondary" id="closefilebrowserbtn" style="max-width: 10%;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

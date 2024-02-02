@@ -1,5 +1,4 @@
 import json
-from magic import Magic
 from metatube.spotify import spotify_metadata as Spotify
 from metatube.genius import Genius
 from re import M
@@ -92,7 +91,6 @@ class processMetadata(object):
         mbp_songid = ""
         tracknr = ""
         isrc = ""
-        length = ""
         genres = ""
         cover_path = self.cover if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         try:
@@ -100,14 +98,11 @@ class processMetadata(object):
         except InvalidCoverURL as e:
             raise e from e
         
-        total_tracks = len(metadata_source["release"]["medium-list"][0]["track-list"])
-        
         for track in metadata_source["release"]["medium-list"][0]["track-list"]:
             if metadata_source["release"]["title"] in track["recording"]["title"]:
                 tracknr += track["number"] if "number" in track and len(track["number"]) > 0 else 1 # type: ignore
                 mbp_songid += track["id"]
                 isrc += track["recording"]["isrc-list"][0] if "isrc-list" in track["recording"] else ''
-                length += track["recording"]["length"] if "length" in track["recording"] else ''
         genres = ""
         try:
             if "tag-list" in metadata_source["release"]["release-group"]:
@@ -137,14 +132,12 @@ class processMetadata(object):
             mbp_songid,
             mbp_albumid,
             int(tracknr),
-            int(total_tracks),
             imagedata['image'],
             cover_path,
             imagedata['mime_type'],
             isrc,
             '',
             self.extension,
-            length,
             'musicbrainz'
         )
     
@@ -155,9 +148,7 @@ class processMetadata(object):
         albumid = metadata_source["album"]["id"] if len(self.usermetadata["albumid"]) < 1 else self.usermetadata["albumid"]
         isrc = metadata_source["external_ids"].get('isrc', '')
         release_date = metadata_source["album"]["release_date"] if len(self.usermetadata["album_releasedate"]) < 1 else self.usermetadata["album_releasedate"]
-        length = str(int(int(metadata_source["duration_ms"]) / 1000))
         tracknr = metadata_source["track_number"] if len(self.usermetadata["album_tracknr"]) < 1 else self.usermetadata["album_tracknr"]
-        total_tracks = metadata_source["total_tracks"] if 'total_tracks' in metadata_source else '1'
         cover_path = metadata_source["album"]["images"][0]["url"] if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["name"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
         genres = "" # Spotify API doesn't provide genres with tracks
@@ -180,14 +171,12 @@ class processMetadata(object):
             songid,
             albumid,
             int(tracknr),
-            int(total_tracks),
             imagedata['image'],
             cover_path,
             imagedata['mime_type'],
             isrc,
             '',
             self.extension,
-            length,
             'spotify',
         )
     
@@ -197,9 +186,7 @@ class processMetadata(object):
         albumid = str(metadata_source["album"]["id"]) if len(self.usermetadata["albumid"]) < 1 else str(self.usermetadata["albumid"])
         isrc = metadata_source.get('isrc', '')
         release_date = metadata_source["release_date"] if len(self.usermetadata["album_releasedate"]) < 1 else self.usermetadata["album_releasedate"]
-        length = str(metadata_source.get('duration', '0'))
         tracknr = str(metadata_source.get('track_position', 1)) if len(self.usermetadata["album_tracknr"]) < 1 else self.usermetadata["album_tracknr"]
-        total_tracks = 1
         default_cover = env.DEFAULT_COVER_PATH
         cover_path = metadata_source["album"].get('cover_xl', default_cover) if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["title"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
@@ -223,14 +210,12 @@ class processMetadata(object):
             songid,
             albumid,
             int(tracknr),
-            int(total_tracks),
             imagedata['image'],
             cover_path,
             imagedata['mime_type'],
             isrc,
             '',
             self.extension,
-            length,
             'deezer',
         )
     
@@ -243,7 +228,6 @@ class processMetadata(object):
         genres = ''
         language = 'Unknown'
         tracknr = self.usermetadata["album_tracknr"]
-        total_tracks = 1
         cover_path = metadata_source["song"]["song_art_image_thumbnail_url"] if len(self.usermetadata["cover"]) < 1 else self.usermetadata["cover"]
         title = metadata_source["song"]["title"] if len(self.usermetadata["title"]) < 1 else self.usermetadata["title"]
         geniusartists = metadata_source["song"]["primary_artist"]["name"] + "; "
@@ -265,14 +249,12 @@ class processMetadata(object):
             songid,
             albumid,
             int(tracknr),
-            int(total_tracks),
             imagedata['image'],
             cover_path,
             imagedata['mime_type'],
             '',
             lyrics,
             self.extension,
-            '',
             'genius',
         )
     
@@ -292,13 +274,11 @@ class processMetadata(object):
             self.usermetadata.get('songid', ''),
             self.usermetadata.get('albumid', ''),
             self.usermetadata.get('album_tracknr', '1'),
-            self.usermetadata.get('album_tracknr', '1'),
             imagedata['image'],
             self.usermetadata["cover"],
             imagedata['mime_type'],
             '',
             '',
             self.extension,
-            '',
             'user'
         )

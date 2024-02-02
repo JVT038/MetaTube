@@ -88,5 +88,8 @@ def finished_metadata(data):
 def changed_metadata(data):
     socketio.emit('changed_metadata', data)
     
+def changed_filedata(data):
+    socketio.emit('changed_filedata', data)
+    
 def inserted_song(data):
     socketio.emit('inserted_song', data)

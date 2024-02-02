@@ -148,7 +148,7 @@ class mergeMetadata():
                 cover_data = cover.write()
                 audio["metadata_block_picture"] = [base64.b64encode(cover_data).decode('ascii')]
                 audio.save()
-        response =  self.metadataResponseMapper(self.metadata.length)
+        response =  self.metadataResponseMapper()
         if self.goal == 'edit':
             response["itemid"] = self.itemId
             logger.info('Finished changing metadata of %s', self.metadata.title)
@@ -185,7 +185,7 @@ class mergeMetadata():
             audio.tags.add(TXXX(encoding=3, desc=u'deezer_albumid', text=self.metadata.albumid))
         audio.tags.add(APIC(encoding=3, mime=self.metadata.cover_mime_type, type=3, desc=u'Cover', data=self.metadata.cover))
         
-        response = self.metadataResponseMapper(self.metadata.length)
+        response = self.metadataResponseMapper()
         if self.goal == 'edit':
             response["itemid"] = self.itemId
             logger.info('Finished changing metadata of %s', self.metadata.title)
@@ -206,17 +206,13 @@ class mergeMetadata():
         video["\xa9ART"] = self.metadata.artists
         video["\xa9gen"] = self.metadata.genres
         video["\xa9day"] = str(year)
-        
-        try:
-            video["trkn"] = [(int(self.metadata.tracknr), int(self.metadata.total_tracks))]
-        except Exception:
-            pass
+
         imageformat = MP4Cover.FORMAT_PNG if "png" in self.metadata.cover_mime_type else MP4Cover.FORMAT_JPEG
         video["covr"] = [MP4Cover(self.metadata.cover, imageformat)]
         
         video.save()
         customTags = EasyMP4(self.filename)
-        response = self.metadataResponseMapper(self.metadata.length)
+        response = self.metadataResponseMapper()
         
         if self.goal == 'edit':
             response["itemid"] = self.itemId
@@ -225,14 +221,13 @@ class mergeMetadata():
             logger.info('Finished adding metadata to %s', self.metadata.title)
         return response
     
-    def metadataResponseMapper(self, length) -> dict:
+    def metadataResponseMapper(self) -> dict:
         return {
             'filepath': os.path.join(Config.BASE_DIR, self.filename),
             'name': self.metadata.title,
             'artist': self.metadata.artists,
             'album': self.metadata.album,
             'date': self.metadata.release_date,
-            'length': length,
             'image': self.metadata.cover_path,
             'songid': self.metadata.songid
         }

@@ -8,9 +8,10 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 class utils(object):
     @staticmethod
     def is_supported(url):
+        exceptions = ['radioactive']
         extractors = yt_dlp.extractor.gen_extractors()
         for e in extractors:
-            if e.suitable(url) and e.IE_NAME == 'youtube':
+            if e.suitable(url) and e.IE_NAME == 'youtube' and url not in exceptions:
                 return True
         return False
 

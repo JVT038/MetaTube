@@ -7,6 +7,9 @@ from metatube.youtube.manageDownloadProcess import manageDownloadProcess
 from metatube.youtube.youtubeUtils import utils as ytutils
 from metatube.youtube.downloadOptions import downloadOptions
 from metatube.metadata.processMetadata import processMetadata
+from metatube.metadata.readMetadata import readMetadata
+from metatube.metadata.mergeMetadata import mergeMetadata
+from metatube.metadata.metadataObject import MetadataObject
 from metatube.deezer import Deezer
 from metatube.spotify import spotify_metadata as Spotify
 from metatube.genius import Genius
@@ -22,7 +25,6 @@ import metatube.sponsorblock as sb
 import metatube.musicbrainz as musicbrainz
 import json
 import os
-import requests
 import random
 import string
 
@@ -410,14 +412,14 @@ def editmetadata(id):
         return False
     extension = item.filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
     if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-        metadata = MetaData.readaudiometadata(item.filepath)
+        metadata = readMetadata.readAudioMetadata(item.filepath, item.songid, item.cover).metadataMapper()
     elif extension in ["M4A", 'MP4']:
-        metadata = MetaData.readVideoMetadata(item.filepath)
+        metadata = readMetadata.readVideoMetadata(item.filepath, item.songid, item.cover).metadataMapper()
     else:
         return False
-    metadata["songid"] = item.songid
     metadata["itemid"] = item.id
-    metadata["cover"] = item.cover
+    metadata["filename"] = item.filepath
+    metadata.pop('cover', 'cover_mime_type')
     metadata_sources = Config.get_metadata_sources()
     metadataform = render_template('metadataform.html', metadata_sources=metadata_sources)
     sockets.editmetadata({'metadata': metadata, 'metadataview': metadataform})
@@ -432,7 +434,6 @@ def editfile(id):
         'name': item.name,
         'album': item.album,
         'date': item.date,
-        'length': item.length,
         'songid': item.songid,
         'youtube_id': item.youtube_id,
         'itemid': item.id
@@ -444,73 +445,53 @@ def editfile(id):
     downloadform = render_template('downloadform.html', templates=templates, segments=segments, default=defaulttemplate)
     sockets.editfile({'data': itemdata, 'downloadview': downloadform})
     
-# @socketio.on('editfilerequest')
-# def editfilerequest(filepath, id):
-#     item = Database.fetchitem(id)
-#     if item is not None:
-#         extension = item.filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
-#         new_extension = filepath.split('.')[len(item.filepath.split('.')) - 1].upper()
-#         if item.cover != env.DEFAULT_COVER_PATH:
-#             try:
-#                 response = requests.get(item.cover)
-#                 image = response.content
-#                 magic = Magic(mime=True)
-#                 mime_type = magic.from_buffer(image)
-#             except Exception:               
-#                 sockets.downloadprocesserror('Cover URL is invalid!')
-#                 return False
-#         else:
-#             file = open(item.cover, 'rb')
-#             image = file.read()
-#             mime_type = 'image/png'
-#         if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-#             metadata_item = MetaData.readaudiometadata(item.filepath)
-                        
-#         elif extension in ['MP4', 'M4A']:
-#             metadata_item = MetaData.readVideoMetadata(item.filepath)
-#             metadata_item["barcode"] = ""
-#             metadata_item["language"] = ""
-            
-#         metadata_item["songid"] = item.songid
-#         metadata_item["cover_path"] = item.cover
-#         metadata_item["cover_mime_type"]  = mime_type
-#         metadata_item["image"] = image
-#         metadata_item["itemid"] = item.id
-#         metadata_item["goal"] = 'edit'
-#         metadata_item["extension"] = new_extension
-#         metadata_item["filename"] = filepath
-            
-#         if new_extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-#             MetaData.mergeaudiodata(metadata_item)
-#         elif new_extension in ['MP4', 'M4A']:
-#             MetaData.mergevideodata(metadata_item)
-#         head, tail = os.path.split(filepath)
-#         move(filepath, os.path.join(head, tail[4:len(tail)]))
-#         try:
-#             os.unlink(item.filepath)
-#         except Exception:
-#             pass
-#         logger.info('Edited file %s', tail)
-#     else:
-#         logger.info('File not in database')
-    
 @socketio.on('editmetadatarequest')
-def editmetadatarequest(metadata_user, filepath, id):
+def editmetadatarequest(usermetadata, filepath, id):
     extension = filepath.split('.')[len(filepath.split('.')) - 1].upper()
-    data = MetaData.onlyuserdata(filepath, metadata_user)
-    if data is not False:
-        data["goal"] = 'edit'
-        data["itemid"] = id
-        data["extension"] = extension
-        data["source"] = metadata_user["source"]
-        if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
-            MetaData.mergeaudiodata(data)
-        elif extension in ['MP4', 'M4A']:
-            MetaData.mergevideodata(data)
-        elif extension in ['WAV']:
-            MetaData.mergeid3data(data)
-        else:
-            return False
+    item = Database.fetchitem(id)
+    if item is None:
+        return
+    cover = readMetadata.getImage(usermetadata['cover'])
+    metadata = MetadataObject(
+        usermetadata['title'],
+        usermetadata['artists'],
+        usermetadata['album'],
+        usermetadata['genres'],
+        usermetadata['language'],
+        usermetadata['release_date'],
+        usermetadata['songid'],
+        usermetadata['albumid'],
+        usermetadata['tracknr'],
+        cover['image'],
+        usermetadata['cover'],
+        cover['mime_type'],
+        usermetadata['isrc'],
+        usermetadata['lyrics'],
+        extension,
+        usermetadata['source']
+    )
+    mergedata = mergeMetadata(filepath, 'edit', metadata, item.youtube_id)
+    # data["goal"] = 'edit'
+    # data["itemid"] = id
+    # data["extension"] = extension
+    # data["source"] = usermetadata["source"]
+    if extension in ['MP3', 'OPUS', 'FLAC', 'OGG']:
+        data = mergedata.mergeaudiodata()
+    elif extension in ['MP4', 'M4A']:
+        data = mergedata.mergevideodata()
+    elif extension in ['WAV']:
+        data = mergedata.mergeid3data()
+    item.update({
+        'filepath': item.filepath,
+        'name': usermetadata['title'],
+        'artist': usermetadata['artists'],
+        'album': usermetadata['album'],
+        'date': parser.parse(usermetadata["release_date"]),
+        'image': usermetadata['cover'],
+        'songid': usermetadata['songid'],
+        'youtube_id': item.youtube_id
+    })
+    sockets.changed_metadata(data) # type: ignore
 
 @bp.context_processor
 def utility_processor():

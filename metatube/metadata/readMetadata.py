@@ -87,14 +87,12 @@ class readMetadata(object):
             songid,
             albumid,
             audio.get('tracknumber', [''])[0], # type: ignore
-            1,
             coverdata['image'],
             cover_path,
             coverdata['mime_type'],
             audio.get('isrc', [''])[0], # type: ignore
             audio.get('lyrics', [''])[0], # type: ignore
             extension,
-            "",
             source
         )
     
@@ -118,13 +116,11 @@ class readMetadata(object):
             songid,
             '',
             1,
-            1,
             coverdata['image'],
             cover_path,
             coverdata['mime_type'],
             "Unknown",
             "",
             extension,
-            "",
             ''
         )

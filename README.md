@@ -286,6 +286,7 @@ Made with :heart: by <a href="https://github.com/JVT038" target="_blank">JVT038<
 - [ ] Send websocket requests to one specific device / client only, to prevent duplicate websocket requests
 - [ ] Add unit tests for the download, metadata logic, template / database stuff, config detection, automatic migrations *
 - [ ] Develop a plugin for yt-dlp to merge the metadata and handle it with postprocessors instead of a custom class
+- [ ] Perform bulk actions for multiple items (such as changing the output template or the directory)
 
 \* in progress
 &#xa0;
