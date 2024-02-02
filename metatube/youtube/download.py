@@ -21,31 +21,31 @@ class download(object):
                 return ytdl.download(url)
             except KeyError as e:
                 logger.error('%s key did not exist', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'The output template was incorrect. Check logs for more info.'})
+                sockets.downloadprocesserror('The output template was incorrect. Check logs for more info.')
                 return None
             except ExtractorError as e:
                 logger.error('Extractor error: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'An extractor error has occured. Check logs for more info.'})
+                sockets.downloadprocesserror('An extractor error has occured. Check logs for more info.')
                 return None
             except FFmpegPostProcessorError as e:
                 logger.error('FFmpegPostProcessor error: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'An processing error involving FFmpeg has occured. Check logs for more info.'})
+                sockets.downloadprocesserror('An processing error involving FFmpeg has occured. Check logs for more info.')
                 return None
             except PostProcessingError as e:
                 logger.error('Postprocessor error: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'A processing error has occured. Check logs for more info.'})
+                sockets.downloadprocesserror('A processing error has occured. Check logs for more info.')
                 return None
             except DownloadError as e:
                 logger.error('Downloading error: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'A downloading error has occured. Check logs for more info.'})
+                sockets.downloadprocesserror('A downloading error has occured. Check logs for more info.')
                 return None
             except URLError as e:
                 logger.error('Network connection error: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'A network error occured. Check logs for more info.'})
+                sockets.downloadprocesserror('A network error occured. Check logs for more info.')
                 return None
             except Exception as e:
                 logger.exception('Error during downloading video: %s', str(e))
-                sockets.downloadprocesserror({'status': 'error', 'message': 'Something has gone wrong. Check logs for more info'})
+                sockets.downloadprocesserror('Something has gone wrong. Check logs for more info')
                 return None
     
     @staticmethod
@@ -54,7 +54,8 @@ class download(object):
 
     @staticmethod
     def postprocessor_hook(queue: LifoQueue, d: dict):
-        if d['status'] == 'processing':
+        print({'status': d['status'], 'postprocessor': d['postprocessor']})
+        if d['status'] == 'started':
             sockets.postprocessing(d['postprocessor'])
         elif d['status'] == 'finished':
             if d['postprocessor'] == 'MoveFiles':
