@@ -346,7 +346,7 @@ def showfilebrowser(visible, id, target_folder=None):
     sockets.overview({'msg': 'showfilebrowser', 'files': files, 'visible': visible, 'directory': folder, 'id': id})
 
 @socketio.on('updatefile')
-def updatefile(filepath, id):
+def updatefile(filepath, id): # type: ignore
     item = Database.fetchitem(id)
     item.updatefilepath(filepath)
 
