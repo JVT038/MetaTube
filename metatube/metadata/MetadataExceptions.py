@@ -26,3 +26,15 @@ class NoMetadataAPIResult(MetaTubeException):
 
 class NoMetadataFound(MetaTubeException):
     pass
+
+class InvalidSpotifyCredentials(MetaTubeException):
+    pass
+
+class NoSpotifyCredentails(MetaTubeException):
+    pass
+
+class NoGeniusToken(MetaTubeException):
+    pass
+
+class InvalidGeniusToken(MetaTubeException):
+    pass

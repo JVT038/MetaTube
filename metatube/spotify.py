@@ -1,6 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOauthError
 from metatube import sockets, logger
+from metatube.metadata.MetadataExceptions import InvalidSpotifyCredentials
 
 class spotify_metadata():
     def __init__(self, id, secret):
@@ -8,6 +9,7 @@ class spotify_metadata():
             self.spotify = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=id, client_secret=secret))
         except SpotifyOauthError as e:
             logger.error('Spotify authentication has failed. Error: %s', str(e))
+            raise InvalidSpotifyCredentials('Spotify authentication has failed. Error: %s', str(e))
             
     def search(self, data):
         searchresults = self.spotify.search(f"track:{data['title']}", data["max"])

@@ -151,7 +151,7 @@ class mergeMetadata():
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            sockets.finished_metadata(response)
+            return response
     
     def mergeid3data(self):
         if self.metadata.extension == 'WAV':
@@ -183,7 +183,7 @@ class mergeMetadata():
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            sockets.finished_metadata(response)
+            return response
     
     def mergevideodata(self):
         if self.metadata.extension in ['M4A', 'MP4']:
@@ -214,7 +214,7 @@ class mergeMetadata():
             sockets.overview({'msg': 'changed_metadata', 'data': response})
         elif self.goal == 'add':
             logger.info('Finished adding metadata to %s', self.metadata.title)
-            sockets.finished_metadata(response)
+            return response
     
     @staticmethod
     def readaudiometadata(filename):
@@ -295,7 +295,7 @@ class mergeMetadata():
             'album': self.metadata.album,
             'date': self.metadata.release_date,
             'length': length,
-            'image': self.metadata.cover,
+            'image': self.metadata.cover_path,
             'songid': self.metadata.songid
         }
     

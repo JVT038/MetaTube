@@ -1,4 +1,5 @@
 from metatube import db, logger, sockets
+from .DatabaseExceptions import *
 from sqlalchemy.sql import expression
 from dateutil import parser
 
@@ -187,7 +188,10 @@ class Database(db.Model):
     
     @staticmethod
     def fetchitem(input_id):
-        return Database.query.filter_by(id = input_id).first()
+        item = Database.query.filter_by(id = input_id).first()
+        if item is None:
+            raise InvalidItemId("Invalid item ID")
+        return item
     
     @staticmethod
     def checkfile(filepath_input):
@@ -208,7 +212,7 @@ class Database(db.Model):
         row = Database(
             filepath = data["filepath"],
             name = data["name"],
-            artist = '; '.join(data["artist"]),
+            artist = data["artist"],
             album = data["album"],
             date = parser.parse(data["date"]),
             cover = data["image"],

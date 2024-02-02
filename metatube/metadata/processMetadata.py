@@ -1,18 +1,27 @@
 import json
 from magic import Magic
+from metatube.spotify import spotify_metadata as Spotify
+from metatube.genius import Genius
 from re import M
 from metatube import Config as env, logger
 from metatube import musicbrainz
 from metatube.deezer import Deezer
+from metatube.database import Config
 from .metadataObject import MetadataObject
-from .MetadataExceptions import InvalidCoverURL, NoMetadataAPIResult, NoMetadataFound
+from .MetadataExceptions import (
+    InvalidCoverURL,
+    NoMetadataAPIResult,
+    NoMetadataFound,
+    NoSpotifyCredentails,
+    InvalidSpotifyCredentials,
+    NoGeniusToken,
+    InvalidGeniusToken
+)    
 import requests, os
 
 class processMetadata(object):  
-    def __init__(self, usermetadata, extension, genius = None, spotify = None):
+    def __init__(self, usermetadata, extension):
         self.usermetadata = usermetadata
-        self.genius = genius
-        self.spotify = spotify
         # self.title = usermetadata['title'] or None
         # self.artists = usermetadata['artists'] or None
         # self.album = usermetadata['album'] or None
@@ -28,25 +37,40 @@ class processMetadata(object):
         self.extension = extension
         
         
-    def getMetadata(self) -> MetadataObject:
+    def getMetadata(self, app) -> MetadataObject:
         metadata = None
         if self.source == 'Spotify':
-            metadata_source = self.spotify.fetch_track(self.songid) # type: ignore
+            with app.app_context():
+                cred = Config.get_spotify()
+                if str(cred) == '':
+                    raise NoSpotifyCredentails("Spotify was selected as source, however there are no API credentials for the Spotify API.")
+            try:
+                spotify = Spotify(cred.split(';')[1], cred.split(';')[0])
+            except InvalidSpotifyCredentials as exception:
+                raise exception from exception
+            metadata_source = spotify.fetch_track(self.songid) # type: ignore
             if metadata_source is None:
-                raise NoMetadataAPIResult("There was no result from the selected metadata API.")
+                raise NoMetadataAPIResult("There was no result from the Spotify API.")
             metadata = self.getspotifydata(metadata_source)
         elif self.source == 'Musicbrainz':
             metadata_source = musicbrainz.search_id_release(self.songid)
             if metadata_source is None:
-                raise NoMetadataAPIResult("There was no result from the selected metadata API.")
+                raise NoMetadataAPIResult("There was no result from the Musicbrainz API.")
             metadata = self.getmusicbrainzdata(metadata_source)
         elif self.source == 'Deezer':
             metadata_source = Deezer.searchid(self.songid) # type: ignore
             if metadata_source is None:
-                raise NoMetadataAPIResult("There was no result from the selected metadata API.")
+                raise NoMetadataAPIResult("There was no result from the Deezer API.")
             metadata = self.getdeezerdata(metadata_source)
         elif self.source == 'Genius':
-            metadata_source = self.genius.fetchsong(self.songid) # type: ignore
+            token = Config.get_genius()
+            if str(token) == '':
+                raise NoGeniusToken("Genius was selected as source, however there is no API token for the Genius API.")
+            try:
+                genius = Genius(token)
+                metadata_source = genius.fetchsong(self.songid) # type: ignore
+            except Exception:
+                raise InvalidGeniusToken("Invalid Genius API token.")
             if metadata_source is None:
                 raise NoMetadataAPIResult("There was no result from the selected metadata API.")
             lyrics = genius.fetchlyrics(metadata_source["song"]["url"]) # type: ignore
@@ -88,7 +112,6 @@ class processMetadata(object):
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                # sockets.metadata_error('Cover URL is invalid!')
                 raise InvalidCoverURL("Cover URL is invalid!")
         else:
             cover_mime_type = "image/png"
@@ -131,7 +154,6 @@ class processMetadata(object):
             release_date,
             mbp_songid,
             mbp_albumid,
-            '',
             int(tracknr),
             int(total_tracks),
             image,
@@ -169,8 +191,6 @@ class processMetadata(object):
                 magic = Magic(mime=True)
                 cover_mime_type = magic.from_buffer(image)
             except Exception:               
-                # sockets.metadata_error('Cover URL is invalid!')
-                # logger.warning('Cover URL submitted by the user was invalid')
                 raise InvalidCoverURL("Cover URL is invalid!")
         else:
             cover_mime_type = "image/png"
@@ -186,7 +206,6 @@ class processMetadata(object):
             release_date,
             songid,
             albumid,
-            '',
             int(tracknr),
             int(total_tracks),
             image,
@@ -238,7 +257,6 @@ class processMetadata(object):
             release_date,
             songid,
             albumid,
-            '',
             int(tracknr),
             int(total_tracks),
             image,
@@ -290,7 +308,6 @@ class processMetadata(object):
             release_date,
             songid,
             albumid,
-            '',
             int(tracknr),
             int(total_tracks),
             image,
@@ -328,7 +345,6 @@ class processMetadata(object):
             self.usermetadata.get('album_releasedate', ''),
             self.usermetadata.get('songid', ''),
             self.usermetadata.get('albumid', ''),
-            '',
             self.usermetadata.get('album_tracknr', '1'),
             self.usermetadata.get('album_tracknr', '1'),
             image,

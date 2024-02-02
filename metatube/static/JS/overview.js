@@ -390,8 +390,7 @@ $(document).ready(function() {
             }
             return n
         }
-        let itemdata = data.data;
-        let dateobj = new Date(itemdata["date"]);
+        let dateobj = new Date(data["date"]);
         let date = addLeadingZeros(dateobj.getDate()) + "-" + addLeadingZeros(dateobj.getMonth() + 1) + "-" + dateobj.getFullYear();
         let tr = document.createElement('tr');
         let td_name = document.createElement('td');
@@ -412,18 +411,18 @@ $(document).ready(function() {
         let namespan = document.createElement('span');
         let namerow = document.createElement('div');
         
-        td_artist.innerText = itemdata["artist"]
-        td_album.innerText = itemdata["album"];
+        td_artist.innerText = data["artist"]
+        td_album.innerText = data["album"];
         td_date.innerText = date;
-        td_ext.innerText = itemdata["filepath"].split('.')[itemdata["filepath"].split('.').length - 1].toUpperCase();
+        td_ext.innerText = data["filepath"].split('.')[data["filepath"].split('.').length - 1].toUpperCase();
         dropdownbtn.innerText = 'Select action';
-        namespan.innerText = itemdata["name"];
+        namespan.innerText = data["name"];
 
-        namerow.classList.add('row', 'd-flex', 'justify-content-center');
+        namerow.classList.add('row');
         namecol.classList.add('align-self-center');
         namespan.classList.add('align-middle');
         if($(window).width() > 991) {
-            covercol.classList.add('col');
+            covercol.classList.add('col', 'd-flex', 'justify-content-center');
             namecol.classList.add('col');
         }
         namecol.style.margin = "0 10px 0 10px";
@@ -451,11 +450,11 @@ $(document).ready(function() {
         dropdownbtn.setAttribute('data-toggle', 'dropdown');
         dropdownmenu.classList.add('dropdown-menu'); 
         
-        tr.id = itemdata["id"];
+        tr.id = data["id"];
 
         cover.classList.add('img-fluid', 'cover-img');
         cover.setAttribute('style', 'width: 100px; height: 100px;');
-        cover.src = itemdata["image"];
+        cover.src = data["image"];
 
         form_check.appendChild(checkbox);       
 
@@ -471,7 +470,7 @@ $(document).ready(function() {
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
         $("#emptyrow").remove();
         $("#recordstable").children("tbody").append(tr);
-        createdropdownmenu(itemdata["id"], itemdata["youtube_id"]);
+        createdropdownmenu(data["id"], data["youtube_id"]);
     }
 
     function downloadURI(uri, name) {
@@ -1450,7 +1449,7 @@ $(document).ready(function() {
             })
             $("#progress_status").siblings('p').empty();
             filedata = {
-                'url': url,
+                'youtube_id': $("#thumbnail_yt").attr('youtube_id'),
                 'ext': ext,
                 'output_folder': output_folder,
                 'output_format': output_format,
@@ -1463,11 +1462,14 @@ $(document).ready(function() {
                 'userMetadata': getMetadata(),
             }
             socket.emit('ytdl_download', filedata, function(ack) {
+                progress_text = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progresstextedit") : $("#progresstext");
                 if(ack == "OK") {
                     $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
                     $("#searchlog").empty();
-                    progress_text = $("#edititemmodal").css('display').toLowerCase() != 'none' ? $("#progresstextedit") : $("#progresstext");
+                    
+                } else if (ack == 'duplicate') {
+                    
                 }
             });
         }
@@ -1582,8 +1584,8 @@ $(document).ready(function() {
         }
     });
 
-    socket.on('finished_postprocessor', function(msg) {
-        if(msg.postprocessor == 'MoveFiles') {
+    socket.on('finished_postprocessor', function(postprocessor) {
+        if(postprocessor == 'MoveFiles') {
             let percentage = (100 / getPhases()) * (getPhases() - 1);
             setProgress(percentage);
             progress_text.text('Adding metadata...');
@@ -1597,18 +1599,21 @@ $(document).ready(function() {
         }
     });
 
-    socket.on('finished_metadata', function(msg) {
+    socket.on('finished_metadata', function(data) {
         setProgress("100");
         progress_text.text('Finished adding metadata!');
-        msg.data["youtube_id"] = $("#thumbnail_yt").attr('youtube_id');
         try {
-            socket.emit('insertitem', msg.data);
             $("#downloadfilebtn").removeClass('d-none');
-            $("#downloadfilebtn").attr('filepath', msg.data["filepath"]);
+            $("#downloadfilebtn").attr('filepath', data["filepath"]);
         } catch (error) {
             console.error(error);
         }
     });
+
+    socket.on('inserted_song', function(data) {
+        $("#overviewlog").empty();
+        additem(data)
+    })
     
     socket.on('metadata_unavailable', function(msg) {
         msg.data["youtube_id"] = $("#thumbnail_yt").attr('youtube_id');
@@ -1619,7 +1624,7 @@ $(document).ready(function() {
         socket.emit('insertitem', msg.data);
     });
 
-    socket.on('downloaderror', function(msg) {
+    socket.on('downloadprocesserror', function(msg) {
         progress_text.text(msg);
         getProgress().attr('aria-valuenow', 100);
         getProgress().html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');

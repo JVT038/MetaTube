@@ -2,6 +2,7 @@ import shutil
 from magic import Magic
 from metatube.overview import bp
 from metatube.database import *
+from metatube.DatabaseExceptions import *
 from metatube.youtube.manageDownloadProcess import manageDownloadProcess
 from metatube.youtube.youtubeUtils import utils as ytutils
 from metatube.youtube.downloadOptions import downloadOptions
@@ -113,20 +114,11 @@ def searchmetadata(data):
 @socketio.on('ytdl_download')
 def download(data):
     if Database.songidexists(data['userMetadata']['songid']) is True:
-        return 'duplicate'
-    url = data["url"]
+        sockets.downloadprocesserror("This song has already been downloaded.")
+        return
     ext = str(data["ext"]).upper() or 'MP3'
     
-    genius = None
-    spotify = None
-    if data['userMetadata']['metadata_source'] == 'Spotify':
-        credentials = Config.get_spotify().split(';')
-        spotify = Spotify(credentials[1], credentials[0])
-    elif data['userMetadata']['metadata_source'] == 'Genius':
-        token = Config.get_genius()
-        genius = Genius(token)
-    
-    processedMetadata = processMetadata(data['userMetadata'], ext, genius, spotify)    
+    processedMetadata = processMetadata(data['userMetadata'], ext)    
     output_folder = data["output_folder"] or '/downloads'
     output_type = data["type"] or 'Audio'
     output_format = data["output_format"] or f'%(title)s.%(ext)s'
@@ -135,16 +127,33 @@ def download(data):
     proxy_data = json.loads(data["proxy_data"]) or {'proxy_type': 'None'}
     width = data["width"] or 'best'
     height = data["height"] or 'best'
+    youtube_id = data['youtube_id']
     ffmpeg = Config.get_ffmpeg()
     hw_transcoding = Config.get_hwt()
     vaapi_device = hw_transcoding.split(';')[1] if 'vaapi' in hw_transcoding else ''
     verbose = True if str(env.LOGGER).lower() == 'true' else False
     
-    ytdl_options = downloadOptions(ext, output_folder, output_type, output_format, bitrate, skipfragments, proxy_data, ffmpeg, hw_transcoding, vaapi_device, width, height, verbose)
+    ytdl_options = downloadOptions(
+        youtube_id,
+        ext,
+        output_folder,
+        output_type,
+        output_format,
+        bitrate,
+        skipfragments,
+        proxy_data,
+        ffmpeg,
+        hw_transcoding,
+        vaapi_device,
+        width,
+        height,
+        verbose
+    )
     if isinstance(ytdl_options, downloadOptions):
-        logger.info('Request to download %s', data["url"])
-        downloadProcess = manageDownloadProcess(ytdl_options, processedMetadata, url, 'add')
-        socketio.start_background_task(downloadProcess.start_download)
+        logger.info('Request to download %s', data["youtube_id"])
+        downloadProcess = manageDownloadProcess(ytdl_options, processedMetadata, 'add')
+        
+        socketio.start_background_task(downloadProcess.start_download, current_app._get_current_object()) # type: ignore
     return 'OK'
 
 @socketio.on('fetchmbprelease')
@@ -192,12 +201,6 @@ def fetchgeniusalbum(input_id):
     token = Config.get_genius()
     genius = Genius(token)
     genius.fetchalbum(input_id)
-        
-@socketio.on('insertitem')
-def insertitem(data):
-    id = Database.insert(data)
-    data["id"] = id
-    sockets.overview({'msg': 'inserted_song', 'data': data})
     
 @socketio.on('updateitem')
 def updateitem(data):
@@ -209,9 +212,12 @@ def updateitem(data):
         data["date"] = parser.parse(data["date"])
     except Exception:
         data["date"] = datetime.now().date()
-    item = Database.fetchitem(id)
-    data["youtube_id"] = item.youtube_id
-    item.update(data)
+    try:
+        item = Database.fetchitem(id)
+        data["youtube_id"] = item.youtube_id
+        item.update(data)
+    except InvalidItemId:
+        return
     
 @socketio.on('downloaditems')
 def downloaditems(items):
@@ -446,7 +452,7 @@ def editfilerequest(filepath, id):
                 magic = Magic(mime=True)
                 mime_type = magic.from_buffer(image)
             except Exception:               
-                sockets.downloaderrors('Cover URL is invalid!')
+                sockets.downloadprocesserror('Cover URL is invalid!')
                 return False
         else:
             file = open(item.cover, 'rb')

@@ -4,8 +4,9 @@ class Genius():
     def __init__(self, client_id):
         try:
             self.genius = geniusobj(client_id)
-        except TypeError() as e:
+        except TypeError as e:
             logger.error('Genius API failed: %s', str(e))
+            raise e from e
     
     def search(self, data):
         search =  self.genius.search_songs(data["title"], data["max"])

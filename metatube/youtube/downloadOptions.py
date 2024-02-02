@@ -6,6 +6,7 @@ from yt_dlp.postprocessor.metadataparser import MetadataParserPP
 class downloadOptions(object):
     def __init__(
         self,
+        youtube_id: str,
         ext: str,
         output_folder: str,
         output_type: str,
@@ -21,6 +22,7 @@ class downloadOptions(object):
     	verbose: bool,
     	
      ):
+        self.youtube_id = youtube_id
         self.ext = ext
         self.output_folder = output_folder
         self.output_type = output_type
@@ -35,7 +37,7 @@ class downloadOptions(object):
         self.height = height
         self.verbose = verbose
         
-    def optionsToDictMapper(self, metadata: MetadataObject) -> dict:
+    def downloadOptionsMapper(self, metadata: MetadataObject) -> dict:
         filepath = os.path.join(self.output_folder, self.output_format)
         postprocessors = []
         postprocessor_args = {}
@@ -111,9 +113,11 @@ class downloadOptions(object):
         postprocessors.append({
             'actions': [
                 (MetadataParserPP.interpretter, " " + metadata.title, ' %(title)s'),
+                (MetadataParserPP.interpretter, " " + metadata.title, ' %(track)s'),
                 (MetadataParserPP.interpretter, metadata.album, '%(album)s'),
-                (MetadataParserPP.interpretter, metadata.album_artists, '%(artist)s'),
-                (MetadataParserPP.interpretter, metadata.album_artists, '%(album_artist)s'),
+                (MetadataParserPP.interpretter, metadata.artists, '%(artist)s'),
+                (MetadataParserPP.interpretter, metadata.artists, '%(creator)s'),
+                (MetadataParserPP.interpretter, metadata.artists, '%(album_artist)s'),
                 (MetadataParserPP.interpretter, str(metadata.tracknr), '%(track_number)s'),
                 (MetadataParserPP.interpretter, metadata.language, '%(language)s'),
                 (MetadataParserPP.interpretter, metadata.genres, '%(genre)s'),

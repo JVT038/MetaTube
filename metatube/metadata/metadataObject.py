@@ -10,7 +10,6 @@ class MetadataObject(object):
         release_date: str | None,
         songid: str | None,
         albumid: str | None,
-        album_artists: str | None,
         tracknr: int | None,
         total_tracks: int | None,
         cover: bytes,
@@ -30,7 +29,6 @@ class MetadataObject(object):
         self.release_date = release_date or ''
         self.albumid = albumid or ''
         self.songid = songid or ''
-        self.album_artists = album_artists or ''
         self.tracknr = tracknr or 1
         self.total_tracks = total_tracks or 1
         self.cover = cover

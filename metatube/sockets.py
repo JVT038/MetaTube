@@ -60,6 +60,9 @@ def deezersearch(data):
 def deezertrack(data):
     socketio.emit('deezer_track', data)
     
+def downloadprocesserror(message: str):
+    socketio.emit('downloadprocesserror', message)
+    
 def downloadprogress(downloaded_bytes, total_bytes):
     socketio.emit('downloadprogress', {
         'status': 'downloading',
@@ -68,7 +71,7 @@ def downloadprogress(downloaded_bytes, total_bytes):
     })
     
 def postprocessing(postprocessor):
-    socketio.emit('postprocessing', {'postprocessor': postprocessor})
+    socketio.emit('postprocessing', postprocessor)
     
 def finished_postprocessor(postprocessor, filepath):
     socketio.emit('finished_postprocessor', {
@@ -79,11 +82,8 @@ def finished_postprocessor(postprocessor, filepath):
 def finished_download():
     socketio.emit('finished_download')
     
-def finished_metadata(response):
-    socketio.emit('finished_metadata', {'status':'finished_metadata', 'data': response})
+def finished_metadata(data):
+    socketio.emit('finished_metadata', data)
     
-def metadata_error(message):
-    socketio.emit('downloaderror', message)
-    
-def downloaderrors(message):
-    socketio.emit('downloaderror', message)
+def inserted_song(data):
+    socketio.emit('inserted_song', data)
