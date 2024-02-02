@@ -1151,6 +1151,7 @@ $(document).ready(function() {
             socket.emit('ytdl_download', filedata, function(ack) {
                 if(ack == "OK") {
                     progress_text = $("#editfilemodal").find(".progresstextedit");
+                    progress_text.addClass('text-center');
                     $("#metadatasection, #downloadsection, #editfilebtnmodal").addClass('d-none');
                     $("#editfilemodal").find(".progressection").removeClass('d-none');
                 }
