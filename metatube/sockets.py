@@ -82,8 +82,8 @@ def finished_download():
 def finished_metadata(response):
     socketio.emit('finished_metadata', {'status':'finished_metadata', 'data': response})
     
-def metadata_error(error):
-    socketio.emit('downloaderror', {'status': 'error', 'message':  error})
+def metadata_error(message):
+    socketio.emit('downloaderror', message)
     
 def downloaderrors(message):
     socketio.emit('downloaderror', message)

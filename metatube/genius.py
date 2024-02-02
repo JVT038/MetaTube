@@ -12,6 +12,7 @@ class Genius():
         sockets.geniussearch(search)
         logger.info('Searched Genius for track \'%s\' ', data["title"])
     
+    @staticmethod
     def searchsong(data, token):
         genius = Genius(token)
         genius.search(data)

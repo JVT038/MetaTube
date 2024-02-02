@@ -1,8 +1,8 @@
 import deezer
 from metatube import sockets
 class Deezer():
-       
-    def socketsearch(data):
+    @staticmethod
+    def socketsearch(data: dict) -> None:
         client = deezer.Client()
         searchresults = client.search(data["title"], artist=data["artist"])
         list = []
@@ -12,10 +12,12 @@ class Deezer():
         maxlist.append(data["title"])
         sockets.deezersearch(maxlist)
     
-    def searchid(id):
+    @staticmethod
+    def searchid(id: int) -> dict:
         client = deezer.Client()
         return client.get_track(id).as_dict()
     
-    def sockets_track(id):
+    @staticmethod
+    def sockets_track(id: int) -> None:
         client = deezer.Client()
         sockets.deezertrack(client.get_track(id).as_dict())

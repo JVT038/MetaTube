@@ -13,7 +13,7 @@ $(document).ready(function() {
     function outputtemplate() {
         if($("#downloadmodal").css('display') != 'none') {
             let val = $("#outputname").val()
-            let url = $("#thumbnail_yt").attr('ytid');
+            let url = $("#thumbnail_yt").attr('youtube_id');
             let info_dict = $("#thumbnail_yt").attr('info_dict');
             socket.emit('ytdl_template', {'template': val, 'url': url, 'info_dict': info_dict});
         }
@@ -58,7 +58,7 @@ $(document).ready(function() {
 
         img.classList.add('img-fluid');
         img.id = "thumbnail_yt";
-        img.setAttribute('ytid', data.id);
+        img.setAttribute('youtube_id', data.id);
         img.src = thumbnail;
         img.title = 'Click to watch video';
         img.alt = 'Thumbnail for video' + data.title;
@@ -164,7 +164,7 @@ $(document).ready(function() {
     }
 
     function insertmusicbrainzdata(mbp_data) {
-        let release_id = mbp_data.id;
+        let songid = mbp_data.id;
         let title = mbp_data.title;
         let artists = mbp_data['artist-credit'].length > 1 ? "Artists: <br />" : "Artist: ";
         let date = mbp_data.date;
@@ -185,7 +185,7 @@ $(document).ready(function() {
             }
         });
         let release_type = mbp_data["release-group"].type;
-        let mbp_url = 'https://musicbrainz.org/release/'+release_id;
+        let mbp_url = 'https://musicbrainz.org/release/'+songid;
         let mbp_image = "";
         if("cover" in mbp_data && mbp_data.cover != "None" && mbp_data.cover != 'error') {
             mbp_image = mbp_data.cover.images[0].thumbnails.small.replace(/^http:/, 'https:');
@@ -201,7 +201,7 @@ $(document).ready(function() {
             'language': language,
             'source': 'Musicbrainz',
             'cover': mbp_image,
-            'id': release_id
+            'id': songid
         };
         createaudiocol(data);
     }
@@ -471,7 +471,7 @@ $(document).ready(function() {
         tr.append(td_name, td_artist, td_album, td_date, td_ext, td_actions);
         $("#emptyrow").remove();
         $("#recordstable").children("tbody").append(tr);
-        createdropdownmenu(itemdata["id"], itemdata["ytid"]);
+        createdropdownmenu(itemdata["id"], itemdata["youtube_id"]);
     }
 
     function downloadURI(uri, name) {
@@ -701,26 +701,26 @@ $(document).ready(function() {
     }
 
     function getMetadata() {          
-        let release_id = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+        let songid = $(".audiocol-checkbox:checked").parent().parent().attr('id');
+        let albumid;
         let people = {};
         let metadata_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').find('span.metadatasource').text() : "Unavailable";
-        let cover = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
-
+        let cover_source = $("#audiocol").length > 0 ? $(".audiocol-checkbox:checked").parents('li').children('img').attr('src') : "Unavailable";
         if(metadata_source == 'Unavailable') {
             // The priority order is: Spotify -> Deezer -> Musibrainz
-            var trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : ($("#deezer_releaseid").val().length > 0 ? $("#deezer_trackid").val() : $("#mbp_trackid").val());
-            var albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
+            songid = $("#spotify_songid").length > 0 ? $("#spotify_songid").val() : ($("#deezer_songid").val().length > 0 ? $("#deezer_songid").val() : $("#mbp_songid").val());
+            albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : ($("#deezer_albumid").val().length > 0 ? $("#deezer_albumid").val() : $("#mbp_albumid").val());
         } else if(metadata_source == 'Spotify') {
-            var trackid = $("#spotify_trackid").val();
-            var albumid = $("#spotify_albumid").val();   
+            
+            albumid = $("#spotify_albumid").val();   
         } else if(metadata_source == 'Musicbrainz') {
-            var trackid = $("#mbp_releaseid").val();
-            var albumid = $("#mbp_albumid").val();
+            
+            albumid = $("#mbp_albumid").val();
         } else if(metadata_source == 'Deezer') {
-            var trackid = $("#deezer_trackid").val();
-            var albumid = $("#deezer_albumid").val();
+            
+            albumid = $("#deezer_albumid").val();
         } else if(metadata_source == 'Genius') { 
-            var trackid = $("#genius_songid").val();
+            
         }
 
         $.each($('.artist_relations'), function() {
@@ -740,7 +740,7 @@ $(document).ready(function() {
         let artists = $("#md_artists").val().split(';');
         let albumartists = $("#md_album_artists").val().split(';');
         return {
-            'trackid': trackid,
+            'songid': songid,
             'albumid': albumid,
             'title': $("#md_title").val(),
             'artists': JSON.stringify(artists),
@@ -750,9 +750,9 @@ $(document).ready(function() {
             'album_releasedate': $("#md_album_releasedate").val(),
             'cover': $("#md_cover").val(),
             'people': JSON.stringify(people),
-            'cover': cover,
-            'release_id': release_id,
-            'metadata_source': metadata_source
+            'songid': songid,
+            'metadata_source': metadata_source,
+            'cover_source': cover_source
         };
     }
 
@@ -965,10 +965,10 @@ $(document).ready(function() {
     });
 
     $(document).on('click', "#fetchmbpreleasebtn", function(){
-        let release_id = $(this).parent().siblings('input').val();
-        if(release_id.length > 0) {
+        let songid = $(this).parent().siblings('input').val();
+        if(songid.length > 0) {
             $(".removeperson").parents('.personrow').remove();
-            socket.emit('fetchmbprelease', release_id)
+            socket.emit('fetchmbprelease', songid)
         } else {
             $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Musicbrainz ID!</p>')
         }
@@ -984,18 +984,18 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '#fetchspotifytrack', function() {
-        let track_id = $(this).parent().siblings('input').val();
-        if(track_id.length > 0) {
-            socket.emit('fetchspotifytrack', track_id)
+        let songid = $(this).parent().siblings('input').val();
+        if(songid.length > 0) {
+            socket.emit('fetchspotifytrack', songid)
         } else {
             $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Spotify track ID!</p>')
         }
     });
 
     $(document).on('click', '#fetchdeezertrack', function() {
-        let track_id = $(this).parent().siblings('input').val();
-        if(track_id.length > 0) {
-            socket.emit('fetchdeezertrack', track_id)
+        let songid = $(this).parent().siblings('input').val();
+        if(songid.length > 0) {
+            socket.emit('fetchdeezertrack', songid)
         } else {
             $("p:contains('* All input fields with an *, are optional')").text('<p>Enter a Deezer track ID!</p>')
         }
@@ -1029,9 +1029,9 @@ $(document).ready(function() {
             let people = {};
             let filepath = $("#item_filepath").val();
             let id = $("#edititemmodal").attr('itemid');
-            let trackid = $("#spotify_trackid").length > 0 ? $("#spotify_trackid").val() : $("#mbp_releaseid").val();
+            let songid = $("#spotify_songid").length > 0 ? $("#spotify_songid").val() : $("#mbp_songid").val();
             let albumid = $("#spotify_albumid").length > 0 ? $("#spotify_albumid").val() : $("#mbp_albumid").val();
-            let source = $("#spotify_trackid").length > 0 ? 'Spotify' : 'Musicbrainz';
+            let source = $("#spotify_songid").length > 0 ? 'Spotify' : 'Musicbrainz';
             $.each($('.artist_relations'), function() {
                 if($(this).val().trim().length < 1 || $(this).parent().siblings().find('.artist_relations').val().trim().length < 1) {
                     return;
@@ -1047,7 +1047,7 @@ $(document).ready(function() {
             });
             
             let metadata = {
-                'trackid': trackid,
+                'songid': songid,
                 'albumid': albumid,
                 'title': $("#md_title").val(),
                 'artists': $("#md_artists").val(),
@@ -1077,7 +1077,7 @@ $(document).ready(function() {
             $("#downloadmodal").animate({ scrollTop: 0 }, 'fast');
             $("#editfilelog").text('Enter all segment fields or disable the segments');
         } else {
-            let url = $("#edititemmodal").attr('ytid');
+            let url = $("#edititemmodal").attr('youtube_id');
             let ext = $("#extension").val();
             let output_folder = $("#output_folder").val();
             let type = $("#type").val();
@@ -1449,7 +1449,7 @@ $(document).ready(function() {
                 'proxy_password': $("#proxy_type").val() == 'None' ? '' : $("#proxy_password").val(),
             })
             $("#progress_status").siblings('p').empty();
-            data = {
+            filedata = {
                 'url': url,
                 'ext': ext,
                 'output_folder': output_folder,
@@ -1459,9 +1459,10 @@ $(document).ready(function() {
                 'skipfragments': skipfragments,
                 'proxy_data': proxy_data,
                 'width': width,
-                'height': height
+                'height': height,
+                'userMetadata': getMetadata(),
             }
-            socket.emit('ytdl_download', data, function(ack) {
+            socket.emit('ytdl_download', filedata, function(ack) {
                 if(ack == "OK") {
                     $("#editmetadata, #downloadbtn, #searchmetadataview, #404p, #defaultview, #resetviewbtn, #geniusbtn, #audiocol, #savemetadata, #metadataview, #geniuscol").addClass('d-none');
                     $("#progressview").removeClass('d-none');
@@ -1599,7 +1600,7 @@ $(document).ready(function() {
     socket.on('finished_metadata', function(msg) {
         setProgress("100");
         progress_text.text('Finished adding metadata!');
-        msg.data["ytid"] = $("#thumbnail_yt").attr('ytid');
+        msg.data["youtube_id"] = $("#thumbnail_yt").attr('youtube_id');
         try {
             socket.emit('insertitem', msg.data);
             $("#downloadfilebtn").removeClass('d-none');
@@ -1610,7 +1611,7 @@ $(document).ready(function() {
     });
     
     socket.on('metadata_unavailable', function(msg) {
-        msg.data["ytid"] = $("#thumbnail_yt").attr('ytid');
+        msg.data["youtube_id"] = $("#thumbnail_yt").attr('youtube_id');
         progress_text.text('Metadata has NOT been added, because metadata is not supported for the selected extension');
         setProgress("100");
         $("#downloadfilebtn").removeClass('d-none');
@@ -1619,11 +1620,10 @@ $(document).ready(function() {
     });
 
     socket.on('downloaderror', function(msg) {
-        progress_text.text(msg.message);
+        progress_text.text(msg);
         getProgress().attr('aria-valuenow', 100);
         getProgress().html('ERROR <i class="fi-cwluxl-smiley-sad-wide" aria-hidden="true"></i>');
         getProgress().css('width', '100%');
-        progress_text.text(msg.message);
         if($("#edititemmodal").css('display').toLowerCase() != 'block') {
             $("#resetviewbtn").removeClass('d-none');
         }
@@ -1974,7 +1974,7 @@ $(document).ready(function() {
     socket.on('edit_metadata', (data) => {
         $("#downloadsection, #metadatasection, #metadataview").empty();
         $("#metadatasection").append(data.metadataview);
-        $("#metadatasection").find('#mbp_releaseid').val(data.metadata.musicbrainz_id);
+        $("#metadatasection").find('#mbp_songid').val(data.metadata.musicbrainz_id);
         $("#metadatasection").find('#mbp_albumid').val(data.metadata.mbp_releasegroupid);
         $("#metadatasection").find('#md_title').val(data.metadata.title);
         $("#metadatasection").find('#md_artists').val(data.metadata.artists);
@@ -1993,8 +1993,8 @@ $(document).ready(function() {
             'aria-valuemin': '0',
             'style': ''
         });
-        if(data.metadata.mbp_releasegroupid == '' && data.metadata.mbp_releaseid == '' && $("#spotify_trackid").length > 0) {
-            $("#spotify_trackid").val(data.metadata.audio_id);
+        if(data.metadata.mbp_releasegroupid == '' && data.metadata.mbp_songid == '' && $("#spotify_songid").length > 0) {
+            $("#spotify_songid").val(data.metadata.songid);
         }
         
         $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);
@@ -2017,7 +2017,7 @@ $(document).ready(function() {
         $("#editmetadatabtnmodal").attr('id', 'editfilebtnmodal');
         $("#downloadsection, #editfilebtnmodal").removeClass('d-none');
         $("#downloadsection").find('hr').remove();
-        $("#edititemmodal").attr({'itemid': data.filedata.itemid, 'ytid': data.filedata.youtube_id});
+        $("#edititemmodal").attr({'itemid': data.filedata.itemid, 'youtube_id': data.filedata.youtube_id});
         $("hr").addClass('d-none');
         
         $("#edititemmodal").addClass(['d-flex', 'justify-content-center']);

@@ -21,7 +21,6 @@ class Config(db.Model):
     
     @staticmethod
     def get_ffmpeg():
-        # return db.session.get(Config, 1).ffmpeg_directory
         return db.session.get(Config, 1).ffmpeg_directory# type: ignore
     
     @staticmethod
@@ -168,7 +167,7 @@ class Database(db.Model):
     date = db.Column(db.DateTime)
     length = db.Column(db.Integer)
     cover = db.Column(db.String(256))
-    audio_id = db.Column(db.String(128))
+    songid = db.Column(db.String(128))
     youtube_id = db.Column(db.String(16), unique=True)
     
     @staticmethod
@@ -199,8 +198,10 @@ class Database(db.Model):
         return Database.query.filter_by(youtube_id = youtube_id_input).first()
     
     @staticmethod
-    def checktrackid(release_id_input):
-        return Database.query.filter_by(audio_id = release_id_input).first()
+    def songidexists(songid_input) -> bool:
+        if Database.query.filter_by(songid = songid_input).first() is None:
+            return False
+        return True
     
     @staticmethod
     def insert(data):
@@ -211,8 +212,8 @@ class Database(db.Model):
             album = data["album"],
             date = parser.parse(data["date"]),
             cover = data["image"],
-            audio_id = data["track_id"],
-            youtube_id = data["ytid"]
+            songid = data["songid"],
+            youtube_id = data["youtube_id"]
         ) # type: ignore
         db.session.add(row)
         db.session.commit()
@@ -227,7 +228,7 @@ class Database(db.Model):
         self.date = data["date"]
         self.length = data["length"]
         self.cover = data["image"]
-        self.audio_id = data["track_id"]
+        self.songid = data["songid"]
         self.youtube_id = data["youtube_id"]
         db.session.commit()
         logger.info('Updated item %s', data["name"])
