@@ -4,23 +4,11 @@ from metatube import create_app, db
 from metatube.database import Config as env
 from metatube.database import Templates, Database
 from datetime import datetime
+from tests.Config import TestConfig
 import os
 import unittest
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-class TestConfig(Config):
-    TESTING = True
-    FFMPEG = 'bin'
-    META_EXTENSIONS = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV']
-    VIDEO_EXTENSIONS = ['MP4', 'M4A', 'FLV', 'WEBM', 'OGG', 'MKV', 'AVI']
-    AUDIO_EXTENSIONS = ['AAC', 'FLAC', 'MP3', 'M4A', 'OPUS', 'VORBIS', 'WAV']
-    DOWNLOADS = '/path/to/downloads'
-    LOGGER = False
-    LOG_LEVEL = 40
-    INIT_DB = False
-    # SQLALCHEMY_DATABASE_URI = os.path.join('sqlite:///', basedir, 'metatube/test.db')
-    # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     
 class TestDatabase(unittest.TestCase):
     def setUp(self):

@@ -16,7 +16,7 @@ class download(object):
         postprocessor_hook_partial = partial(download.postprocessor_hook, queue)
         ytdl_options['progress_hooks'] = [download_hook_partial]
         ytdl_options['postprocessor_hooks'] = [postprocessor_hook_partial]
-        with yt_dlp.YoutubeDL(ytdl_options) as ytdl:
+        with yt_dlp.YoutubeDL(params=ytdl_options) as ytdl:
             try:
                 return ytdl.download(url)
             except KeyError as e:
