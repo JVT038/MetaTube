@@ -7,6 +7,7 @@
     <title>MetaTube</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/bootstrap-icons.css') }}" />
+    <link href="{{ url_for('static', filename='CSS/style.css') }}" rel="stylesheet"/>
     <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}" type="image/icon type">
     <script src="{{ url_for('static', filename='JS/libraries/jquery-3.6.0.min.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/libraries/popper.min.js') }}"></script>
@@ -14,12 +15,17 @@
     <script src="{{ url_for('static', filename='JS/libraries/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/global.js') }}"></script>
     </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 ">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
+<<<<<<< HEAD
                     <a class="nav-brand" href="{{ url_for('overview.index') }}"><img
+=======
+                    <a class="nav-brand" href="{{ url_for('overview.index') }}">
+                        <img class="icon"
+>>>>>>> 2fe97d6 (Changed the Overview to the site's logo)
                             src="{{url_for('static', filename='images/icon.png')}}"></a>
                 </li>
             </ul>
@@ -36,8 +42,8 @@
             </ul>
         </div>
     </nav>
-        
-    {% block content %}{% endblock %}
+
+    x
     <footer class="d-flex container-fluid justify-content-end mt-auto footer bg-light" style="bottom: 0;">
         <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star
             me on GitHub<i aria-hidden="true" class="bi bi-github"></i></a></p>
