@@ -19,7 +19,8 @@
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
-                    <a class="nav-link" href="{{ url_for('overview.index') }}">Overview</a>
+                    <a class="nav-brand" href="{{ url_for('overview.index') }}"><img
+                            src="{{url_for('static', filename='images/icon.png')}}"></a>
                 </li>
             </ul>
             <ul class="navbar-nav">
@@ -38,7 +39,8 @@
         
     {% block content %}{% endblock %}
     <footer class="d-flex container-fluid justify-content-end mt-auto footer bg-light" style="bottom: 0;">
-            <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star me on Github<i class="bi bi-github" aria-hidden="true"></i></a></p>
+        <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star
+            me on GitHub<i aria-hidden="true" class="bi bi-github"></i></a></p>
     </footer>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/dark.css') }}" />
     <script src="{{ url_for('static', filename='JS/libraries/dark.min.js') }}"></script>
