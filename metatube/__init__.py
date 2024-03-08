@@ -21,10 +21,6 @@ console.setFormatter(fmt=logformat)
 logger = logging.Logger('default')
 logger.addHandler(console)
 
-from metatube.settings import bp as bp_settings
-from metatube.overview import bp as bp_overview
-from metatube.routes import error
-
 from metatube.init import init as init_db
 
 def create_app(config_class=Config):
@@ -34,16 +30,24 @@ def create_app(config_class=Config):
         FLASK_DEBUG=False,
         FLASK_ENV='production'
     )
-    app.register_error_handler(Exception, error)
     app.logger.removeHandler(default_handler)
     app.logger.addHandler(console)
+    
+    with app.app_context():
+        from metatube.settings import bp as bp_settings
+        from metatube.overview import bp as bp_overview
+        from metatube.routes import error
+        from metatube.Exception import MetaTubeException
+        
+        app.register_blueprint(bp_overview)
+        app.register_blueprint(bp_settings)
+        app.register_error_handler(MetaTubeException, error)
+        
     console.setLevel(int(app.config["LOG_LEVEL"]))
     socket_log = logger if strtobool(str(app.config["SOCKET_LOG"])) == 1 else False
     db.init_app(app)
     migrate.init_app(app, db, compare_type=True, ping_interval=60)
     socketio.init_app(app, json=json, engineio_logger=socket_log, logger=socket_log, async_mode='gevent')
-    app.register_blueprint(bp_overview)
-    app.register_blueprint(bp_settings)
     if app.config.get('INIT_DB') == True:
         init_db(app)
     return app

@@ -36,10 +36,10 @@ def search_id_release_group(id):
     except Exception as e:
         return str(e)
     
-def get_cover(releaseid):
-    logger.info('Searching for cover of release %s', releaseid)
+def get_cover(songid):
+    logger.info('Searching for cover of release %s', songid)
     try:
-        return musicbrainzngs.get_image_list(releaseid)
+        return musicbrainzngs.get_image_list(songid)
     except ResponseError as e:
         logger.error(str(e))
         return str(e.message)

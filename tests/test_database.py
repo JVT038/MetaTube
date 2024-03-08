@@ -4,23 +4,11 @@ from metatube import create_app, db
 from metatube.database import Config as env
 from metatube.database import Templates, Database
 from datetime import datetime
+from tests.Config import TestConfig
 import os
 import unittest
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-class TestConfig(Config):
-    TESTING = True
-    FFMPEG = 'bin'
-    META_EXTENSIONS = ['MP3', 'OPUS', 'FLAC', 'OGG', 'MP4', 'M4A', 'WAV']
-    VIDEO_EXTENSIONS = ['MP4', 'M4A', 'FLV', 'WEBM', 'OGG', 'MKV', 'AVI']
-    AUDIO_EXTENSIONS = ['AAC', 'FLAC', 'MP3', 'M4A', 'OPUS', 'VORBIS', 'WAV']
-    DOWNLOADS = '/path/to/downloads'
-    LOGGER = False
-    LOG_LEVEL = 40
-    INIT_DB = False
-    # SQLALCHEMY_DATABASE_URI = os.path.join('sqlite:///', basedir, 'metatube/test.db')
-    # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     
 class TestDatabase(unittest.TestCase):
     def setUp(self):
@@ -184,12 +172,12 @@ class TestDatabase(unittest.TestCase):
         itemId = Database.insert({
             'filepath': os.path.join(self.app.config['DOWNLOADS'], '/file.mp3'),
             'name': 'Never Gonna Give You Up',
-            'artist': ['Rick Astley'],
+            'artist': 'Rick Astley',
             'album': 'Whenever You Need Somebody',
             'date': '12-11-1987',
             'image': 'https://i.scdn.co/image/ab67616d0000b273baf89eb11ec7c657805d2da0',
-            'track_id': '4cOdK2wGLETKBW3PvgPWqT',
-            'ytid': 'dQw4w9WgXcQ'
+            'songid': '4cOdK2wGLETKBW3PvgPWqT',
+            'youtube_id': 'dQw4w9WgXcQ'
         })
         item = Database.fetchitem(itemId)
         
@@ -203,14 +191,13 @@ class TestDatabase(unittest.TestCase):
             'artist': 'Rick Astley',
             'album': 'Whenever You Need Somebody',
             'date': '1987-12-11 00:00:00',
-            'length': 'None',
             'cover': 'https://i.scdn.co/image/ab67616d0000b273baf89eb11ec7c657805d2da0',
-            'audio_id': '4cOdK2wGLETKBW3PvgPWqT',
+            'songid': '4cOdK2wGLETKBW3PvgPWqT',
             'youtube_id': 'dQw4w9WgXcQ'
         })
         self.assertIs(Database.checkfile(item.filepath), item) # type: ignore
         self.assertIs(Database.checkyt(item.youtube_id), item) # type: ignore
-        self.assertIs(Database.checktrackid(item.audio_id), item) # type: ignore
+        self.assertIs(Database.songidexists(item.songid), True) # type: ignore
         
         item.update({ # type: ignore
             'filepath': os.path.join(self.app.config['DOWNLOADS'], '/test.mp3'),
@@ -219,9 +206,8 @@ class TestDatabase(unittest.TestCase):
             'album': 'Some album',
             'date': datetime.now().date(),
             'image': '/path/to/cover.png',
-            'track_id': 'someid',
+            'songid': 'someid',
             'youtube_id': 'y6120QOlsfU',
-            'length': None
         })
         
         self.assertEqual(Database.itemtodict(item), {
@@ -231,9 +217,8 @@ class TestDatabase(unittest.TestCase):
             'artist': 'Famous artist',
             'album': 'Some album',
             'date': datetime.now().strftime("%Y-%m-%d 00:00:00"),
-            'length': 'None',
             'cover': '/path/to/cover.png',
-            'audio_id': 'someid',
+            'songid': 'someid',
             'youtube_id': 'y6120QOlsfU'
         })
         

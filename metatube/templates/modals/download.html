@@ -1,0 +1,72 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="downloadmodal" aria-hidden="true">
+    <div class="modal-dialog modal-lg mw-100 w-75">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Download song</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    {% if ffmpeg_path is sameas True %}
+                    <div class="row">
+                        <form id="queryform" class="form-group" style="width: 100%;">
+                            <p>Only YouTube URLs are currently supported</p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="query" placeholder="Enter URL or a name of a YouTube video" aria-describedby="basic-addon2" autocomplete="off" aria-autocomplete="Query to what to search for">
+                                <div class="input-group-append">
+                                    <button type="button" id="searchsongbtn" class="btn btn-success"><i class="bi bi-search"></i></button>
+                                </div>
+                            </div>
+                            <p class="text-center" id="searchlog"></p>
+                        </form>
+                    </div>
+                    <div id="searchmetadataview" class="d-none">
+                        <p class="d-none" id="404p">No matching items found from selected metadata providers :( <br />Enter metadata manually here to search the metadata providers or enter metadata manually</p>
+                        <p id="otherp">In case the desired item wasn't found, enter an alternative metadata search query here:</p>
+                        <form id="metadataqueryform">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="metadataquery" />
+                                <div class="input-group-append">
+                                    <button type="button" id="searchmetadatabtn" class="btn btn-success"><i class="bi bi-search" aria-label="Search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="defaultview" class="row d-flex"></div>
+                    <div id="metadataview" class="d-none"></div>
+                    <div id="progressview" class="d-none">
+                        <div class="form-row">
+                            <div class="col">
+                                <p id="progresstext" class="text-center"></p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <div class="progress" id="progressdownload">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <h3 class="text-center">Select an FFmpeg location in settings before downloading any songs!</h3>
+                    </div>
+                    {% endif %}                    
+                </div>
+            </div>
+            <div class="modal-footer d-none" id="searchvideomodalfooter">
+                <button type="button" class="btn btn-success d-none" id="nextbtn">Next</button>
+                <button type="button" class="btn btn-warning d-none" id="resetviewbtn">Return to video overview</button>
+                <button type="button" class="btn btn-primary d-none" id="editmetadata">Edit metadata manually</button>
+                <button type="button" class="btn btn-primary d-none" id="downloadfilebtn">Download file</button>
+                <button type="button" class="btn btn-warning d-none" id="metadataviewbtn">Return to metadata source</button>
+                {% if genius is sameas True %} <button type="button" class="btn btn-warning d-none" id="geniusbtn">Choose lyrics</button> {% endif %}
+                <button type="button" class="btn btn-success d-none" id="downloadbtn">Download</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

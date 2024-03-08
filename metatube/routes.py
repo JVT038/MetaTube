@@ -4,9 +4,9 @@ from metatube.database import Templates
 import json
 
 @socketio.on('fetchtemplate')
-def fetchtemplate(id):
-    if id is not None and len(id) > 0:
-        template = Templates.fetchtemplate(id)
+def fetchtemplate(id = -1):
+    template = Templates.fetchtemplate(id)
+    if template is not None:
         data = {
             "id": template.id,
             "name": template.name,
