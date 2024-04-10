@@ -3,7 +3,7 @@ requests==2.31.0
 yt-dlp==2024.4.9
 gevent==23.9.1
 gevent-websocket==0.10.1
-Flask==3.0.1
+Flask==3.0.3
 Flask-SocketIO==5.3.6
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.1.1
