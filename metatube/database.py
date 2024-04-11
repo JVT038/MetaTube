@@ -1,4 +1,5 @@
 from metatube import db, logger, sockets
+from .DatabaseExceptions import *
 from sqlalchemy.sql import expression
 from dateutil import parser
 
@@ -21,7 +22,6 @@ class Config(db.Model):
     
     @staticmethod
     def get_ffmpeg():
-        # return db.session.get(Config, 1).ffmpeg_directory
         return db.session.get(Config, 1).ffmpeg_directory# type: ignore
     
     @staticmethod
@@ -131,7 +131,10 @@ class Templates(db.Model):
     
     @staticmethod
     def searchdefault():
-        return Templates.query.filter_by(default = True).first()
+        default = Templates.query.filter_by(default = True).first()
+        if default is None:
+            raise NoDefaultTemplate("There is no template marked as 'default'!")
+        return default
         
     def setdefault(self, defaulttemplate = None):
         self.default = True
@@ -166,9 +169,8 @@ class Database(db.Model):
     artist = db.Column(db.String(64))
     album = db.Column(db.String(64))
     date = db.Column(db.DateTime)
-    length = db.Column(db.Integer)
     cover = db.Column(db.String(256))
-    audio_id = db.Column(db.String(128))
+    songid = db.Column(db.String(128))
     youtube_id = db.Column(db.String(16), unique=True)
     
     @staticmethod
@@ -188,7 +190,10 @@ class Database(db.Model):
     
     @staticmethod
     def fetchitem(input_id):
-        return Database.query.filter_by(id = input_id).first()
+        item = Database.query.filter_by(id = input_id).first()
+        if item is None:
+            raise InvalidItemId("Invalid item ID")
+        return item
     
     @staticmethod
     def checkfile(filepath_input):
@@ -199,20 +204,22 @@ class Database(db.Model):
         return Database.query.filter_by(youtube_id = youtube_id_input).first()
     
     @staticmethod
-    def checktrackid(release_id_input):
-        return Database.query.filter_by(audio_id = release_id_input).first()
+    def songidexists(songid_input) -> bool:
+        if Database.query.filter_by(songid = songid_input).first() is None:
+            return False
+        return True
     
     @staticmethod
     def insert(data):
         row = Database(
             filepath = data["filepath"],
             name = data["name"],
-            artist = '; '.join(data["artist"]),
+            artist = data["artist"],
             album = data["album"],
             date = parser.parse(data["date"]),
             cover = data["image"],
-            audio_id = data["track_id"],
-            youtube_id = data["ytid"]
+            songid = data["songid"],
+            youtube_id = data["youtube_id"]
         ) # type: ignore
         db.session.add(row)
         db.session.commit()
@@ -225,14 +232,12 @@ class Database(db.Model):
         self.artist = data["artist"]
         self.album = data["album"]
         self.date = data["date"]
-        self.length = data["length"]
         self.cover = data["image"]
-        self.audio_id = data["track_id"]
+        self.songid = data["songid"]
         self.youtube_id = data["youtube_id"]
         db.session.commit()
         logger.info('Updated item %s', data["name"])
         data["date"] = data["date"].strftime('%d-%m-%Y')
-        sockets.overview({'msg': 'changed_metadata_db', 'data': data})
     
     def updatefilepath(self, filepath):
         self.filepath = filepath
