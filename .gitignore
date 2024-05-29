@@ -1,12 +1,13 @@
-# For virtual environment
+# Virtual environment files
 Lib*
 Scripts*
 pyvenv.cfg
+.venv
 
+# Project-specific Files
 share
 include
 __pycache__
-.vscode
 .flaskenv
 *.db
 *.pem
@@ -14,3 +15,8 @@ migrations
 bin
 downloads/*
 .cache
+node_modules
+
+# IDE files
+.idea
+.vscode/
