@@ -16,6 +16,6 @@ pytest==8.0.0
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.6
 spotipy==2.23.0
-urllib3==2.1.0
+urllib3==2.2.2
 deezer-python==6.1.1
 lyricsgenius==3.0.1
