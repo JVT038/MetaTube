@@ -1,6 +1,6 @@
 mutagen==1.47.0
 requests==2.31.0
-yt-dlp==2024.7.1
+yt-dlp==2024.8.6
 gevent==23.9.1
 gevent-websocket==0.10.1
 Flask==3.0.1
