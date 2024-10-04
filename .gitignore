@@ -1,5 +1,7 @@
 # For virtual environment
 Lib*
+lib
+lib64
 Scripts*
 pyvenv.cfg
 

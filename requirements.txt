@@ -1,5 +1,5 @@
 mutagen==1.47.0
-requests==2.31.0
+requests==2.32.3
 yt-dlp==2024.9.27
 gevent==23.9.1
 gevent-websocket==0.10.1
@@ -12,9 +12,10 @@ sponsorblock.py==0.2.3
 python-dateutil==2.8.2
 python-dotenv==1.0.1
 python-magic==0.4.27
+pytest==8.0.0
 ffmpeg-python==0.2.0
 youtube-search-python==1.6.6
 spotipy==2.24.0
-urllib3==2.1.0
+urllib3==2.2.2
 deezer-python==6.1.1
 lyricsgenius==3.0.1
