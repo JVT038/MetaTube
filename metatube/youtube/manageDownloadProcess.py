@@ -15,12 +15,13 @@ from shutil import move
 from datetime import datetime
 
 class manageDownloadProcess(object):
-    def __init__(self, downloadOptions: downloadOptions, metadataProcessor: processMetadata | None, goal: 'str', item: Database | None):
+    def __init__(self, downloadOptions: downloadOptions, metadataProcessor: processMetadata | None, goal: 'str',
+                 item: Database | None):
         self.downloadOptions = downloadOptions
         self.metadataProcessor = metadataProcessor
         self.goal = goal
         self.item = item
-        
+
     def start_download(self, app):
         metadata = None
         if self.goal == 'add' and self.metadataProcessor is not None:
@@ -45,7 +46,7 @@ class manageDownloadProcess(object):
             downloadprocesserror("Download process could not be started. Please check thet logs and try again.")
             return
         try:
-            yt_dlpOptions = self.downloadOptions.downloadOptionsMapper(metadata) 
+            yt_dlpOptions = self.downloadOptions.downloadOptionsMapper(metadata)
         except MetaTubeException as error:
             downloadprocesserror(str(error))
             return
@@ -92,7 +93,7 @@ class manageDownloadProcess(object):
                         data["date"] = parser.parse(data["date"])
                     except Exception:
                         data["date"] = datetime.now().date()
-                    self.item.update(data) # type: ignore
+                    self.item.update(data)  # type: ignore
         except Empty:
             pass
         except MetaTubeException as error:

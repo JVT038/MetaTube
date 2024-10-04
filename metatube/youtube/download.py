@@ -25,7 +25,7 @@ class download(object):
                 return None
             except ExtractorError as e:
                 logger.error('Extractor error: %s', str(e))
-                sockets.downloadprocesserror('An extractor error has occured. Check logs for more info.')
+                sockets.downloadprocesserror('An extractor error has occurred. Check logs for more info.')
                 return None
             except FFmpegPostProcessorError as e:
                 logger.error('FFmpegPostProcessor error: %s', str(e))
@@ -33,15 +33,15 @@ class download(object):
                 return None
             except PostProcessingError as e:
                 logger.error('Postprocessor error: %s', str(e))
-                sockets.downloadprocesserror('A processing error has occured. Check logs for more info.')
+                sockets.downloadprocesserror('A processing error has occurred. Check logs for more info.')
                 return None
             except DownloadError as e:
                 logger.error('Downloading error: %s', str(e))
-                sockets.downloadprocesserror('A downloading error has occured. Check logs for more info.')
+                sockets.downloadprocesserror('A downloading error has occurred. Check logs for more info.')
                 return None
             except URLError as e:
                 logger.error('Network connection error: %s', str(e))
-                sockets.downloadprocesserror('A network error occured. Check logs for more info.')
+                sockets.downloadprocesserror('A network error occurred. Check logs for more info.')
                 return None
             except Exception as e:
                 logger.exception('Error during downloading video: %s', str(e))
