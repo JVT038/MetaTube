@@ -14,3 +14,4 @@ migrations
 bin
 downloads/*
 .cache
+.idea
