@@ -3,10 +3,10 @@ Lib*
 Scripts*
 pyvenv.cfg
 
+# Runtime files
 share
 include
 __pycache__
-.vscode
 .flaskenv
 *.db
 *.pem
@@ -14,4 +14,8 @@ migrations
 bin
 downloads/*
 .cache
+.env*
+
+# Code editors
 .idea
+.vscode
