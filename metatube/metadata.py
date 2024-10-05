@@ -425,9 +425,15 @@ class MetaData:
             )
             cover.save()
         else:
+            from PIL import Image
+            from io import BytesIO
+            img = Image.open(BytesIO(data["image"]))
             cover = Picture()
             cover.data = data["image"]
             cover.type = 3
+            cover.height = img.height
+            cover.width = img.width
+            cover.depth = self.modeToDepth().get(img.mode, 0)
             cover.mime = data["cover_mime_type"]
             cover.desc = 'Front cover'
             if data["extension"] == 'FLAC':
@@ -594,3 +600,14 @@ class MetaData:
     @staticmethod
     def AVI(filename):
         pass
+    
+    @staticmethod
+    def modeToDepth():
+        return {
+            '1': 1,    # 1-bit pixels
+            'L': 8,    # 8-bit grayscale
+            'P': 8,    # 8-bit palette
+            'RGB': 24, # 24-bit (8 bits per channel)
+            'RGBA': 32, # 32-bit (8 bits per channel + alpha)
+            'CMYK': 32 # 32-bit (8 bits per channel)
+        }
