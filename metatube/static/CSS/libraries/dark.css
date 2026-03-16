@@ -1,3 +1,45 @@
+.sun-and-moon {
+  pointer-events: none;
+}
+.icons {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: #454D54;
+}
+
+[data-theme="dark"] .icons {
+  fill: #e8eaed;
+}
+[data-theme="dark"] .icons:hover {
+  fill: #251619;
+}
+
+@import "https://unpkg.com/open-props/easings.min.css";
+
+.sun-and-moon > :is(.moon, .sun, .sun-beams) {
+  transform-origin: center;
+}
+
+.sun-and-moon > :is(.moon, .sun) {
+  fill: var(--icon-fill);
+}
+
+.theme-toggle:is(:hover, :focus-visible) > .sun-and-moon > :is(.moon, .sun) {
+  fill: var(--icon-fill-hover);
+}
+
+.sun-and-moon > .sun-beams {
+  stroke: var(--icon-fill);
+  stroke-width: 2px;
+}
+
+.theme-toggle:is(:hover, :focus-visible) .sun-and-moon > .sun-beams {
+  stroke: var(--icon-fill-hover);
+}
+
+
+
+
 [data-theme="dark"] {
   background-color: #111 !important;
   color: #eee;
@@ -7,7 +49,7 @@
   color: #8dc6ff;
 }
 
-[data-theme="dark"] .darkanchor:hover {
+[data-theme="dark"] svg:hover {
   color: #fff;
 }
 
@@ -78,4 +120,32 @@
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .modal-footer {
   border-color: #222;
+}
+
+svg {
+  fill: rgba(0,0,0,.5)
+}
+
+[data-theme="dark"] .svg {
+  fill: #ebe9fc;
+}
+
+button {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+svg[xmlns] {
+  width: 24px;
+  height: 24px;
+}
+.nav-link {
+  color: inherit;
+}
+.tab-content {
+  margin-top: 1rem;
 }

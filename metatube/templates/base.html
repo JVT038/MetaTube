@@ -15,22 +15,49 @@
     <script src="{{ url_for('static', filename='JS/global.js') }}"></script>
     </head>
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
-                    <a class="nav-link" href="{{ url_for('overview.index') }}">Overview</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item {{ 'active' if current_page == 'overview' else '' }}">
+                <a class="nav-link" href="{{ url_for('overview.index') }}">
+                    <svg class="icons" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M160-200v-360q0-19 8.5-36t23.5-28l240-180q21-16 48-16t48 16l240 180q15 11 23.5 28t8.5 36v360q0 33-23.5 56.5T720-120H600q-17 0-28.5-11.5T560-160v-200q0-17-11.5-28.5T520-400h-80q-17 0-28.5 11.5T400-360v200q0 17-11.5 28.5T360-120H240q-33 0-56.5-23.5T160-200Z"/>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
                     <span class="custom-control custom-switch nav-link">
-                        <input type="checkbox" class="custom-control-input nav-link" id="darkSwitch" />
-                        <label class="custom-control-label" id="switchlabel" for="darkSwitch">Dark Mode</label>
+                        <button aria-label="auto" aria-live="polite" class="theme-toggle" data-theme-toggle id="darkSwitch" title="Toggles light & dark">
+                          <svg aria-hidden="true" class="icons sun-and-moon"viewBox="0 0 24 24">
+                            <mask class="moon" id="moon-mask">
+                              <rect fill="white" height="100%" width="100%" x="0" y="0" />
+                              <circle cx="24" cy="10" fill="black" r="6" />
+                            </mask>
+                            <circle class="sun" cx="12" cy="12" fill="currentColor" mask="url(#moon-mask)" r="6" />
+                            <g class="sun-beams" stroke="currentColor">
+                              <line x1="12" x2="12" y1="1" y2="3" />
+                              <line x1="12" x2="12" y1="21" y2="23" />
+                              <line x1="4.22" x2="5.64" y1="4.22" y2="5.64" />
+                              <line x1="18.36" x2="19.78" y1="18.36" y2="19.78" />
+                              <line x1="1" x2="3" y1="12" y2="12" />
+                              <line x1="21" x2="23" y1="12" y2="12" />
+                              <line x1="4.22" x2="5.64" y1="19.78" y2="18.36" />
+                              <line x1="18.36" x2="19.78" y1="5.64" y2="4.22" />
+                             </g>
+                          </svg>
+                        </button>
+                        <!--                        <input type="checkbox" class="custom-control-input nav-link" id="darkSwitch" />-->
+                        <!--                        <label class="custom-control-label" id="switchlabel" for="darkSwitch">Dark Mode</label>-->
                     </span>
                 </li>
                 <li class="nav-item {{ 'active' if current_page == 'settings' else '' }} ">
-                    <a class="nav-link" href="{{ url_for('settings.settings') }}">Settings <i class="bi bi-gear-fill" aria-hidden="true"></i></a>
+                    <a class="nav-link" href="{{ url_for('settings.settings') }}">
+                        <svg class="icons" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M433-80q-27 0-46.5-18T363-142l-9-66q-13-5-24.5-12T307-235l-62 26q-25 11-50 2t-39-32l-47-82q-14-23-8-49t27-43l53-40q-1-7-1-13.5v-27q0-6.5 1-13.5l-53-40q-21-17-27-43t8-49l47-82q14-23 39-32t50 2l62 26q11-8 23-15t24-12l9-66q4-26 23.5-44t46.5-18h94q27 0 46.5 18t23.5 44l9 66q13 5 24.5 12t22.5 15l62-26q25-11 50-2t39 32l47 82q14 23 8 49t-27 43l-53 40q1 7 1 13.5v27q0 6.5-2 13.5l53 40q21 17 27 43t-8 49l-48 82q-14 23-39 32t-50-2l-60-26q-11 8-23 15t-24 12l-9 66q-4 26-23.5 44T527-80h-94Zm49-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/>
+                        </svg>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -41,6 +68,6 @@
             <p class="text-right text-dark">Made by JVT038<br/><a href="https://github.com/JVT038/MetaTube" target="_blank">Star me on Github<i class="bi bi-github" aria-hidden="true"></i></a></p>
     </footer>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/libraries/dark.css') }}" />
-    <script src="{{ url_for('static', filename='JS/libraries/dark.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/dark.js') }}"></script>
 </body>
 </html>

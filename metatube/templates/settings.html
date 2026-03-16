@@ -5,10 +5,20 @@
     <nav>
         <ul class="nav nav-tabs justify-content-center" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" href="#downloadtab" data-toggle="tab">Download settings</a>
+                <a class="nav-link active" data-toggle="tab" href="#downloadtab">
+                    <svg class="icons"  viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M200-160h560q17 0 28.5 11.5T800-120q0 17-11.5 28.5T760-80H200q-17 0-28.5-11.5T160-120q0-17 11.5-28.5T200-160Zm280-105q-9 0-17.5-4T448-281L250-535q-15-20-4-42.5t36-22.5h78v-240q0-17 11.5-28.5T400-880h160q17 0 28.5 11.5T600-840v240h78q25 0 36 22.5t-4 42.5L512-281q-6 8-14.5 12t-17.5 4Z"/>
+                    </svg>
+                    Download
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#templatestab" data-toggle="tab">Template settings</a>
+                <a class="nav-link" data-toggle="tab" href="#templatestab">
+                    <svg class="icons" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M256-200h447l-84-84q-29 21-64.5 32.5T480-240q-39 0-74.5-12T341-285l-85 85Zm-56-57 84-84q-21-29-32.5-64.5T240-480q0-39 12-74.5t33-64.5l-85-85v447Zm142-142 82-81-82-81q-11 18-16.5 38t-5.5 43q0 23 5.5 43t16.5 38Zm138 79q23 0 43-5.5t38-16.5l-81-82-82 82q18 11 38.5 16.5T480-320Zm0-217 81-81q-18-11-38-16.5t-43-5.5q-23 0-43 5.5T399-618l81 81Zm138 138q11-18 16.5-38t5.5-43q0-23-5.5-43.5T618-562l-81 81 81 82Zm142 142v-447l-85 85q21 29 33 64.5t12 74.5q0 39-11.5 74.5T676-341l84 84ZM619-675l85-85H257l84 84q29-21 64.5-32.5T480-720q39 0 74.5 12t64.5 33ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Z"/>
+                    </svg>
+                    Template
+                </a>
             </li>
             <button class="navbar-toggler d-block d-lg-none" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="bi bi-list"></i>
@@ -94,15 +104,15 @@
             </div>
             <div class="form-row d-none" id="geniusrow">
                 <p class="mt-3">You can get Genius API credentials <a href="https://genius.com/api-clients" target="_blank">here</a> <br />
-                You don't have to enter a redirect URI, as you only need the access token. After creating the client, you can go back to the overview and click on 'Generate access token' <br />
-                If you're wondering why you should choose Genius over the other sources: Only Genius can fetch lyrics and embed lyrics in the audio files, while the others can't</p>
+                    You don't have to enter a redirect URI, as you only need the access token. After creating the client, you can go back to the overview and click on 'Generate access token' <br />
+                    If you're wondering why you should choose Genius over the other sources: Only Genius can fetch lyrics and embed lyrics in the audio files, while the others can't</p>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Genius access token</span>
                     </div>
                     <input type="text" class="form-control" value="{{ genius }}" id="geniusaccesstoken" />
                 </div>
-        </div>
+            </div>
             <p> * An absolute path starts with <code>/</code> or <code>drive_letter:\</code> <br/>
                 ** The root directory is the same directory where <code>metatube.py</code> is located
             </p>
@@ -114,89 +124,89 @@
             <div class="table-responsive">
                 <table class="table table-hover table-bordered">
                     <thead>
-                        <tr>
-                            <th class="text-dark" scope="col">Template name</th>
-                            <th class="text-dark" scope="col">Template type</th>
-                            <th class="text-dark" scope="col">Template extension</th>
-                            <th class="text-dark" scope="col">Template name format</th>
-                            <th class="text-dark" scope="col">Template output folder</th>
-                            <th class="text-dark" scope="col">Edit template</th>
-                        </tr>
+                    <tr>
+                        <th class="text-dark" scope="col">Template name</th>
+                        <th class="text-dark" scope="col">Template type</th>
+                        <th class="text-dark" scope="col">Template extension</th>
+                        <th class="text-dark" scope="col">Template name format</th>
+                        <th class="text-dark" scope="col">Template output folder</th>
+                        <th class="text-dark" scope="col">Edit template</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for template in templates %}
-                            <tr id="{{ template.id }}">
-                                <td class="text-dark td_name">{{ template.name }}</td>
-                                <td class="text-dark td_type">{{ template.type }}</td>
-                                <td class="text-dark td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') | upper }}</td>
-                                <td class="text-dark td_output_name">{{ template.output_name }}</td>
-                                <td class="text-dark td_output_folder">{{ template.output_folder }}</td>
-                                <td>
-                                    {% if template.default is sameas True %}
-                                        <button type="button" data-toggle="tooltip" data-placement="top" title="Template is already the default template" class="btn btn-info disabled defaulttemplate" disabled><i class="bi bi-check-lg"></i></button>
-                                    {% else %}
-                                        <button type="button" data-toggle="tooltip" data-placement="top" title="Set as default template" class="btn btn-info setdefaulttemplate"><i class="bi bi-check-lg"></i></button>
-                                    {% endif %}
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Edit template" class="btn btn-success changetemplatebtn"><i class="bi bi-pencil-square"></i></button>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Delete template" class="btn btn-danger deltemplatebtn"><i class="bi bi-trash-fill"></i></button>
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Show more info" class="btn btn-primary expandtemplatebtn"><i class="bi bi-caret-down-fill"></i></button>
-                                </td>
-                            </tr>
-                            <tr id="hidden_{{ template.id }}" class="d-none">
-                                <td class="text-dark" colspan="7">
-                                    <p>
-                                    Bitrate: {{ template.bitrate }} <br />
-                                    {% if template.type == 'Video' %}
-                                        {% set resolution = template.resolution.split(';') %}
-                                        Width: {{ resolution[0] }} <br />
-                                        Height: {{ resolution[1] }} <br />
-                                    {% endif %}
-                                    Proxy status: {{ template.proxy_status }} <br/>
-                                    {% if template.proxy_status == 1 %}
-                                        Proxy type: {{ template.proxy_type }} <br/>
-                                        Proxy address: {{ template.proxy_address }} <br/>
-                                        Proxy port: {{ template.proxy_port }} <br/>
-                                        Proxy username: {{ template.proxy_username if template.proxy_username|length > 0 else 'None' }} <br/>
-                                        Proxy password: {{ template.proxy_password if template.proxy_password|length > 0 else 'None' }}
-                                    {% endif %}
-                                    </p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        <tr id="addtemplaterow">
-                            <td colspan="7" class="text-center"><button type="button" data-toggle="tooltip" data-placement="top" title="Add template" class="btn btn-success" id="addtemplatemodalbtn"><i class="bi bi-plus"></i></button></td>
-                        </tr>
+                    {% for template in templates %}
+                    <tr id="{{ template.id }}">
+                        <td class="text-dark td_name">{{ template.name }}</td>
+                        <td class="text-dark td_type">{{ template.type }}</td>
+                        <td class="text-dark td_extension">{{ template.extension | replace('m4a_audio', 'm4a') | replace('m4a_video', 'm4a') | upper }}</td>
+                        <td class="text-dark td_output_name">{{ template.output_name }}</td>
+                        <td class="text-dark td_output_folder">{{ template.output_folder }}</td>
+                        <td>
+                            {% if template.default is sameas True %}
+                            <button class="btn btn-info disabled defaulttemplate" data-placement="top" data-toggle="tooltip" disabled title="Template is already the default template" type="button"><i class="bi bi-check-lg"></i></button>
+                            {% else %}
+                            <button class="btn btn-info setdefaulttemplate" data-placement="top" data-toggle="tooltip" title="Set as default template" type="button"><i class="bi bi-check-lg"></i></button>
+                            {% endif %}
+                            <button class="btn btn-success changetemplatebtn" data-placement="top" data-toggle="tooltip" title="Edit template" type="button"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger deltemplatebtn" data-placement="top" data-toggle="tooltip" title="Delete template" type="button"><i class="bi bi-trash-fill"></i></button>
+                            <button class="btn btn-primary expandtemplatebtn" data-placement="top" data-toggle="tooltip" title="Show more info" type="button"><i class="bi bi-caret-down-fill"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="d-none" id="hidden_{{ template.id }}">
+                        <td class="text-dark" colspan="7">
+                            <p>
+                                Bitrate: {{ template.bitrate }} <br />
+                                {% if template.type == 'Video' %}
+                                {% set resolution = template.resolution.split(';') %}
+                                Width: {{ resolution[0] }} <br />
+                                Height: {{ resolution[1] }} <br />
+                                {% endif %}
+                                Proxy status: {{ template.proxy_status }} <br/>
+                                {% if template.proxy_status == 1 %}
+                                Proxy type: {{ template.proxy_type }} <br/>
+                                Proxy address: {{ template.proxy_address }} <br/>
+                                Proxy port: {{ template.proxy_port }} <br/>
+                                Proxy username: {{ template.proxy_username if template.proxy_username|length > 0 else 'None' }} <br/>
+                                Proxy password: {{ template.proxy_password if template.proxy_password|length > 0 else 'None' }}
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="addtemplaterow">
+                        <td class="text-center" colspan="7"><button class="btn btn-success" data-placement="top" data-toggle="tooltip" id="addtemplatemodalbtn" title="Add template" type="button"><i class="bi bi-plus"></i></button></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="removetemplatemodal" tabindex="-1" role="dialog" aria-labelledby="remove template modal" aria-hidden="true">
+<div aria-hidden="true" aria-labelledby="remove template modal" class="modal fade" id="removetemplatemodal" role="dialog" tabindex="-1">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="removetemplatemodaltitle"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removetemplatemodaltitle"></h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
                     <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                </button>
+            </div>
             <div class="modal-body">
-                Are you sure you want to delete this Template? 
+                Are you sure you want to delete this Template?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="deltemplatebtnmodal">Delete template</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-danger" id="deltemplatebtnmodal" type="button">Delete template</button>
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" tabindex="-1" role="dialog" id="templatesmodal" aria-labelledby="template modal" aria-hidden="true">
+<div aria-hidden="true" aria-labelledby="template modal" class="modal fade" id="templatesmodal" role="dialog" tabindex="-1">
     <div class="modal-dialog modal-lg mw-100 w-75">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add template</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -210,17 +220,17 @@
                     <div class="form-row">
                         <div class="col">
                             <label for="#template_name">Name of the template</label>
-                            <input type="text" id="template_name" class="form-control"/>
+                            <input class="form-control" id="template_name" type="text"/>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="col">
                             <label for="#template_folder">Output folder* of the template</label>
-                            <input type="text" id="template_folder" class="form-control" />
+                            <input class="form-control" id="template_folder" type="text" />
                         </div>
                         <div class="col">
                             <label for="#template_outputname">Output name format**</label>
-                            <input type="text" class="form-control" id="template_outputname" />
+                            <input class="form-control" id="template_outputname" type="text" />
                         </div>
                         <div class="col">
                             <label for="#template_type">Output type of the template</label>
@@ -250,15 +260,15 @@
                         <div class="form-row" id="outputrow">
                             <div class="col" id="bitratecol">
                                 <label for="#template_bitrate">Audio bitrate***</label>
-                                <input type="text" class="form-control num_input" id="template_bitrate" />
+                                <input class="form-control num_input" id="template_bitrate" type="text" />
                             </div>
                             <div class="col videocol d-none">
                                 <label for="template_width">Video width (in pixels)</label>
-                                <input type="text" class="form-control num_input" id="template_width" />
+                                <input class="form-control num_input" id="template_width" type="text" />
                             </div>
                             <div class="col videocol d-none">
                                 <label for="template_height">Video height (in pixels)</label>
-                                <input type="text" class="form-control num_input" id="template_height" />
+                                <input class="form-control num_input" id="template_height" type="text" />
                             </div>
                             <div class="col videocol d-none">
                                 <label for="#template_resolution">Resolution****</label>
@@ -266,7 +276,7 @@
                                     <option value="best">Best</option>
                                     <option value="7680;4320">8K UHD</option>
                                     <option value="3840;2160">4K UHD</option>
-                                    <option value="1920;1080" selected>FHD</option>
+                                    <option selected value="1920;1080">FHD</option>
                                     <option value="1280;720">HD</option>
                                     <option value="720;480">SD</option>
                                 </select>
@@ -275,57 +285,57 @@
                         <div class="form-row" id="proxyrow">
                             <div class="col">
                                 <label for="#proxy_status">Enable proxy</label>
-                                <select id="proxy_status" class="custom-select">
-                                    <option value="false" selected>False</option>
+                                <select class="custom-select" id="proxy_status">
+                                    <option selected value="false">False</option>
                                     <option value="true">True</option>
                                 </select>
                             </div>
                             <div class="col d-none">
                                 <label for="#proxy_type">Select proxy type</label>
-                                <select id="proxy_type" class="custom-select">
-                                    <option value="HTTP" selected>HTTP</option>
+                                <select class="custom-select" id="proxy_type">
+                                    <option selected value="HTTP">HTTP</option>
                                     <option value="HTTPS">HTTPS</option>
                                     <option value="SOCKS5">SOCKS5</option>
                                 </select>
                             </div>
                             <div class="col d-none">
                                 <label for="#proxy_address">Enter proxy address</label>
-                                <input type="text" class="form-control" id="proxy_address" />
+                                <input class="form-control" id="proxy_address" type="text" />
                             </div>
                             <div class="col d-none">
                                 <label for="#proxy_port">Enter proxy port</label>
-                                <input type="text" class="form-control num_input" id="proxy_port" />
+                                <input class="form-control num_input" id="proxy_port" type="text" />
                             </div>
                             <div class="col d-none">
                                 <label for="#proxy_username">Enter proxy username</label>
-                                <input type="text" class="form-control" id="proxy_username" />
+                                <input class="form-control" id="proxy_username" type="text" />
                             </div>
                             <div class="col d-none">
                                 <label for="#proxy_password">Enter proxy password</label>
-                                <input type="text" class="form-control" id="proxy_password" />
+                                <input class="form-control" id="proxy_password" type="text" />
                             </div>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="col">
-                            <button type="button" class="btn btn-success" id="advancedtoggle">Show advanced</button>
+                            <button class="btn btn-success" id="advancedtoggle" type="button">Show advanced</button>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="col">
                             <p class="float-left">
                                 * (absolute path starting with <code>/</code> or <code>drive_letter:\</code> or a relative path from the root directory) <br/>
-                                ** (More info about name formatting <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#format-selection">here</a>) <br />
-                                *** (Leave empty to use best bitrate; More info about bitrates <a target="_blank" href="https://en.wikipedia.org/wiki/Bit_rate">here</a>) <br />
-                                **** (More info on resolutions <a target="_blank" href="https://levvvel.com/169-resolutions/">here</a>)
+                                ** (More info about name formatting <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">here</a>) <br />
+                                *** (Leave empty to use best bitrate; More info about bitrates <a href="https://en.wikipedia.org/wiki/Bit_rate" target="_blank">here</a>) <br />
+                                **** (More info on resolutions <a href="https://levvvel.com/169-resolutions/" target="_blank">here</a>)
                             </p>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" id="addtemplatebtn" class="btn templatebtn btn-primary">Add template</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn templatebtn btn-primary" id="addtemplatebtn" type="button">Add template</button>
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
             </div>
         </div>
     </div>
