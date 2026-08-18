@@ -1,28 +1,39 @@
-import subprocess, os
-from metatube.database import Config
+import os
+import subprocess
+
 from metatube import Config as env
 from metatube import logger
-import ffmpeg as ffmpeg_python
+from metatube.database import Config
 
 
-class ffmpeg():
+class ffmpeg:
     def __init__(self):
         ffmpeg_path = Config.get_ffmpeg()
         if len(ffmpeg_path) > 0:
-            if (ffmpeg_path.startswith('/') or (ffmpeg_path[0].isalpha() and ffmpeg_path[1].startswith(':\\'))) and len(ffmpeg_path) > 0:
+            if (
+                ffmpeg_path.startswith("/")
+                or (ffmpeg_path[0].isalpha() and ffmpeg_path[1].startswith(":\\"))
+            ) and len(ffmpeg_path) > 0:
                 self.ffmpeg_path = ffmpeg_path
             else:
                 self.ffmpeg_path = os.path.join(env.BASE_DIR, ffmpeg_path)
         else:
             self.ffmpeg_path = ""
+
     def test(self):
         try:
-            p = subprocess.Popen('ffmpeg', cwd=self.ffmpeg_path, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            p = subprocess.Popen(
+                "ffmpeg",
+                cwd=self.ffmpeg_path,
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT,
+            )
             p.wait()
-            logger.info('FFmpeg has been found!')
+            logger.info("FFmpeg has been found!")
             return True
         except Exception as e:
-            logger.warn('FFmpeg has not been found at %s', self.ffmpeg_path)
+            logger.warn("FFmpeg has not been found at %s", self.ffmpeg_path)
             return str(e)
 
     # So I wrote this function to exclude fragments from the download, and I spent countless hours trying to figure this out.
