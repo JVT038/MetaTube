@@ -1,0 +1,15 @@
+{
+  "configurations": [
+        {
+            "name": "Start backend",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/metatube/__init__.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.flaskenv",
+            "env": {
+                "GEVENT_SUPPORT":"True"
+            }
+        }
+  ]
+}

@@ -2,7 +2,7 @@ import json
 
 from flask import render_template
 
-from metatube import socketio
+from metatube.app import socketio
 from metatube.database import Templates
 
 

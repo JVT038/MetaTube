@@ -8,7 +8,6 @@ pyvenv.cfg
 share
 include
 __pycache__
-.vscode
 .flaskenv
 *.db
 *.pem

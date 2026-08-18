@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "astral-sh.ty",
+        "charliermarsh.ruff"
+    ]
+}

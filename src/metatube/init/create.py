@@ -5,9 +5,9 @@ import sqlite3
 
 from flask_migrate import init, migrate, stamp, upgrade
 
-from metatube import Config as env
-from metatube import db, logger
-from metatube import migrate as metatube_migrate
+from config import Config as env
+from metatube.app import db, logger
+from metatube.app import migrate as metatube_migrate
 from metatube.database import *
 from metatube.ffmpeg import ffmpeg
 

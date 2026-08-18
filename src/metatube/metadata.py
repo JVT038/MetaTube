@@ -29,7 +29,9 @@ from mutagen.oggopus import OggOpus
 from mutagen.oggvorbis import OggVorbis
 from mutagen.wave import WAVE
 
-from metatube import Config, logger, sockets
+from config import Config
+from metatube import sockets
+from metatube.app import logger
 
 
 class MetaData:

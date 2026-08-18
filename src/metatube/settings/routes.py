@@ -1,11 +1,14 @@
-from flask.templating import render_template_string
-from metatube.settings import bp
+import json
+import os
+
+from flask import render_template
+
+from config import Config as env
+from metatube import sockets
+from metatube.app import socketio
 from metatube.database import *
 from metatube.ffmpeg import ffmpeg
-from metatube import Config as env
-from metatube import socketio, sockets
-from flask import render_template, request, jsonify
-import os, json
+from metatube.settings import bp
 
 
 @bp.route("/settings", methods=["GET", "POST"])

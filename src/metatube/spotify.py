@@ -1,7 +1,8 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOauthError
 
-from metatube import logger, sockets
+from metatube import sockets
+from metatube.app import logger
 
 
 class spotify_metadata:

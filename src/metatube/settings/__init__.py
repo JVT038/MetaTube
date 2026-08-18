@@ -1,5 +1,5 @@
 from flask import Blueprint
-from metatube import Config
+from config import Config
 
 bp = Blueprint(
     "settings",

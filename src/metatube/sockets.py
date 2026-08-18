@@ -1,4 +1,4 @@
-from metatube import socketio
+from metatube.app import socketio
 
 
 def downloadsettings(message):

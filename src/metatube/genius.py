@@ -1,6 +1,7 @@
 from lyricsgenius import Genius as geniusobj
 
-from metatube import logger, sockets
+from metatube import sockets
+from metatube.app import logger
 
 
 class Genius:

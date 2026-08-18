@@ -1,7 +1,8 @@
 from dateutil import parser
 from sqlalchemy.sql import expression
 
-from metatube import db, logger, sockets
+from metatube import sockets
+from metatube.app import db, logger
 
 
 class Config(db.Model):

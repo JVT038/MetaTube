@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-from metatube import Config as env
-from metatube import logger
+from config import Config as env
+from metatube.app import logger
 from metatube.database import Config
 
 
@@ -33,7 +33,7 @@ class ffmpeg:
             logger.info("FFmpeg has been found!")
             return True
         except Exception as e:
-            logger.warn("FFmpeg has not been found at %s", self.ffmpeg_path)
+            logger.warning("FFmpeg has not been found at %s", self.ffmpeg_path)
             return str(e)
 
     # So I wrote this function to exclude fragments from the download, and I spent countless hours trying to figure this out.

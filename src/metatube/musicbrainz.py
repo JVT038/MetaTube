@@ -2,7 +2,8 @@
 import musicbrainzngs
 from musicbrainzngs.musicbrainz import NetworkError, ResponseError
 
-from metatube import logger, sockets
+from metatube import sockets
+from metatube.app import logger
 
 musicbrainzngs.set_useragent("metatube", "0.1", "https://github.com/JVT038/MetaTube")
 

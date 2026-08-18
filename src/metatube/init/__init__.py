@@ -1,6 +1,6 @@
 import os
 
-from metatube import Config
+from config import Config
 from metatube.init.create import Default
 
 

@@ -1,7 +1,7 @@
 import sponsorblock
 from sponsorblock.errors import *
 
-from metatube import logger
+from metatube.app import logger
 
 
 def segments(url):
@@ -11,7 +11,7 @@ def segments(url):
     try:
         segments = client.get_skip_segments(url)
     except NotFoundException:
-        logger.warn("No segments found for %s", str(url))
+        logger.warning("No segments found for %s", str(url))
         return "404"
     except Exception as e:
         logger.error("Error in metatube/sponsorblock.py: %s", str(e))

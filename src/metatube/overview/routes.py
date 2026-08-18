@@ -18,8 +18,9 @@ from magic import Magic
 
 import metatube.musicbrainz as musicbrainz
 import metatube.sponsorblock as sb
-from metatube import Config as env
-from metatube import socketio, sockets
+from config import Config as env
+from metatube import sockets
+from metatube.app import socketio
 from metatube.database import *
 from metatube.deezer import Deezer
 from metatube.genius import Genius

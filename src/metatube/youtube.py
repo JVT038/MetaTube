@@ -14,7 +14,8 @@ from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
 from yt_dlp.postprocessor.metadataparser import MetadataParserPP
 from yt_dlp.utils import DownloadError, ExtractorError, PostProcessingError
 
-from metatube import logger, sockets
+from metatube import sockets
+from metatube.app import logger
 from metatube.sponsorblock import segments as findsegments
 
 

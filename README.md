@@ -22,8 +22,6 @@
  :heavy_check_mark:  MetaTube 🚀 Finished! :heavy_check_mark: <br/>
 </h4>
 
-<h2>Disclaimer: This project is abandoned. Use at your own risk. </h2>
-
 <hr>
 
 <p align="center">
@@ -141,40 +139,24 @@ You need to set the variable `DATABASE_URL` to a custom mount point (in these ex
 
 ### :hammer_and_wrench: Manually build and start server ###
 
+This project uses [uv](https://docs.astral.sh/uv/) to manage the dependencies and such. 
+Check out their [installation](https://docs.astral.sh/uv/getting-started/installation/) page for instructions on how to install on your system.
+The following instructions assume you've installed uv and got it to work properly.
+
 ```bash
 # Clone this project
 $ git clone https://github.com/JVT038/metatube
 
-# Access
+# Access repository
 $ cd metatube
 
-# Skip these steps if you don't want to use a virtual environment
-# Install virtualenv
-$ pip install virtualenv
-# Create virtual environment in current directory
-$ virtualenv .
-# Activate environment
-# Windows:
-$ cd Scripts
-$ activate
-# Linux:
-$ source bin/activate
- 
-# Navigate to the root directory
-$ cd ../
-
-# Install dependencies
-$ pip install -r requirements.txt
-
-# If you're using Windows, you need to install python-magic-bin
-$ pip install python-magic-bin
 # If you're using Debian / Ubuntu, you'll need to install libmagic1
 $ sudo apt-get install libmagic1
 # If you're using iOS, you'll need to install libmagic
 $ brew install libmagic
 
-# Run the file
-$ python metatube.py
+# Run the project
+$ uv run metatube
 
 # The server will initialize in the <http://localhost:5000>
 ```

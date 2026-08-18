@@ -1,6 +1,6 @@
 from config import Config
 from metatube.init import Default
-from metatube import create_app, db
+from metatube.app import create_app, db
 from metatube.database import Config as env
 from metatube.database import Templates, Database
 from datetime import datetime
