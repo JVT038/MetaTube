@@ -30,7 +30,7 @@ dependencies = [
     "urllib3>=2.7.0",
     "youtube-search>=2.2.0",
     "youtube-search-python>=1.6.6",
-    "yt-dlp>=2026.7.4",
+    "yt-dlp>=2026.8.19",
 ]
 
 [project.scripts]
