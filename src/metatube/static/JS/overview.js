@@ -492,13 +492,12 @@ $(document).ready(function() {
         let header = document.createElement('a');
         let channel = document.createElement('a');
         let desc = document.createElement('p');
-
         ul.classList.add('list-unstyled', 'youtuberesult');
         img.classList.add('img-fluid');
         body.classList.add('media-body');
         header.classList.add('youtubelink');
 
-        header.href = data.link;
+        header.href = "https://youtu.be/" + data.id;
         header.innerText = data.title;
         header.target = '_blank';
         header.classList.add('youtubelink', 'darkanchor');

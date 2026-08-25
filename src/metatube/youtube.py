@@ -9,7 +9,7 @@ from urllib.error import URLError
 
 import yt_dlp
 from jinja2 import Environment, PackageLoader, select_autoescape
-from youtubesearchpython import VideosSearch
+from youtube_search import YoutubeSearch
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessorError
 from yt_dlp.postprocessor.metadataparser import MetadataParserPP
 from yt_dlp.utils import DownloadError, ExtractorError, PostProcessingError
@@ -54,9 +54,11 @@ class YouTube:
     @staticmethod
     def search(query: str):
         logger.info("Searching YouTube for '%s'", query)
-        search = VideosSearch(query)
-        result = search.result()
-        sockets.youtubesearch(result)
+        # search = VideosSearch(query)
+        # result = search.result()
+        # sockets.youtubesearch(result)
+        search: dict = YoutubeSearch(query).to_dict()
+        sockets.youtubesearch(search)
 
     @staticmethod
     async def download(url: list, queue: LifoQueue, ytdl_options: dict):

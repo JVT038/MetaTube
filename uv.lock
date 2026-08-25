@@ -530,6 +530,7 @@ dependencies = [
     { name = "sponsorblock-py" },
     { name = "spotipy" },
     { name = "urllib3" },
+    { name = "youtube-search" },
     { name = "youtube-search-python" },
     { name = "yt-dlp" },
 ]
@@ -562,6 +563,7 @@ requires-dist = [
     { name = "sponsorblock-py", specifier = ">=1.0.0" },
     { name = "spotipy", specifier = ">=2.26.0" },
     { name = "urllib3", specifier = ">=2.7.0" },
+    { name = "youtube-search", specifier = ">=2.2.0" },
     { name = "youtube-search-python", specifier = ">=1.6.6" },
     { name = "yt-dlp", specifier = ">=2026.7.4" },
 ]
@@ -947,6 +949,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c7/79/12135bdf8b9c9367b8701c2c19a14c913c120b882d50b014ca0d38083c2c/wsproto-1.3.2.tar.gz", hash = "sha256:b86885dcf294e15204919950f666e06ffc6c7c114ca900b060d6e16293528294", size = 50116, upload-time = "2025-11-20T18:18:01.871Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a4/f5/10b68b7b1544245097b2a1b8238f66f2fc6dcaeb24ba5d917f52bd2eed4f/wsproto-1.3.2-py3-none-any.whl", hash = "sha256:61eea322cdf56e8cc904bd3ad7573359a242ba65688716b0710a5eb12beab584", size = 24405, upload-time = "2025-11-20T18:18:00.454Z" },
+]
+
+[[package]]
+name = "youtube-search"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5f/13/153d6841d0a9850e956f2f99987185c5b8477cc36fbabca24c4acf0321ff/youtube_search-2.2.0.tar.gz", hash = "sha256:5398a7cd65d9b75a8bac27ef689ec044abab3cbfa1f20d19db0277659ac70d98", size = 3313, upload-time = "2025-12-06T15:52:32.393Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/3d/7285e86e6390801fb177763a9cf1d81762487f98b3872ab5e1080bb82602/youtube_search-2.2.0-py3-none-any.whl", hash = "sha256:bdffbb5b22d7a7c85a88e6eeb6b00c5b5dbd29ea7b95139d21b8b8dab2ca5871", size = 3554, upload-time = "2025-12-06T15:52:31.217Z" },
 ]
 
 [[package]]

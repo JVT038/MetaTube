@@ -1,0 +1,498 @@
+{
+  "videoId": "xR_pWVoVM-M",
+  "thumbnail": {
+    "thumbnails": [
+      {
+        "url": "https://i.ytimg.com/vi/xR_pWVoVM-M/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLCw9rrdvk7x92B01UZQsOlnxG6-9A",
+        "width": 360,
+        "height": 202
+      },
+      {
+        "url": "https://i.ytimg.com/vi/xR_pWVoVM-M/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAcmS5oAn6HXL8RV2QYAPOSLr5eLQ",
+        "width": 720,
+        "height": 404
+      }
+    ]
+  },
+  "title": {
+    "runs": [{ "text": "PubMed: Identifying Search Terms" }],
+    "accessibility": {
+      "accessibilityData": {
+        "label": "PubMed: Identifying Search Terms 10 minuten en 8 seconden"
+      }
+    }
+  },
+  "longBylineText": {
+    "runs": [
+      {
+        "text": "Welch Medical Library",
+        "navigationEndpoint": {
+          "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+          "commandMetadata": {
+            "webCommandMetadata": {
+              "url": "/@WelchMedicalLibrary",
+              "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+              "rootVe": 3611,
+              "apiUrl": "/youtubei/v1/browse"
+            }
+          },
+          "browseEndpoint": {
+            "browseId": "UCKJ4HvODRVJ-U8mW9kvUZow",
+            "canonicalBaseUrl": "/@WelchMedicalLibrary"
+          }
+        }
+      }
+    ]
+  },
+  "publishedTimeText": { "simpleText": "6 jaar geleden" },
+  "lengthText": {
+    "accessibility": {
+      "accessibilityData": { "label": "10 minuten en 8 seconden" }
+    },
+    "simpleText": "10:08"
+  },
+  "viewCountText": { "simpleText": "55.746 weergaven" },
+  "navigationEndpoint": {
+    "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqMyBnNlYXJjaFIMc2VhcmNoIHRlcm1zmgEDEPQkygEEr-rR4A==",
+    "commandMetadata": {
+      "webCommandMetadata": {
+        "url": "/watch?v=xR_pWVoVM-M&pp=ygUMc2VhcmNoIHRlcm1z",
+        "webPageType": "WEB_PAGE_TYPE_WATCH",
+        "rootVe": 3832
+      }
+    },
+    "watchEndpoint": {
+      "videoId": "xR_pWVoVM-M",
+      "params": "qgMMc2VhcmNoIHRlcm1zugMKCML2i6PthLnyJLoDCwjY1Oqx1JCu384BugMKCIvZ_un50KeNPLoDCgit-q_cx-zi1we6AwoIz_GwusLJlPo4ugMKCPGA5Jvss_msMLoDCwjTiIfP35qyoLEBugMLCI6K6Yvk0OK7vgG6AwoIzPKarOnDlNIuugMKCLfJu5mhhub2C7oDCgil8-_-gfjbqHS6AwsIu5L1j5ub1JSyAboDCgis14u_ypnL_QG6AwoIq6bIqqKXktoNugMLCP6cw6bK5aqg6gG6AwsIoNbyv-Senf6wAboDCwiU1JnSztW-1c4BugMLCN3Q9cXO_-KbmAG6AwoIh5qIz_Dnm59p",
+      "playerParams": "ygUMc2VhcmNoIHRlcm1z",
+      "watchEndpointSupportedOnesieConfig": {
+        "html5PlaybackOnesieConfig": {
+          "commonConfig": {
+            "url": "https://rr2---sn-32o-bg9e.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c51fe9595a1533e3&ip=2a02%3Aa45e%3A7c3%3A0%3A60ee%3Afff1%3Ab5c5%3Ae770&initcwndbps=4551250&mt=1787139228&oweuc="
+          }
+        }
+      }
+    }
+  },
+  "badges": [
+    {
+      "metadataBadgeRenderer": {
+        "style": "BADGE_STYLE_TYPE_SIMPLE",
+        "label": "Ondertiteling",
+        "trackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqM=",
+        "accessibilityData": { "label": "Ondertiteling" }
+      }
+    }
+  ],
+  "ownerText": {
+    "runs": [
+      {
+        "text": "Welch Medical Library",
+        "navigationEndpoint": {
+          "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+          "commandMetadata": {
+            "webCommandMetadata": {
+              "url": "/@WelchMedicalLibrary",
+              "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+              "rootVe": 3611,
+              "apiUrl": "/youtubei/v1/browse"
+            }
+          },
+          "browseEndpoint": {
+            "browseId": "UCKJ4HvODRVJ-U8mW9kvUZow",
+            "canonicalBaseUrl": "/@WelchMedicalLibrary"
+          }
+        }
+      }
+    ]
+  },
+  "shortBylineText": {
+    "runs": [
+      {
+        "text": "Welch Medical Library",
+        "navigationEndpoint": {
+          "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+          "commandMetadata": {
+            "webCommandMetadata": {
+              "url": "/@WelchMedicalLibrary",
+              "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+              "rootVe": 3611,
+              "apiUrl": "/youtubei/v1/browse"
+            }
+          },
+          "browseEndpoint": {
+            "browseId": "UCKJ4HvODRVJ-U8mW9kvUZow",
+            "canonicalBaseUrl": "/@WelchMedicalLibrary"
+          }
+        }
+      }
+    ]
+  },
+  "trackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqNA4-fU0JWr-o_FAQ==",
+  "showActionMenu": false,
+  "shortViewCountText": {
+    "accessibility": {
+      "accessibilityData": { "label": "55 duizend weergaven" }
+    },
+    "simpleText": "55K weergaven"
+  },
+  "menu": {
+    "menuRenderer": {
+      "items": [
+        {
+          "menuServiceItemRenderer": {
+            "text": { "runs": [{ "text": "Toevoegen aan wachtrij" }] },
+            "icon": { "iconType": "ADD_TO_QUEUE_TAIL" },
+            "serviceEndpoint": {
+              "clickTrackingParams": "CJkDEP6YBBgPIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+              "commandMetadata": { "webCommandMetadata": { "sendPost": true } },
+              "signalServiceEndpoint": {
+                "signal": "CLIENT_SIGNAL",
+                "actions": [
+                  {
+                    "clickTrackingParams": "CJkDEP6YBBgPIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                    "addToPlaylistCommand": {
+                      "openMiniplayer": true,
+                      "videoId": "xR_pWVoVM-M",
+                      "listType": "PLAYLIST_EDIT_LIST_TYPE_QUEUE",
+                      "onCreateListCommand": {
+                        "clickTrackingParams": "CJkDEP6YBBgPIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                        "commandMetadata": {
+                          "webCommandMetadata": {
+                            "sendPost": true,
+                            "apiUrl": "/youtubei/v1/playlist/create"
+                          }
+                        },
+                        "createPlaylistServiceEndpoint": {
+                          "videoIds": ["xR_pWVoVM-M"],
+                          "params": "CAQ%3D"
+                        }
+                      },
+                      "videoIds": ["xR_pWVoVM-M"],
+                      "videoCommand": {
+                        "clickTrackingParams": "CJkDEP6YBBgPIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                        "commandMetadata": {
+                          "webCommandMetadata": {
+                            "url": "/watch?v=xR_pWVoVM-M",
+                            "webPageType": "WEB_PAGE_TYPE_WATCH",
+                            "rootVe": 3832
+                          }
+                        },
+                        "watchEndpoint": {
+                          "videoId": "xR_pWVoVM-M",
+                          "watchEndpointSupportedOnesieConfig": {
+                            "html5PlaybackOnesieConfig": {
+                              "commonConfig": {
+                                "url": "https://rr2---sn-32o-bg9e.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c51fe9595a1533e3&ip=2a02%3Aa45e%3A7c3%3A0%3A60ee%3Afff1%3Ab5c5%3Ae770&initcwndbps=4551250&mt=1787139228&oweuc="
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "trackingParams": "CJkDEP6YBBgPIhMIy8vWzM6slgMVDFD7BB2iLQ6j"
+          }
+        },
+        {
+          "menuNavigationItemRenderer": {
+            "text": { "runs": [{ "text": "Opslaan in playlist" }] },
+            "icon": { "iconType": "BOOKMARK_BORDER" },
+            "navigationEndpoint": {
+              "clickTrackingParams": "CJgDEJSsCRgQIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+              "commandMetadata": {
+                "webCommandMetadata": {
+                  "url": "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Dnl&hl=nl",
+                  "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+                  "rootVe": 83769
+                }
+              },
+              "signInEndpoint": {
+                "nextEndpoint": {
+                  "clickTrackingParams": "CJgDEJSsCRgQIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                  "showSheetCommand": {
+                    "panelLoadingStrategy": {
+                      "requestTemplate": {
+                        "panelId": "PAadd_to_playlist",
+                        "params": "-gYNCgt4Ul9wV1ZvVk0tTQ%3D%3D"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "trackingParams": "CJgDEJSsCRgQIhMIy8vWzM6slgMVDFD7BB2iLQ6j"
+          }
+        },
+        {
+          "menuServiceItemRenderer": {
+            "text": { "runs": [{ "text": "Delen" }] },
+            "icon": { "iconType": "SHARE" },
+            "serviceEndpoint": {
+              "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+              "commandMetadata": {
+                "webCommandMetadata": {
+                  "sendPost": true,
+                  "apiUrl": "/youtubei/v1/share/get_share_panel"
+                }
+              },
+              "shareEntityServiceEndpoint": {
+                "serializedShareEntity": "Cgt4Ul9wV1ZvVk0tTQ%3D%3D",
+                "commands": [
+                  {
+                    "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+                    "openPopupAction": {
+                      "popup": {
+                        "unifiedSharePanelRenderer": {
+                          "trackingParams": "CJcDEI5iIhMIy8vWzM6slgMVDFD7BB2iLQ6j",
+                          "showLoadingSpinner": true
+                        }
+                      },
+                      "popupType": "DIALOG",
+                      "beReused": true
+                    }
+                  }
+                ]
+              }
+            },
+            "trackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqM=",
+            "hasSeparator": true
+          }
+        }
+      ],
+      "trackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqM=",
+      "accessibility": { "accessibilityData": { "label": "Actiemenu" } }
+    }
+  },
+  "channelThumbnailSupportedRenderers": {
+    "channelThumbnailWithLinkRenderer": {
+      "thumbnail": {
+        "thumbnails": [
+          {
+            "url": "https://yt3.ggpht.com/ytc/AIdro_kUCJEhy8weEn6IXgzBZA--WbsiwqcYFLNYKVwXnIor=s68-c-k-c0x00ffffff-no-rj",
+            "width": 68,
+            "height": 68
+          }
+        ]
+      },
+      "navigationEndpoint": {
+        "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+        "commandMetadata": {
+          "webCommandMetadata": {
+            "url": "/@WelchMedicalLibrary",
+            "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+            "rootVe": 3611,
+            "apiUrl": "/youtubei/v1/browse"
+          }
+        },
+        "browseEndpoint": {
+          "browseId": "UCKJ4HvODRVJ-U8mW9kvUZow",
+          "canonicalBaseUrl": "/@WelchMedicalLibrary"
+        }
+      },
+      "accessibility": {
+        "accessibilityData": { "label": "Naar kanaal Welch Medical Library" }
+      }
+    }
+  },
+  "thumbnailOverlays": [
+    {
+      "thumbnailOverlayTimeStatusRenderer": {
+        "text": {
+          "accessibility": {
+            "accessibilityData": { "label": "10 minuten en 8 seconden" }
+          },
+          "simpleText": "10:08"
+        },
+        "style": "DEFAULT"
+      }
+    },
+    {
+      "thumbnailOverlayToggleButtonRenderer": {
+        "isToggled": false,
+        "untoggledIcon": { "iconType": "WATCH_LATER" },
+        "toggledIcon": { "iconType": "CHECK" },
+        "untoggledTooltip": "Later bekijken",
+        "toggledTooltip": "Toegevoegd",
+        "untoggledServiceEndpoint": {
+          "clickTrackingParams": "CJYDEPnnAxgCIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+          "commandMetadata": {
+            "webCommandMetadata": {
+              "sendPost": true,
+              "apiUrl": "/youtubei/v1/browse/edit_playlist"
+            }
+          },
+          "playlistEditEndpoint": {
+            "playlistId": "WL",
+            "actions": [
+              { "addedVideoId": "xR_pWVoVM-M", "action": "ACTION_ADD_VIDEO" }
+            ]
+          }
+        },
+        "toggledServiceEndpoint": {
+          "clickTrackingParams": "CJYDEPnnAxgCIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+          "commandMetadata": {
+            "webCommandMetadata": {
+              "sendPost": true,
+              "apiUrl": "/youtubei/v1/browse/edit_playlist"
+            }
+          },
+          "playlistEditEndpoint": {
+            "playlistId": "WL",
+            "actions": [
+              {
+                "action": "ACTION_REMOVE_VIDEO_BY_VIDEO_ID",
+                "removedVideoId": "xR_pWVoVM-M"
+              }
+            ]
+          }
+        },
+        "untoggledAccessibility": {
+          "accessibilityData": { "label": "Later bekijken" }
+        },
+        "toggledAccessibility": {
+          "accessibilityData": { "label": "Toegevoegd" }
+        },
+        "trackingParams": "CJYDEPnnAxgCIhMIy8vWzM6slgMVDFD7BB2iLQ6j"
+      }
+    },
+    {
+      "thumbnailOverlayToggleButtonRenderer": {
+        "untoggledIcon": { "iconType": "ADD_TO_QUEUE_TAIL" },
+        "toggledIcon": { "iconType": "PLAYLIST_ADD_CHECK" },
+        "untoggledTooltip": "Toevoegen aan wachtrij",
+        "toggledTooltip": "Toegevoegd",
+        "untoggledServiceEndpoint": {
+          "clickTrackingParams": "CJUDEMfsBBgDIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+          "commandMetadata": { "webCommandMetadata": { "sendPost": true } },
+          "signalServiceEndpoint": {
+            "signal": "CLIENT_SIGNAL",
+            "actions": [
+              {
+                "clickTrackingParams": "CJUDEMfsBBgDIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                "addToPlaylistCommand": {
+                  "openMiniplayer": true,
+                  "videoId": "xR_pWVoVM-M",
+                  "listType": "PLAYLIST_EDIT_LIST_TYPE_QUEUE",
+                  "onCreateListCommand": {
+                    "clickTrackingParams": "CJUDEMfsBBgDIhMIy8vWzM6slgMVDFD7BB2iLQ6jygEEr-rR4A==",
+                    "commandMetadata": {
+                      "webCommandMetadata": {
+                        "sendPost": true,
+                        "apiUrl": "/youtubei/v1/playlist/create"
+                      }
+                    },
+                    "createPlaylistServiceEndpoint": {
+                      "videoIds": ["xR_pWVoVM-M"],
+                      "params": "CAQ%3D"
+                    }
+                  },
+                  "videoIds": ["xR_pWVoVM-M"]
+                }
+              }
+            ]
+          }
+        },
+        "untoggledAccessibility": {
+          "accessibilityData": { "label": "Toevoegen aan wachtrij" }
+        },
+        "toggledAccessibility": {
+          "accessibilityData": { "label": "Toegevoegd" }
+        },
+        "trackingParams": "CJUDEMfsBBgDIhMIy8vWzM6slgMVDFD7BB2iLQ6j"
+      }
+    },
+    {
+      "thumbnailOverlayNowPlayingRenderer": {
+        "text": { "runs": [{ "text": "Wordt nu afgespeeld" }] }
+      }
+    },
+    {
+      "thumbnailOverlayLoadingPreviewRenderer": {
+        "text": { "runs": [{ "text": "Houd je cursor hier om af te spelen" }] }
+      }
+    }
+  ],
+  "detailedMetadataSnippets": [
+    {
+      "snippetText": {
+        "runs": [
+          {
+            "text": "This lecture will cover strategies for identifying terms to include in your search, focusing on identifying "
+          },
+          { "text": "search terms", "bold": true },
+          { "text": " by scanning\u00a0..." }
+        ]
+      },
+      "snippetHoverText": { "runs": [{ "text": "Uit de videobeschrijving" }] },
+      "maxOneLine": false
+    }
+  ],
+  "inlinePlaybackEndpoint": {
+    "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqMyBnNlYXJjaFIMc2VhcmNoIHRlcm1zmgEDEPQkygEEr-rR4A==",
+    "commandMetadata": {
+      "webCommandMetadata": {
+        "url": "/watch?v=xR_pWVoVM-M&pp=YAHIAQGiBhUBrf4zj4UtvcYvvZaVQvLjzXUOPII%3D",
+        "webPageType": "WEB_PAGE_TYPE_WATCH",
+        "rootVe": 3832
+      }
+    },
+    "watchEndpoint": {
+      "videoId": "xR_pWVoVM-M",
+      "params": "qgMMc2VhcmNoIHRlcm1zugMKCML2i6PthLnyJLoDCwjY1Oqx1JCu384BugMKCIvZ_un50KeNPLoDCgit-q_cx-zi1we6AwoIz_GwusLJlPo4ugMKCPGA5Jvss_msMLoDCwjTiIfP35qyoLEBugMLCI6K6Yvk0OK7vgG6AwoIzPKarOnDlNIuugMKCLfJu5mhhub2C7oDCgil8-_-gfjbqHS6AwsIu5L1j5ub1JSyAboDCgis14u_ypnL_QG6AwoIq6bIqqKXktoNugMLCP6cw6bK5aqg6gG6AwsIoNbyv-Senf6wAboDCwiU1JnSztW-1c4BugMLCN3Q9cXO_-KbmAG6AwoIh5qIz_Dnm59p",
+      "playerParams": "YAHIAQGiBhUBrf4zj4UtvcYvvZaVQvLjzXUOPII%3D",
+      "playerExtraUrlParams": [{ "key": "inline", "value": "1" }],
+      "watchEndpointSupportedOnesieConfig": {
+        "html5PlaybackOnesieConfig": {
+          "commonConfig": {
+            "url": "https://rr2---sn-32o-bg9e.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c51fe9595a1533e3&ip=2a02%3Aa45e%3A7c3%3A0%3A60ee%3Afff1%3Ab5c5%3Ae770&initcwndbps=4551250&mt=1787139228&oweuc="
+          }
+        }
+      }
+    }
+  },
+  "searchVideoResultEntityKey": "Egt4Ul9wV1ZvVk0tTSDnAigB",
+  "avatar": {
+    "decoratedAvatarViewModel": {
+      "avatar": {
+        "avatarViewModel": {
+          "image": {
+            "sources": [
+              {
+                "url": "https://yt3.ggpht.com/ytc/AIdro_kUCJEhy8weEn6IXgzBZA--WbsiwqcYFLNYKVwXnIor=s68-c-k-c0x00ffffff-no-rj",
+                "width": 68,
+                "height": 68
+              }
+            ]
+          },
+          "avatarImageSize": "AVATAR_SIZE_M"
+        }
+      },
+      "a11yLabel": "Naar kanaal Welch Medical Library",
+      "rendererContext": {
+        "commandContext": {
+          "onTap": {
+            "innertubeCommand": {
+              "clickTrackingParams": "CJQDENwwGAAiEwjLy9bMzqyWAxUMUPsEHaItDqPKAQSv6tHg",
+              "commandMetadata": {
+                "webCommandMetadata": {
+                  "url": "/@WelchMedicalLibrary",
+                  "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                  "rootVe": 3611,
+                  "apiUrl": "/youtubei/v1/browse"
+                }
+              },
+              "browseEndpoint": {
+                "browseId": "UCKJ4HvODRVJ-U8mW9kvUZow",
+                "canonicalBaseUrl": "/@WelchMedicalLibrary"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
