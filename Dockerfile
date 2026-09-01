@@ -13,6 +13,6 @@ RUN \
     apk add --no-cache --upgrade alpine-sdk libffi-dev ffmpeg libmagic && \
     mkdir -p {/config,$DOWNLOADS,/database} && \
     python3 -m pip install --upgrade pip && \
-    pip3 install -r /config/requirements.txt && \
+    pip3 install --no-cache-dir -r /config/requirements.txt && \
     apk del --purge alpine-sdk
 ENTRYPOINT ["/usr/local/bin/python3", "config/metatube.py"]
